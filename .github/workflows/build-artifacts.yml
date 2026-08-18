@@ -113,7 +113,7 @@ jobs:
         with:
           maturin-version: v1.14.1
           command: sdist
-          args: --locked --out dist
+          args: --out dist
       - uses: actions/upload-artifact@v6
         with:
           name: source-distribution
