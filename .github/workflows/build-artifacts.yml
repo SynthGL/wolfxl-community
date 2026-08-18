@@ -1,0 +1,121 @@
+name: Build release artifacts
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  linux:
+    name: Linux ${{ matrix.target }} wheels
+    runs-on: ubuntu-22.04
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [x86_64, aarch64]
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.9"
+      - name: Enable aarch64 emulation
+        if: matrix.target == 'aarch64'
+        uses: docker/setup-qemu-action@v3
+      - name: Build wheels
+        uses: PyO3/maturin-action@86b9d133d34bc1b40018696f782949dac11bd380
+        with:
+          maturin-version: v1.14.1
+          target: ${{ matrix.target }}
+          manylinux: "2_28"
+          args: --release --locked --compatibility pypi --out dist --find-interpreter
+      - uses: actions/upload-artifact@v6
+        with:
+          name: wheels-linux-${{ matrix.target }}
+          path: dist/*.whl
+          if-no-files-found: error
+
+  macos:
+    name: macOS ${{ matrix.target }} wheels
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-15-intel
+            target: x86_64-apple-darwin
+          - runner: macos-15
+            target: aarch64-apple-darwin
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: |
+            3.9
+            3.10
+            3.11
+            3.12
+            3.13
+            3.14
+      - name: Build wheels
+        uses: PyO3/maturin-action@86b9d133d34bc1b40018696f782949dac11bd380
+        with:
+          maturin-version: v1.14.1
+          target: ${{ matrix.target }}
+          args: --release --locked --compatibility pypi --out dist --find-interpreter
+      - uses: actions/upload-artifact@v6
+        with:
+          name: wheels-macos-${{ matrix.target }}
+          path: dist/*.whl
+          if-no-files-found: error
+
+  windows:
+    name: Windows x86_64 wheels
+    runs-on: windows-latest
+    timeout-minutes: 45
+    steps:
+      - name: Enable long paths
+        shell: pwsh
+        run: git config --global core.longpaths true
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: |
+            3.9
+            3.10
+            3.11
+            3.12
+            3.13
+            3.14
+          architecture: x64
+      - name: Build wheels
+        uses: PyO3/maturin-action@86b9d133d34bc1b40018696f782949dac11bd380
+        with:
+          maturin-version: v1.14.1
+          target: x86_64-pc-windows-msvc
+          args: --release --locked --compatibility pypi --out dist --find-interpreter
+      - uses: actions/upload-artifact@v6
+        with:
+          name: wheels-windows-x86_64
+          path: dist/*.whl
+          if-no-files-found: error
+
+  sdist:
+    name: Source distribution
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+      - name: Build source distribution
+        uses: PyO3/maturin-action@86b9d133d34bc1b40018696f782949dac11bd380
+        with:
+          maturin-version: v1.14.1
+          command: sdist
+          args: --locked --out dist
+      - uses: actions/upload-artifact@v6
+        with:
+          name: source-distribution
+          path: dist/*.tar.gz
+          if-no-files-found: error
