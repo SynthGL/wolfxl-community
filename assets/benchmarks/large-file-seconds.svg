@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="466" viewBox="0 0 920 466" role="img" aria-label="1.6 million cells: wall-clock seconds (lower is better)">
+<defs>
+<linearGradient id="wolfxl" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#f59e0b"/><stop offset="1" stop-color="#fbbf24"/></linearGradient>
+</defs>
+<rect x="0.5" y="0.5" width="919" height="465" rx="14" fill="#0f172a" stroke="#1e293b"/>
+<text x="36" y="42" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="21" font-weight="700" fill="#e2e8f0">1.6 million cells: wall-clock seconds (lower is better)</text>
+<text x="36" y="66" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13" fill="#94a3b8">wolfxl 2.0.1 (PyPI wheel) vs openpyxl 3.1.5 | Apple M4 Pro | Python 3.13.9 | median of 5 rounds</text>
+<rect x="648" y="30" width="12" height="12" rx="3" fill="url(#wolfxl)"/><text x="666" y="41" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="12.5" fill="#e2e8f0">WolfXL Community 2.0.1</text><rect x="648" y="50" width="12" height="12" rx="3" fill="#475569"/><text x="666" y="61" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="12.5" fill="#e2e8f0">openpyxl 3.1.5</text>
+<text x="36" y="122" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13.5" font-weight="600" fill="#e2e8f0">Write 200,000 x 8</text>
+<text x="36" y="138" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="11" fill="#94a3b8">ws.write_rows() vs ws.append()</text>
+<rect x="324" y="106" width="8.4" height="18" rx="9" fill="url(#wolfxl)"/>
+<text x="342.4" y="120" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13" font-weight="700" fill="#fbbf24">479 ms</text>
+<rect x="324" y="132" width="86.6" height="18" rx="9" fill="#475569"/>
+<text x="420.6" y="146" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13" font-weight="700" fill="#94a3b8">4.95 s</text>
+<text x="36" y="196" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13.5" font-weight="600" fill="#e2e8f0">Read 200,000 x 8</text>
+<text x="36" y="212" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="11" fill="#94a3b8">load_workbook(), value iteration</text>
+<rect x="324" y="180" width="10.4" height="18" rx="9" fill="url(#wolfxl)"/>
+<text x="344.4" y="194" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13" font-weight="700" fill="#fbbf24">597 ms</text>
+<rect x="324" y="206" width="112.4" height="18" rx="9" fill="#475569"/>
+<text x="446.4" y="220" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13" font-weight="700" fill="#94a3b8">6.43 s</text>
+<text x="36" y="270" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13.5" font-weight="600" fill="#e2e8f0">Read 200,000 x 8, read-only</text>
+<text x="36" y="286" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="11" fill="#94a3b8">load_workbook(read_only=True)</text>
+<rect x="324" y="254" width="7.1" height="18" rx="9" fill="url(#wolfxl)"/>
+<text x="341.1" y="268" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13" font-weight="700" fill="#fbbf24">404 ms</text>
+<rect x="324" y="280" width="85.5" height="18" rx="9" fill="#475569"/>
+<text x="419.5" y="294" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13" font-weight="700" fill="#94a3b8">4.89 s</text>
+<text x="36" y="344" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13.5" font-weight="600" fill="#e2e8f0">Modify 2 cells + save</text>
+<text x="36" y="360" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="11" fill="#94a3b8">200,000 x 8 existing workbook</text>
+<rect x="324" y="328" width="143.9" height="18" rx="9" fill="url(#wolfxl)"/>
+<text x="477.9" y="342" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13" font-weight="700" fill="#fbbf24">8.24 s</text>
+<rect x="324" y="354" width="464.0" height="18" rx="9" fill="#475569"/>
+<text x="798.0" y="368" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13" font-weight="700" fill="#94a3b8">26.5 s</text>
+<text x="36" y="432" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="11.5" fill="#94a3b8">Raw data: benchmarks/results/2026-08-18-community-2.0.1-vs-openpyxl-3.1.5.json (run 2026-08-18)</text>
+<text x="36" y="448" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="11.5" fill="#94a3b8">Reproduce: python benchmarks/benchmark_openpyxl_vs_wolfxl.py (see benchmarks/README.md)</text>
+</svg>

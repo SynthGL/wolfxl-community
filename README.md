@@ -77,6 +77,22 @@ wolfxl.install_as_openpyxl()
 import openpyxl
 ```
 
+## Performance
+
+Median speedups over openpyxl 3.1.5, from the committed benchmark run
+(wolfxl 2.0.1 PyPI wheel, Apple M4 Pro, Python 3.13.9, median of 5 rounds):
+
+![WolfXL Community vs openpyxl: median speedup](assets/benchmarks/speedup-vs-openpyxl.svg)
+
+![1.6 million cells: wall-clock seconds](assets/benchmarks/large-file-seconds.svg)
+
+![1.6 million cells: peak memory](assets/benchmarks/large-file-memory.svg)
+
+Speedups vary by workload, and small workbooks see smaller wins. Raw results,
+the benchmark harness, and reproduction instructions are in
+[`benchmarks/`](benchmarks/README.md). The charts are generated from the
+committed results JSON by `benchmarks/render_charts.py`.
+
 ## Development
 
 Prerequisites: a supported CPython, Rust, and `maturin`.
