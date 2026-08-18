@@ -30,7 +30,7 @@ fidelity, and support work required by production workbook pipelines.
 
 ## Install
 
-After the Community release is published:
+Install the current Community release with:
 
 ```bash
 python -m pip install wolfxl==2.0.1
