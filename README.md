@@ -90,11 +90,13 @@ Median speedups over openpyxl 3.1.5, from the committed benchmark run
 
 ### Against other open-source Python Excel libraries
 
-Cross-library comparison on a separate machine (AMD EPYC 9654, x86_64 Linux,
-Python 3.13.15, median of 5 rounds) against openpyxl, XlsxWriter,
-PyExcelerate, pylightxl, pandas, Polars, python-calamine, and fastexcel. Each
-library is measured only inside its supported scope; write-only, read-only,
-and DataFrame specialists are labeled:
+Cross-library comparison on a separate machine (AMD EPYC 9655, x86_64 Linux,
+Python 3.13, median of 5 rounds) against twelve other libraries: openpyxl,
+XlsxWriter, PyExcelerate, pylightxl, pandas, Polars, DuckDB, Tablib, pyexcel,
+python-calamine, fastexcel, and xlsx2csv. The bar for inclusion is xlsx
+support, no external application, and roughly one million PyPI downloads per
+month. Each library is measured only inside its supported scope; write-only,
+read-only, DataFrame, and SQL specialists are labeled:
 
 ![Write 200,000 x 8 plain values](assets/benchmarks/ecosystem-write-large.svg)
 

@@ -54,14 +54,24 @@ the 200,000-row workloads, `--no-memory` skips the peak-RSS pass. Run with
 | pylightxl | pure-Python read/write |
 | pandas | DataFrame I/O (openpyxl write engine, openpyxl and calamine read engines) |
 | Polars | DataFrame I/O (wraps XlsxWriter for writes, fastexcel for reads) |
+| DuckDB | SQL engine (excel extension: COPY xlsx / read_xlsx to Arrow) |
+| Tablib | Dataset wrapper (openpyxl xlsx backend) |
+| pyexcel | wrapper (openpyxl backend via pyexcel-xlsx) |
 | python-calamine | read-only, returns Python values |
 | fastexcel | read-only, returns Arrow tables |
+| xlsx2csv | read-only, transcodes to CSV text |
+
+Inclusion bar: xlsx-capable, no external application required, and broad real
+adoption (roughly one million PyPI downloads per month). Excluded for scope:
+xlrd/xlwt (.xls only), pyxlsb (.xlsb only), xlwings (drives a running Excel
+installation), and commercial SDKs.
 
 Cases: large plain write, mixed-type write, unique-strings write
 (shared-strings stress), large value read, and a peak-RSS pass that runs each
 large case in a fresh process. Write-only libraries appear only in write cases
-and read-only libraries only in read cases. pandas and Polars are timed from a
-prebuilt DataFrame, so their numbers include the frame-to-worksheet
+and read-only libraries only in read cases. pandas, Polars, and DuckDB are
+timed from a prebuilt DataFrame (DuckDB reads a registered DataFrame view) and
+Tablib from a prebuilt Dataset, so their numbers include the frame-to-worksheet
 conversion but not frame construction. The read fixture is written by
 openpyxl so no reader parses its own writer's output. pylightxl has no
 datetime support and is excluded from the mixed-type case.
@@ -73,7 +83,8 @@ of being silently dropped.
 
 ```bash
 .bench/bin/pip install wolfxl==2.0.1 openpyxl==3.1.5 xlsxwriter pyexcelerate \
-    python-calamine fastexcel pyarrow pylightxl pandas polars
+    python-calamine fastexcel pyarrow pylightxl pandas polars duckdb \
+    tablib pyexcel pyexcel-xlsx xlsx2csv
 .bench/bin/python benchmarks/benchmark_python_excel_ecosystem.py \
     --rounds 5 --output-dir /tmp/ecosystem-results --prefix my-run
 ```
@@ -85,7 +96,7 @@ python benchmarks/render_charts.py \
     benchmarks/results/2026-08-18-community-2.0.1-vs-openpyxl-3.1.5.json \
     assets/benchmarks
 python benchmarks/render_ecosystem_charts.py \
-    benchmarks/results/2026-08-18-ecosystem-linux-epyc.json \
+    benchmarks/results/2026-08-18-ecosystem-full-linux-epyc.json \
     assets/benchmarks
 ```
 
@@ -102,13 +113,13 @@ produces byte-identical SVGs.
   shapes in both libraries.
 - On small workloads, peak memory is roughly equal between the two libraries;
   the memory chart shows the large-file cases where they diverge.
-- In the ecosystem read case, fastexcel and Polars are slightly faster than
-  wolfxl but return Arrow-backed tables; wolfxl and python-calamine return
-  Python cell values, and only wolfxl, openpyxl, and pylightxl can also write.
-- PyExcelerate serializes floats with fewer significant digits than the other
-  writers, so its speed comes with a round-trip precision difference. It also
-  has the lowest write peak RSS.
-- pylightxl did not finish one 1.6-million-cell write round within the 240 s
-  budget and is recorded as DNF, not omitted.
+- In the ecosystem read case, the Arrow-native engines (fastexcel, Polars,
+  DuckDB) avoid materializing Python cell objects; wolfxl and python-calamine
+  return Python cell values, and only wolfxl, openpyxl, pylightxl, Tablib, and
+  pyexcel can also write.
+- PyExcelerate, Tablib, and pyexcel serialize floats with fewer significant
+  digits than the other writers (a value like `8/7` does not round-trip
+  bit-exactly), so their write numbers come with a precision tradeoff.
+- Engines that exceed the per-round budget are recorded as DNF, not omitted.
 - Numbers are from the pinned versions, hardware, and OS recorded in the
   results JSON. Different machines will produce different absolute times.
