@@ -9,7 +9,7 @@ permissions:
 jobs:
   linux:
     name: Linux ${{ matrix.target }} wheels
-    runs-on: ubuntu-22.04
+    runs-on: blacksmith-4vcpu-ubuntu-2204
     timeout-minutes: 45
     strategy:
       fail-fast: false
@@ -54,7 +54,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - runner: macos-15-intel
+          - runner: blacksmith-6vcpu-macos-15
             target: x86_64-apple-darwin
           - runner: macos-15
             target: aarch64-apple-darwin
@@ -87,7 +87,7 @@ jobs:
 
   windows:
     name: Windows x86_64 wheels
-    runs-on: windows-latest
+    runs-on: blacksmith-4vcpu-windows-2025
     timeout-minutes: 45
     steps:
       - name: Enable long paths
@@ -125,7 +125,7 @@ jobs:
 
   sdist:
     name: Source distribution
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v6
