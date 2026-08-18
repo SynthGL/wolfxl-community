@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="308" viewBox="0 0 920 308" role="img" aria-label="Write 200,000 x 8 plain values">
+<defs>
+<linearGradient id="wolfxl" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#f59e0b"/><stop offset="1" stop-color="#fbbf24"/></linearGradient>
+</defs>
+<rect x="0.5" y="0.5" width="919" height="307" rx="14" fill="#0f172a" stroke="#1e293b"/>
+<text x="36" y="42" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="21" font-weight="700" fill="#e2e8f0">Write 200,000 x 8 plain values</text>
+<text x="36" y="66" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13" fill="#94a3b8">AMD EPYC 9654 96-Core Processor | x86_64 Linux | Python 3.13.15 | median of 5 rounds | lower is better</text>
+<text x="36" y="108" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13" font-weight="700" fill="#e2e8f0">WolfXL Community 2.0.1</text>
+<text x="36" y="122" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="10.5" fill="#94a3b8">full read/write</text>
+<rect x="336" y="96" width="37.3" height="24" rx="12.0" fill="url(#wolfxl)"/>
+<text x="383.3" y="113" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13.5" font-weight="700" fill="#fbbf24">1.01 s</text>
+<text x="36" y="142" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13" font-weight="600" fill="#94a3b8">PyExcelerate 0.13.0</text>
+<text x="36" y="156" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="10.5" fill="#94a3b8">write-only</text>
+<rect x="336" y="130" width="187.8" height="24" rx="12.0" fill="#64748b"/>
+<text x="533.8" y="147" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13.5" font-weight="700" fill="#94a3b8">5.08 s</text>
+<text x="36" y="176" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13" font-weight="600" fill="#94a3b8">XlsxWriter 3.2.9</text>
+<text x="36" y="190" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="10.5" fill="#94a3b8">write-only</text>
+<rect x="336" y="164" width="240.0" height="24" rx="12.0" fill="#64748b"/>
+<text x="586.0" y="181" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13.5" font-weight="700" fill="#94a3b8">6.49 s</text>
+<text x="36" y="210" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13" font-weight="600" fill="#94a3b8">openpyxl 3.1.5</text>
+<text x="36" y="224" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="10.5" fill="#94a3b8">full read/write</text>
+<rect x="336" y="198" width="438.0" height="24" rx="12.0" fill="#475569"/>
+<text x="784.0" y="215" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13.5" font-weight="700" fill="#94a3b8">11.8 s</text>
+<text x="36" y="274" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="11.5" fill="#94a3b8">Raw data: benchmarks/results/2026-08-18-ecosystem-linux-epyc.json (run 2026-08-18)</text>
+<text x="36" y="290" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="11.5" fill="#94a3b8">Reproduce: python benchmarks/benchmark_python_excel_ecosystem.py (see benchmarks/README.md)</text>
+</svg>

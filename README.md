@@ -88,10 +88,25 @@ Median speedups over openpyxl 3.1.5, from the committed benchmark run
 
 ![1.6 million cells: peak memory](assets/benchmarks/large-file-memory.svg)
 
+### Against other open-source Python Excel libraries
+
+Cross-library comparison on a separate machine (AMD EPYC 9654, x86_64 Linux,
+Python 3.13.15, median of 5 rounds). Each library is measured only inside its
+supported scope; write-only and read-only specialists are labeled:
+
+![Write 200,000 x 8 plain values](assets/benchmarks/ecosystem-write-large.svg)
+
+![Write 10,000 x 5 mixed types](assets/benchmarks/ecosystem-write-mixed.svg)
+
+![Read 200,000 x 8, all values](assets/benchmarks/ecosystem-read-large.svg)
+
+In the read case, fastexcel is about 5% faster than wolfxl but returns Arrow
+tables rather than Python cell values, and it cannot write workbooks.
+
 Speedups vary by workload, and small workbooks see smaller wins. Raw results,
-the benchmark harness, and reproduction instructions are in
-[`benchmarks/`](benchmarks/README.md). The charts are generated from the
-committed results JSON by `benchmarks/render_charts.py`.
+the benchmark harnesses, and reproduction instructions are in
+[`benchmarks/`](benchmarks/README.md). All charts are generated from the
+committed results JSON files, never edited by hand.
 
 ## Development
 
