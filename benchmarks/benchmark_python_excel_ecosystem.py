@@ -9,12 +9,25 @@ Engines and their honest scope:
 - pylightxl        pure-Python read/write (no native datetime support)
 - pandas           DataFrame to_excel/read_excel (openpyxl and calamine engines)
 - polars           DataFrame write_excel/read_excel (wraps XlsxWriter/fastexcel)
+- duckdb           SQL engine (excel extension: COPY xlsx / read_xlsx to Arrow)
+- tablib           Dataset wrapper (openpyxl xlsx backend)
+- pyexcel          wrapper (openpyxl backend via pyexcel-xlsx)
 - python-calamine  read-only, returns Python values
 - fastexcel        read-only, returns Arrow tables (not Python cell objects)
+- xlsx2csv         read-only, transcodes to CSV text
+
+Inclusion bar: xlsx-capable, no external application required, and broad real
+adoption (roughly one million PyPI downloads per month). Format-specific
+libraries (xlrd/xlwt for .xls, pyxlsb for .xlsb), xlwings (requires a running
+Excel installation), and commercial SDKs are out of scope.
 
 Write-only libraries appear only in write cases and read-only libraries only
-in read cases. pandas and polars are timed from a prebuilt DataFrame, which is
-their primary use case; DataFrame construction is excluded from their timings.
+in read cases. pandas, polars, and duckdb are timed from a prebuilt
+DataFrame (duckdb reads a registered DataFrame view), which is their primary
+use case; DataFrame construction is excluded from their timings. tablib is
+timed from a prebuilt Dataset. duckdb, tablib, pyexcel, and xlsx2csv are
+imported lazily inside their engine functions so the peak-RSS children of
+other engines do not pay for their imports.
 Read cases share one fixture written by openpyxl so no reader is parsing its
 own writer's output. A separate peak-RSS pass runs each large case once per
 engine in a fresh process; a grid-only baseline child shows how much of the
@@ -131,6 +144,43 @@ def write_polars(path: Path, frame: "pl.DataFrame") -> None:
     frame.write_excel(str(path), include_header=False)
 
 
+_DUCKDB_CON: Any = None
+
+
+def _duckdb_connection() -> Any:
+    global _DUCKDB_CON
+    if _DUCKDB_CON is None:
+        import duckdb
+
+        _DUCKDB_CON = duckdb.connect()
+        _DUCKDB_CON.execute("INSTALL excel; LOAD excel;")
+    return _DUCKDB_CON
+
+
+def _tablib_dataset(grid: list[list[Any]]) -> Any:
+    import tablib
+
+    dataset = tablib.Dataset()
+    dataset.extend(grid)
+    return dataset
+
+
+def write_duckdb(con: Any, view: str, path: Path) -> None:
+    if path.exists():
+        path.unlink()
+    con.execute(f"COPY (SELECT * FROM {view}) TO '{path}' (FORMAT xlsx)")
+
+
+def write_tablib(path: Path, dataset: Any) -> None:
+    path.write_bytes(dataset.export("xlsx"))
+
+
+def write_pyexcel(path: Path, grid: list[list[Any]]) -> None:
+    import pyexcel
+
+    pyexcel.save_as(array=grid, dest_file_name=str(path))
+
+
 # --- read engines ----------------------------------------------------------
 
 
@@ -189,6 +239,46 @@ def read_polars(path: Path) -> int:
     return frame.height * frame.width
 
 
+def read_duckdb(path: Path) -> int:
+    con = _duckdb_connection()
+    table = con.execute(
+        f"SELECT * FROM read_xlsx('{path}', header = false)"
+    ).fetch_arrow_table()
+    return table.num_rows * table.num_columns
+
+
+def read_tablib(path: Path) -> int:
+    import tablib
+
+    dataset = tablib.Dataset().load(path.read_bytes(), format="xlsx", headers=False)
+    return dataset.height * dataset.width
+
+
+def read_pyexcel(path: Path) -> int:
+    import pyexcel
+
+    rows = pyexcel.get_array(file_name=str(path))
+    count = sum(len(row) for row in rows)
+    pyexcel.free_resources()
+    return count
+
+
+def read_xlsx2csv(path: Path) -> int:
+    from xlsx2csv import Xlsx2csv
+
+    with tempfile.NamedTemporaryFile(suffix=".csv", delete=False) as tmp:
+        csv_path = Path(tmp.name)
+    try:
+        Xlsx2csv(str(path), outputencoding="utf-8").convert(str(csv_path))
+        with csv_path.open(encoding="utf-8") as fh:
+            first = fh.readline()
+            cols = first.count(",") + 1
+            lines = 1 + sum(1 for _ in fh)
+    finally:
+        csv_path.unlink(missing_ok=True)
+    return lines * cols
+
+
 READ_ENGINES: dict[str, Callable[[Path], int]] = {
     "wolfxl": read_wolfxl,
     "openpyxl": read_openpyxl,
@@ -198,6 +288,10 @@ READ_ENGINES: dict[str, Callable[[Path], int]] = {
     "pandas_openpyxl": read_pandas_openpyxl,
     "pandas_calamine": read_pandas_calamine,
     "polars": read_polars,
+    "duckdb": read_duckdb,
+    "tablib": read_tablib,
+    "pyexcel": read_pyexcel,
+    "xlsx2csv": read_xlsx2csv,
 }
 
 ENGINE_SCOPE = {
@@ -211,6 +305,10 @@ ENGINE_SCOPE = {
     "polars": "DataFrame I/O, wraps XlsxWriter/fastexcel",
     "python_calamine": "read-only, Python values",
     "fastexcel": "read-only, Arrow tables",
+    "duckdb": "SQL engine; DataFrame in, Arrow out",
+    "tablib": "Dataset wrapper, openpyxl backend",
+    "pyexcel": "wrapper, openpyxl backend",
+    "xlsx2csv": "read-only, transcodes to CSV text",
 }
 
 # pylightxl has no native datetime support, so it is excluded from the mixed
@@ -224,6 +322,9 @@ WRITE_CASE_ENGINES = {
         "pylightxl",
         "pandas_openpyxl",
         "polars",
+        "duckdb",
+        "tablib",
+        "pyexcel",
     ),
     "write_mixed": (
         "wolfxl",
@@ -232,6 +333,9 @@ WRITE_CASE_ENGINES = {
         "pyexcelerate",
         "pandas_openpyxl",
         "polars",
+        "duckdb",
+        "tablib",
+        "pyexcel",
     ),
     "write_unique_strings": (
         "wolfxl",
@@ -241,6 +345,9 @@ WRITE_CASE_ENGINES = {
         "pylightxl",
         "pandas_openpyxl",
         "polars",
+        "duckdb",
+        "tablib",
+        "pyexcel",
     ),
 }
 
@@ -254,6 +361,10 @@ READ_CASE_ENGINES = {
         "pandas_openpyxl",
         "pandas_calamine",
         "polars",
+        "duckdb",
+        "tablib",
+        "pyexcel",
+        "xlsx2csv",
     ),
 }
 
@@ -264,7 +375,8 @@ MEMORY_READ_ENGINES = READ_CASE_ENGINES["read_values_large"]
 def build_write_engines(
     names: tuple[str, ...], grid: list[list[Any]], workdir: Path, case: str
 ) -> dict[str, Callable[[], None]]:
-    pandas_frame = pd.DataFrame(grid) if "pandas_openpyxl" in names else None
+    needs_pandas = "pandas_openpyxl" in names or "duckdb" in names
+    pandas_frame = pd.DataFrame(grid) if needs_pandas else None
     polars_frame = pl.DataFrame(grid, orient="row") if "polars" in names else None
     engines: dict[str, Callable[[], None]] = {}
     for name in names:
@@ -273,6 +385,16 @@ def build_write_engines(
             engines[name] = lambda t=target, f=pandas_frame: write_pandas(t, f)
         elif name == "polars":
             engines[name] = lambda t=target, f=polars_frame: write_polars(t, f)
+        elif name == "duckdb":
+            con = _duckdb_connection()
+            view = f"grid_{case}"
+            con.register(view, pandas_frame)
+            engines[name] = lambda c=con, v=view, t=target: write_duckdb(c, v, t)
+        elif name == "tablib":
+            dataset = _tablib_dataset(grid)
+            engines[name] = lambda t=target, d=dataset: write_tablib(t, d)
+        elif name == "pyexcel":
+            engines[name] = lambda t=target, g=grid: write_pyexcel(t, g)
         else:
             writer = {
                 "wolfxl": write_wolfxl,
@@ -315,6 +437,11 @@ def library_versions() -> dict[str, str]:
         "python-calamine",
         "fastexcel",
         "pyarrow",
+        "duckdb",
+        "tablib",
+        "pyexcel",
+        "pyexcel-xlsx",
+        "xlsx2csv",
     ):
         try:
             versions[dist] = importlib.metadata.version(dist)
@@ -644,7 +771,7 @@ def main() -> None:
             "warmup_rounds": 1,
             "round_budget_seconds": args.round_budget,
             "read_fixture_writer": "openpyxl",
-            "dataframe_timing": "pandas/polars timed from a prebuilt DataFrame",
+            "dataframe_timing": "pandas/polars/duckdb timed from a prebuilt DataFrame; tablib from a prebuilt Dataset",
             "memory_pass": "one fresh process per engine, single run, peak RSS",
             "versions": library_versions(),
             "engine_scope": ENGINE_SCOPE,

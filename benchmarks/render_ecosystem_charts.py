@@ -46,6 +46,10 @@ ENGINE_META = {
     "polars": ("Polars", "polars"),
     "python_calamine": ("python-calamine", "python-calamine"),
     "fastexcel": ("fastexcel", "fastexcel"),
+    "duckdb": ("DuckDB", "duckdb"),
+    "tablib": ("Tablib", "tablib"),
+    "pyexcel": ("pyexcel", "pyexcel"),
+    "xlsx2csv": ("xlsx2csv", "xlsx2csv"),
     "grid_baseline": ("input grid only", ""),
 }
 
@@ -69,8 +73,8 @@ OUTPUTS = {
 
 EXTRA_NOTES = {
     "read_values_large": [
-        "fastexcel/Polars return Arrow-backed tables, not Python cell objects; "
-        "read fixture written by openpyxl.",
+        "fastexcel/Polars/DuckDB return Arrow-backed tables, not Python cell "
+        "objects; xlsx2csv emits CSV text; read fixture written by openpyxl.",
     ],
     "memory_write_large": [
         "One fresh process per engine, single run. 'input grid only' is the cost "
