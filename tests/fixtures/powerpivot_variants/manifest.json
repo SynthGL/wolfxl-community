@@ -1,0 +1,35 @@
+{
+  "description": "Sidecar PowerPivot/data-model real-world variants used to harden evidence beyond the active external-oracle pack.",
+  "fixtures": [
+    {
+      "filename": "real-excel-powerpivot-contoso-pnl.xlsx",
+      "tool": "excel",
+      "fixture_id": "real_excel_powerpivot_contoso_pnl",
+      "app_unsupported_features": [
+        "power_view"
+      ],
+      "sha256": "d9a77819ed43a93cda82ab7ba08dd6406981d9d3eae7cfb7cae4720a40f87ac5",
+      "size_bytes": 7361732,
+      "expected_parts": [
+        "xl/workbook.xml",
+        "xl/_rels/workbook.xml.rels",
+        "xl/connections.xml",
+        "xl/model/item.data",
+        "xl/pivotCache/pivotCacheDefinition1.xml",
+        "xl/pivotCache/pivotCacheDefinition2.xml",
+        "xl/pivotCache/pivotCacheDefinition3.xml",
+        "xl/pivotCache/pivotCacheDefinition4.xml",
+        "xl/pivotTables/pivotTable1.xml",
+        "xl/pivotTables/pivotTable2.xml",
+        "xl/pivotTables/pivotTable3.xml",
+        "xl/slicerCaches/slicerCache1.xml",
+        "xl/slicerCaches/slicerCache2.xml",
+        "xl/slicerCaches/slicerCache3.xml",
+        "xl/slicers/slicer1.xml",
+        "xl/styles.xml",
+        "xl/theme/theme1.xml"
+      ],
+      "notes": "Official Microsoft Download Center sample ContosoPnL_Excel2013.xlsx from ContosoPnL_Excel2013.zip for Profit and Loss Data Modeling and Analysis with Microsoft PowerPivot in Excel. Workbook metadata reports Application=Microsoft Excel and covers a richer PowerPivot/data-model variant with xl/model/item.data, workbook connections, multiple pivot caches, multiple pivot tables, and slicer caches. This workbook also contains PowerView content; local Microsoft Excel app-smoke treats it as app-unsupported evidence instead of clean editable open/close evidence."
+    }
+  ]
+}

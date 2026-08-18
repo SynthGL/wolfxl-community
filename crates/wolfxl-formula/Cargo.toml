@@ -1,0 +1,12 @@
+[package]
+name = "wolfxl-formula"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "A1-syntax Excel formula tokenizer and reference translator (port of openpyxl/Bachtal). Pure Rust, no PyO3 — used by both the wolfxl patcher (modify mode) and the native writer."
+
+[dependencies]
+
+[dev-dependencies]
+zip.workspace = true

@@ -1,0 +1,114 @@
+[build-system]
+requires = ["maturin>=1.0,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "wolfxl"
+version = "2.0.1"
+description = "MIT-licensed, openpyxl-compatible Excel I/O with a Rust backend"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = ["defusedxml>=0.7.1,<1.0"]
+license = { text = "MIT" }
+authors = [{ name = "Wolfgang Schoenberger" }]
+keywords = ["excel", "xlsx", "openpyxl", "rust", "performance", "spreadsheet", "formula", "calc", "financial"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Financial and Insurance Industry",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Rust",
+    "Topic :: Office/Business :: Financial :: Spreadsheet",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+
+[project.optional-dependencies]
+calc = ["formulas>=1.3.3,<2.0"]
+encrypted = ["msoffcrypto-tool>=5.4,<6.0"]
+# Runtime test dependencies (see .github/workflows/ci.yml). Install with
+# `pip install -e .[test]` or `uv pip install -e .[test]`.
+#   - maturin is NOT listed here: it is the build backend, pulled from
+#     [build-system].requires (CI installs it separately to build the wheel).
+#   - pytest-xdist is used by the parity CI job for parallel runs; the plain
+#     test job runs without it. It is included here so a local `.[test]` env can
+#     reproduce either job.
+#   - Pillow is REQUIRED for the image/drawing/chart round-trip tests: openpyxl's
+#     reader silently drops images when Pillow is absent
+#     (openpyxl/reader/drawings.py: `if not PILImage: return charts, []`), so a
+#     venv without Pillow shows false image-test failures, not a writer defect.
+test = [
+    "pytest>=7.4",
+    "pytest-xdist>=3.3",
+    "openpyxl>=3.1",
+    "Pillow>=10.0",
+]
+
+[project.urls]
+Homepage = "https://wolfxl.com"
+Repository = "https://github.com/SynthGL/wolfxl-community"
+Issues = "https://github.com/SynthGL/wolfxl-community/issues"
+Changelog = "https://github.com/SynthGL/wolfxl-community/releases"
+
+[tool.maturin]
+bindings = "pyo3"
+module-name = "wolfxl._rust"
+python-source = "python"
+features = ["extension-module"]
+
+[tool.pyright]
+pythonVersion = "3.12"
+extraPaths = ["python"]
+
+[tool.ruff]
+line-length = 100
+extend-exclude = ["tests/vendored_openpyxl"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP"]
+ignore = [
+    # WolfXL intentionally mirrors openpyxl's camelCase public API.
+    "N",
+    # Keep lint focused on behavioral issues until the openpyxl surface is
+    # migrated to a project-wide formatter/import policy.
+    "I",
+    # The package supports Python 3.9; defer pyupgrade-style rewrites.
+    "UP",
+    # Existing OOXML fixture strings and importorskip patterns are long/by design.
+    "E402",
+    "E501",
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Compatibility shims intentionally mirror openpyxl's dynamic import surface.
+# Many imported or dynamically-created names are part of that public API even
+# when this repository does not reference them directly.
+"python/wolfxl/_constants.py" = ["F401"]
+"python/wolfxl/cell/rich_text.py" = ["E721"]
+"python/wolfxl/chart/print_settings.py" = ["E741"]
+"python/wolfxl/descriptors/serialisable.py" = ["E721", "F811", "F841"]
+"python/wolfxl/drawing/*.py" = ["F401", "F821", "F822"]
+"python/wolfxl/styles/builtins.py" = ["F401"]
+"python/wolfxl/styles/stylesheet.py" = ["F401", "F811"]
+"python/wolfxl/styles/table.py" = ["F401"]
+"python/wolfxl/utils/cell.py" = ["F401"]
+"python/wolfxl/worksheet/_reader.py" = ["F401", "F821"]
+
+[tool.pytest.ini_options]
+markers = [
+    "slow: marks tests that are sensitive to CI timing",
+    "rich_features: tests that exercise rich-feature pymethods (hyperlinks, comments, named ranges, properties, tables, CF, DV, print area) on the always-native writer path.",
+    "smoke: hand-rolled Layer 1/3 smoke gates for the native writer (precedes the W4C diff harness).",
+    "libreoffice_smoke: Layer 4 LibreOffice headless round-trip (gold-star, opt-in via WOLFXL_RUN_LIBREOFFICE_SMOKE=1).",
+    "rfc030: RFC-030 — insert_rows / delete_rows in modify mode.",
+    "rfc034: RFC-034 — Worksheet.move_range in modify mode.",
+    "rfc035: RFC-035 — Workbook.copy_worksheet in modify+write mode.",
+    "rfc031: RFC-031 — insert_cols/delete_cols in modify mode.",
+    "rfc036: RFC-036 — Workbook.move_sheet in modify mode.",
+    "rfc046: RFC-046 — chart write and modify-mode chart insertion.",
+    "manual: tests requiring manual environment setup (e.g. LibreOffice path).",
+]
+
+[tool.mypy]
+strict = true

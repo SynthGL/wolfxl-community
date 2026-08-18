@@ -1,0 +1,69 @@
+[workspace]
+resolver = "2"
+members = ["crates/wolfxl-core", "crates/wolfxl-cli", "crates/wolfxl-writer", "crates/wolfxl-rels", "crates/wolfxl-reader", "crates/wolfxl-merger", "crates/wolfxl-formula", "crates/wolfxl-structural", "crates/wolfxl-classify", "crates/wolfxl-pivot", "crates/wolfxl-autofilter"]
+
+[workspace.package]
+edition = "2021"
+license = "MIT"
+repository = "https://github.com/SynthGL/wolfxl-community"
+authors = ["Wolfgang Schoenberger"]
+
+[workspace.dependencies]
+calamine-styles = { version = "0.1", features = ["dates"] }
+indexmap = "2.2"
+zip = { version = "2", default-features = false, features = ["deflate"] }
+quick-xml = "0.37"
+chrono = "0.4"
+anyhow = "1"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tempfile = "3"
+
+[package]
+name = "wolfxl"
+version = "2.0.1"
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Fast, openpyxl-compatible Excel I/O backed by Rust"
+build = "build.rs"
+
+[lib]
+name = "wolfxl"
+crate-type = ["cdylib", "rlib"]
+
+[features]
+default = []
+extension-module = ["pyo3/extension-module"]
+
+[dependencies]
+pyo3 = { version = "0.28", features = ["multiple-pymethods"] }
+calamine-styles.workspace = true
+indexmap.workspace = true
+zip.workspace = true
+quick-xml.workspace = true
+chrono.workspace = true
+wolfxl-core = { path = "crates/wolfxl-core", version = "0.8" }
+wolfxl-writer = { path = "crates/wolfxl-writer", version = "0.1" }
+wolfxl-rels = { path = "crates/wolfxl-rels", version = "0.1" }
+wolfxl-reader = { path = "crates/wolfxl-reader", version = "0.1" }
+wolfxl-merger = { path = "crates/wolfxl-merger", version = "0.1" }
+wolfxl-formula = { path = "crates/wolfxl-formula", version = "0.1" }
+wolfxl-structural = { path = "crates/wolfxl-structural", version = "0.1" }
+wolfxl-classify = { path = "crates/wolfxl-classify", version = "0.1" }
+wolfxl-pivot = { path = "crates/wolfxl-pivot", version = "2.0.0" }
+wolfxl-autofilter = { path = "crates/wolfxl-autofilter", version = "2.0.0" }
+tempfile.workspace = true
+
+[build-dependencies]
+pyo3-build-config = "0.28"
+
+# Release tuning for the shipped cdylib. `lto = "fat"` + `codegen-units = 1`
+# let the optimizer inline across crate boundaries (the 11 worker crates +
+# pyo3 binding) at the cost of slower compiles. `panic = "abort"` is
+# deliberately NOT set: pyo3 relies on `catch_unwind` to turn Rust panics into
+# catchable Python exceptions, and aborting would crash the host interpreter on
+# malformed input instead of raising.
+[profile.release]
+lto = "fat"
+codegen-units = 1

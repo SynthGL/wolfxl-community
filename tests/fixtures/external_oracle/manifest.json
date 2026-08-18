@@ -1,0 +1,408 @@
+{
+  "schema_version": 1,
+  "description": "Pinned external-oracle fixture pack for tests/test_external_oracle_preservation.py. Seeded 2026-05-04 from the ExcelBench external-oracle harness (results_dev_external/fixtures/manifest.json), with targeted synthetic OOXML, public Excel-authored slicer workbooks, and Excel-compatible replacement fixtures added for surfaces missing from that harness. Each active entry is expected to open/save in Microsoft Excel or is explicitly documented as normalized from an external source. Each entry's expected_parts list comes from the authored OOXML; the modify-save preservation test asserts each part still exists in the workbook AFTER wolfxl saves a one-cell mutation.",
+  "source_harness": "ExcelBench results_dev_external/fixtures (2026-04-28 generation) plus targeted synthetic OOXML fixtures",
+  "fixtures": [
+    {
+      "filename": "closedxml-pivot-cf-table.xlsx",
+      "tool": "closedxml",
+      "fixture_id": "closedxml_pivot_cf_table",
+      "sha256": "c37a895c6b37084f4b6483978cddafb7ea160974b82225cb57663f5751d2e1d6",
+      "size_bytes": 10951,
+      "expected_parts": [
+        "xl/tables/table1.xml",
+        "xl/pivotTables/pivotTable.xml",
+        "pivotCache/pivotCacheDefinition1.xml",
+        "xl/worksheets/sheet1.xml"
+      ]
+    },
+    {
+      "filename": "openpyxl-table-validation-image-comment.xlsx",
+      "tool": "openpyxl",
+      "fixture_id": "openpyxl_table_validation_image_comment",
+      "sha256": "aa7dff111dd1edb85621a6dcb428dfcbd3b5308b792c2d7864cca463a9158264",
+      "size_bytes": 7785,
+      "expected_parts": [
+        "xl/comments/comment1.xml",
+        "xl/drawings/commentsDrawing1.vml",
+        "xl/drawings/_rels/drawing1.xml.rels",
+        "xl/drawings/drawing1.xml",
+        "xl/media/image1.png",
+        "xl/styles.xml",
+        "xl/tables/table1.xml",
+        "xl/workbook.xml",
+        "xl/worksheets/_rels/sheet1.xml.rels",
+        "xl/worksheets/sheet1.xml"
+      ],
+      "notes": "Excel-compatible replacement for Apache POI/ExcelJS source fixtures that Microsoft Excel rejected before WolfXL mutation; covers table, data validation, comment, drawing, and image preservation."
+    },
+    {
+      "filename": "closedxml-rich-comment-protection.xlsx",
+      "tool": "closedxml",
+      "fixture_id": "closedxml_rich_comment_protection",
+      "sha256": "4a54ebc4997a1b019035c0ab9d18a048714eb6fc9f5e7d4538079664782921db",
+      "size_bytes": 7992,
+      "expected_parts": [
+        "xl/sharedStrings.xml",
+        "xl/comments1.xml",
+        "xl/drawings/vmldrawing.vml",
+        "xl/worksheets/sheet1.xml"
+      ]
+    },
+    {
+      "filename": "excelize-chart-points-formula-cf.xlsx",
+      "tool": "excelize",
+      "fixture_id": "excelize_chart_points_formula_cf",
+      "sha256": "f26b2f60f294fadc86cd0cadc072246eff4ac9d3ec7e325809f0b2cfbe0d6571",
+      "size_bytes": 9177,
+      "expected_parts": [
+        "xl/charts/chart1.xml",
+        "xl/drawings/drawing1.xml",
+        "xl/worksheets/sheet1.xml"
+      ]
+    },
+    {
+      "filename": "excelize-sales-pivot-slicer-chart.xlsx",
+      "tool": "libreoffice-normalized-excelize",
+      "fixture_id": "libreoffice_normalized_excelize_sales_pivot_slicer_chart",
+      "sha256": "aa9f8713749717f37f93c75ca833228f193d485e9f1e80e43d50aa2c6876858e",
+      "size_bytes": 16215,
+      "expected_parts": [
+        "xl/tables/table1.xml",
+        "xl/pivotTables/pivotTable1.xml",
+        "xl/pivotCache/pivotCacheDefinition1.xml",
+        "xl/charts/chart1.xml",
+        "xl/charts/style1.xml",
+        "xl/charts/colors1.xml",
+        "xl/drawings/drawing1.xml"
+      ],
+      "notes": "Excelize-authored source normalized through LibreOffice because Microsoft Excel rejected the original source fixture before WolfXL mutation. The normalized active fixture preserves pivot, chart, style, color, table, and drawing parts, but LibreOffice removed the original slicer parts; slicer coverage remains a known follow-up for native Excel-authored fixtures."
+    },
+    {
+      "filename": "excelize-2.10-pivot-slicers.xlsx",
+      "tool": "excelize",
+      "fixture_id": "excelize_2_10_pivot_slicers",
+      "sha256": "a0d609aa852942ac5269b6fcaa312de4862b689114db0c2c441b7088d1f82b53",
+      "size_bytes": 12554,
+      "expected_parts": [
+        "xl/workbook.xml",
+        "xl/_rels/workbook.xml.rels",
+        "xl/worksheets/sheet1.xml",
+        "xl/worksheets/sheet2.xml",
+        "xl/worksheets/_rels/sheet1.xml.rels",
+        "xl/worksheets/_rels/sheet2.xml.rels",
+        "xl/slicerCaches/slicerCache1.xml",
+        "xl/slicers/slicer1.xml",
+        "xl/tables/table1.xml",
+        "xl/drawings/drawing1.xml",
+        "xl/pivotTables/pivotTable1.xml",
+        "xl/pivotTables/_rels/pivotTable1.xml.rels",
+        "xl/pivotCache/pivotCacheDefinition1.xml",
+        "xl/styles.xml",
+        "xl/theme/theme1.xml"
+      ],
+      "notes": "Generated locally with github.com/xuri/excelize/v2 v2.10.1 using deterministic sample data and AddPivotTable/AddSlicer. Workbook metadata reports Application=Go Excelize. Covers Excel-compatible external-tool pivot slicer and slicer-cache preservation."
+    },
+    {
+      "filename": "npoi-formula-comment-merge-protection.xlsx",
+      "tool": "npoi",
+      "fixture_id": "npoi_formula_comment_merge_protection",
+      "sha256": "42daf0032203f721140c12eb01ea135079c2c4b8899a87adfe99fb9a3ccfacc7",
+      "size_bytes": 6058,
+      "expected_parts": [
+        "xl/sharedStrings.xml",
+        "xl/comments1.xml",
+        "xl/drawings/vmlDrawing1.vml",
+        "xl/worksheets/sheet1.xml"
+      ]
+    },
+    {
+      "filename": "synthetic-external-link-basic.xlsx",
+      "tool": "synthetic-ooxml",
+      "fixture_id": "synthetic_external_link_basic",
+      "sha256": "920c181d9710b6a3bb1b6c660292d40ae554bbb9d25a22860827a79742e8204f",
+      "size_bytes": 2735,
+      "expected_parts": [
+        "xl/workbook.xml",
+        "xl/_rels/workbook.xml.rels",
+        "xl/worksheets/sheet1.xml",
+        "xl/externalLinks/externalLink1.xml",
+        "xl/externalLinks/_rels/externalLink1.xml.rels"
+      ]
+    },
+    {
+      "filename": "real-excel-table-slicers.xlsx",
+      "tool": "excel",
+      "fixture_id": "real_excel_table_slicers_myexcelonline",
+      "sha256": "08f7746560b731ad0a0d3ecd6065f2a8764887d61b8a99e598b6c2704681fb51",
+      "size_bytes": 38902,
+      "expected_parts": [
+        "xl/workbook.xml",
+        "xl/_rels/workbook.xml.rels",
+        "xl/worksheets/sheet1.xml",
+        "xl/worksheets/_rels/sheet1.xml.rels",
+        "xl/slicerCaches/slicerCache1.xml",
+        "xl/slicerCaches/slicerCache2.xml",
+        "xl/slicers/slicer1.xml",
+        "xl/tables/table1.xml",
+        "xl/drawings/drawing1.xml",
+        "xl/drawings/_rels/drawing1.xml.rels",
+        "xl/calcChain.xml",
+        "xl/styles.xml",
+        "xl/theme/theme1.xml"
+      ],
+      "notes": "Public free practice workbook from https://www.myexcelonline.com/blog/excel-table-slicers/ (Download workbook Table-Slicers.xlsx). Workbook metadata reports Application=Microsoft Excel and creator John Michaloudis;www.myexcelonline.com/blog. Covers Excel-authored table slicer and slicer-cache preservation."
+    },
+    {
+      "filename": "real-excel-pivot-chart-slicers.xlsx",
+      "tool": "excel",
+      "fixture_id": "real_excel_pivot_chart_slicers_myexcelonline",
+      "sha256": "61a2cce8968f4f0c7024fd4c10ad208a5fedffe5980dd27bbfba128e4be1d472",
+      "size_bytes": 53871,
+      "expected_parts": [
+        "xl/workbook.xml",
+        "xl/_rels/workbook.xml.rels",
+        "xl/worksheets/sheet1.xml",
+        "xl/worksheets/sheet2.xml",
+        "xl/worksheets/_rels/sheet1.xml.rels",
+        "xl/worksheets/_rels/sheet2.xml.rels",
+        "xl/slicerCaches/slicerCache1.xml",
+        "xl/slicerCaches/slicerCache2.xml",
+        "xl/slicers/slicer1.xml",
+        "xl/tables/table1.xml",
+        "xl/drawings/drawing1.xml",
+        "xl/drawings/_rels/drawing1.xml.rels",
+        "xl/charts/chart1.xml",
+        "xl/pivotTables/pivotTable1.xml",
+        "xl/pivotTables/_rels/pivotTable1.xml.rels",
+        "xl/pivotCache/pivotCacheDefinition1.xml",
+        "xl/pivotCache/_rels/pivotCacheDefinition1.xml.rels",
+        "xl/pivotCache/pivotCacheRecords1.xml",
+        "xl/styles.xml",
+        "xl/theme/theme1.xml"
+      ],
+      "notes": "Public free practice workbook from https://www.myexcelonline.com/blog/pivot-charts-slicers/ (Download excel workbook Pivot-Charts-Slicers.xlsx). Workbook metadata reports Application=Microsoft Excel and creator John Michaloudis;www.myexcelonline.com/blog. Covers Excel-authored pivot table, pivot chart, slicers, and slicer-cache preservation."
+    },
+    {
+      "filename": "real-excel-timeline-slicer.xlsx",
+      "tool": "excel",
+      "fixture_id": "real_excel_timeline_slicer_myexcelonline",
+      "sha256": "cfe1164c9ee37537a683cbbc5b1cfcd50b60b068aa61b607929b8803d9b006a7",
+      "size_bytes": 88657,
+      "expected_parts": [
+        "xl/workbook.xml",
+        "xl/_rels/workbook.xml.rels",
+        "xl/worksheets/sheet1.xml",
+        "xl/worksheets/sheet2.xml",
+        "xl/worksheets/_rels/sheet1.xml.rels",
+        "xl/worksheets/_rels/sheet2.xml.rels",
+        "xl/timelineCaches/timelineCache1.xml",
+        "xl/timelines/timeline1.xml",
+        "xl/tables/table1.xml",
+        "xl/drawings/drawing1.xml",
+        "xl/drawings/_rels/drawing1.xml.rels",
+        "xl/pivotTables/pivotTable1.xml",
+        "xl/pivotTables/_rels/pivotTable1.xml.rels",
+        "xl/pivotCache/pivotCacheDefinition1.xml",
+        "xl/pivotCache/_rels/pivotCacheDefinition1.xml.rels",
+        "xl/pivotCache/pivotCacheRecords1.xml",
+        "xl/styles.xml",
+        "xl/theme/theme1.xml"
+      ],
+      "notes": "Public free practice workbook from https://www.myexcelonline.com/blog/timeline-slicers-in-microsoft-excel/ (direct workbook Timeline-Slicers.xlsx). Workbook metadata reports Application=Microsoft Excel and creator Bryan and Esther;MyExcelOnline. Covers Excel-authored pivot timeline and timeline-cache preservation."
+    },
+    {
+      "filename": "real-excel-chart-cf-basic.xlsx",
+      "tool": "excel",
+      "fixture_id": "real_excel_chart_cf_basic",
+      "sha256": "2924be3ec8d930f537388333942daadc61007c5f1181d5b51d4e588d339278c7",
+      "size_bytes": 11286,
+      "expected_parts": [
+        "xl/workbook.xml",
+        "xl/_rels/workbook.xml.rels",
+        "xl/worksheets/sheet1.xml",
+        "xl/worksheets/_rels/sheet1.xml.rels",
+        "xl/drawings/drawing1.xml",
+        "xl/drawings/_rels/drawing1.xml.rels",
+        "xl/charts/chart1.xml",
+        "xl/styles.xml",
+        "xl/theme/theme1.xml"
+      ]
+    },
+    {
+      "filename": "real-excel-normalized-pivot-cf-table.xlsx",
+      "tool": "excel",
+      "fixture_id": "real_excel_normalized_pivot_cf_table",
+      "sha256": "4ee3f6436a75853e4121f1cf02dd1eaae99bb414e852c76e95a2a84443a49fab",
+      "size_bytes": 13468,
+      "expected_parts": [
+        "xl/workbook.xml",
+        "xl/_rels/workbook.xml.rels",
+        "xl/worksheets/sheet1.xml",
+        "xl/worksheets/_rels/sheet1.xml.rels",
+        "xl/pivotCache/pivotCacheDefinition1.xml",
+        "xl/pivotCache/_rels/pivotCacheDefinition1.xml.rels",
+        "xl/pivotCache/pivotCacheRecords1.xml",
+        "xl/pivotTables/pivotTable1.xml",
+        "xl/pivotTables/_rels/pivotTable1.xml.rels",
+        "xl/styles.xml",
+        "xl/theme/theme1.xml"
+      ]
+    },
+    {
+      "filename": "real-excel-external-link-basic.xlsx",
+      "tool": "excel",
+      "fixture_id": "real_excel_external_link_basic",
+      "sha256": "7fc9432bbad733caafc08c1d8b4f244591296f3181e650549a6a51548c235713",
+      "size_bytes": 10094,
+      "expected_parts": [
+        "xl/workbook.xml",
+        "xl/_rels/workbook.xml.rels",
+        "xl/worksheets/sheet1.xml",
+        "xl/externalLinks/externalLink1.xml",
+        "xl/externalLinks/_rels/externalLink1.xml.rels",
+        "xl/calcChain.xml"
+      ]
+    },
+    {
+      "filename": "openpyxl-connections-basic.xlsx",
+      "tool": "openpyxl",
+      "fixture_id": "openpyxl_connections_basic",
+      "expected_parts": [
+        "xl/workbook.xml",
+        "xl/_rels/workbook.xml.rels",
+        "xl/worksheets/sheet1.xml",
+        "xl/connections.xml",
+        "xl/styles.xml",
+        "xl/theme/theme1.xml"
+      ],
+      "notes": "OpenPyXL workbook with an injected OOXML workbook connections part. Covers external-tool workbook connection/query metadata preservation.",
+      "sha256": "e202b74a30854416f1ca69945bfffe1e51f58ee5e2582ee0d5689945014678af",
+      "size_bytes": 5340
+    },
+    {
+      "filename": "real-excel-connections-basic.xlsx",
+      "tool": "excel",
+      "fixture_id": "real_excel_connections_basic",
+      "expected_parts": [
+        "xl/workbook.xml",
+        "xl/_rels/workbook.xml.rels",
+        "xl/worksheets/sheet1.xml",
+        "xl/connections.xml",
+        "xl/styles.xml",
+        "xl/theme/theme1.xml"
+      ],
+      "notes": "Microsoft Excel in-place save of openpyxl-connections-basic.xlsx. Workbook metadata reports Application=Microsoft Macintosh Excel and preserves xl/connections.xml for real-Excel workbook connection/query metadata coverage.",
+      "sha256": "01a8a68430d4de5c3ece1c3c489746d7f6279524e80836f27b44b88e991759e6",
+      "size_bytes": 8793
+    },
+    {
+      "filename": "openpyxl-p1-structured-validation-protection-customxml.xlsx",
+      "tool": "openpyxl",
+      "fixture_id": "openpyxl_p1_structured_validation_protection_customxml",
+      "expected_parts": [
+        "xl/workbook.xml",
+        "xl/_rels/workbook.xml.rels",
+        "xl/worksheets/sheet1.xml",
+        "xl/worksheets/_rels/sheet1.xml.rels",
+        "xl/comments/comment1.xml",
+        "xl/drawings/commentsDrawing1.vml",
+        "xl/tables/table1.xml",
+        "customXml/item1.xml",
+        "customXml/itemProps1.xml",
+        "customXml/_rels/item1.xml.rels",
+        "xl/styles.xml"
+      ],
+      "notes": "Created with scripts/generate_p1_fidelity_fixtures.py and OpenPyXL. Covers P1 table, structured-reference formula, data validation, legacy comment/VML, workbook protection, custom XML, defined name, and page setup preservation.",
+      "sha256": "1baafd3da3c7af7e012b9ab99367a42602441dd6fbe4d649661c79820b7563fb",
+      "size_bytes": 8156
+    },
+    {
+      "filename": "real-excel-p1-comments-validation-protection.xlsx",
+      "tool": "excel",
+      "fixture_id": "real_excel_p1_comments_validation_protection",
+      "expected_parts": [
+        "xl/workbook.xml",
+        "xl/_rels/workbook.xml.rels",
+        "xl/worksheets/sheet1.xml",
+        "xl/worksheets/_rels/sheet1.xml.rels",
+        "xl/comments1.xml",
+        "xl/drawings/vmlDrawing1.vml",
+        "xl/tables/table1.xml",
+        "xl/calcChain.xml",
+        "xl/styles.xml",
+        "xl/theme/theme1.xml"
+      ],
+      "notes": "Microsoft Excel open/save of openpyxl-p1-structured-validation-protection-customxml.xlsx. Excel preserves comments, table, data validation, structured references, workbook protection, page setup, and calc chain, but strips the injected custom XML part.",
+      "sha256": "c6b35af92371d7f6ce9ae91439c11549e72337e786460311950a97549686c7d4",
+      "size_bytes": 11441
+    },
+    {
+      "filename": "real-excel-macro-basic.xlsm",
+      "tool": "excel",
+      "fixture_id": "real_excel_macro_basic",
+      "expected_parts": [
+        "xl/workbook.xml",
+        "xl/_rels/workbook.xml.rels",
+        "xl/worksheets/sheet1.xml",
+        "xl/vbaProject.bin"
+      ],
+      "notes": "Vendored from tests/fixtures/macro_basic.xlsm. Workbook metadata reports Application=Microsoft Excel and preserves xl/vbaProject.bin for macro/VBA package fidelity coverage.",
+      "sha256": "09c35d1580eb6d7e678ba8249cdd1cbc0bd245fbb0eed8794981728715944736",
+      "size_bytes": 11463
+    },
+    {
+      "filename": "umya-control-props-basic.xlsx",
+      "tool": "umya-spreadsheet",
+      "fixture_id": "umya_control_props_basic",
+      "expected_parts": [
+        "xl/workbook.xml",
+        "xl/_rels/workbook.xml.rels",
+        "xl/worksheets/sheet1.xml",
+        "xl/worksheets/_rels/sheet1.xml.rels",
+        "xl/drawings/vmlDrawing1.vml",
+        "xl/drawings/drawing1.xml",
+        "xl/ctrlProps/ctrlProp1.xml",
+        "xl/printerSettings/printerSettings1.bin"
+      ],
+      "notes": "Copied from the umya-spreadsheet issue_189 fixture. Covers external-tool control-property preservation as the active embedded-object/control P1 fixture.",
+      "sha256": "cb3afc151cb43494473088bb41699f9f0501838e4b5c2f3e722be874e50e735a",
+      "size_bytes": 11903
+    },
+    {
+      "filename": "real-excel-control-props-basic.xlsx",
+      "tool": "excel",
+      "fixture_id": "real_excel_control_props_basic",
+      "expected_parts": [
+        "xl/workbook.xml",
+        "xl/_rels/workbook.xml.rels",
+        "xl/worksheets/sheet1.xml",
+        "xl/worksheets/_rels/sheet1.xml.rels",
+        "xl/drawings/vmlDrawing1.vml",
+        "xl/drawings/drawing1.xml",
+        "xl/ctrlProps/ctrlProp1.xml"
+      ],
+      "notes": "Copied from the umya-spreadsheet issue_208 fixture. Workbook metadata reports Application=Microsoft Excel and covers real-Excel control-property preservation for the embedded-object/control P1 row.",
+      "sha256": "4e7eb582eec866173e0612ec544763644d51f4659cf86a25f70955c1d88d09e0",
+      "size_bytes": 11870
+    },
+    {
+      "filename": "real-excel-powerpivot-model-basic.xlsx",
+      "tool": "excel",
+      "fixture_id": "real_excel_powerpivot_model_basic",
+      "expected_parts": [
+        "xl/workbook.xml",
+        "xl/_rels/workbook.xml.rels",
+        "xl/connections.xml",
+        "xl/model/item.data",
+        "xl/pivotCache/pivotCacheDefinition1.xml",
+        "xl/pivotTables/pivotTable1.xml",
+        "xl/styles.xml",
+        "xl/theme/theme1.xml"
+      ],
+      "notes": "Microsoft Download Center PowerPivotExamplesExcel2013.zip sample workbook LCA BI - Financial Report Usage.xlsx, renamed for fixture clarity. Workbook metadata reports Application=Microsoft Excel and covers PowerPivot/data-model package preservation via xl/model/item.data and workbook powerPivotData relationship.",
+      "sha256": "7566b44366091d3c10d91ab2240931bfcb3606b4ee3e8c829382273fe5574ef2",
+      "size_bytes": 685039
+    }
+  ]
+}

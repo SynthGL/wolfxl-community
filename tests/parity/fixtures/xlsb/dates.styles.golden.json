@@ -1,0 +1,24 @@
+{
+  "Sheet1": {
+    "A1": {
+      "font": {
+        "bold": false,
+        "italic": false,
+        "name": "Arial",
+        "size": 10.0
+      },
+      "number_format": "yyyy\\-mm\\-dd",
+      "style_id": 1
+    },
+    "A3": {
+      "font": {
+        "bold": false,
+        "italic": false,
+        "name": "Arial",
+        "size": 10.0
+      },
+      "number_format": "[hh]:mm:ss",
+      "style_id": 3
+    }
+  }
+}

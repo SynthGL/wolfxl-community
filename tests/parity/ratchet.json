@@ -1,0 +1,20 @@
+{
+  "_meta": {
+    "description": "Soft-tier mismatch baseline. Never allow soft counts to exceed these numbers; doing so means a fidelity regression. To update the baseline after an intentional change, run: python scripts/update_parity_ratchet.py --fixture <id>",
+    "schema": "fixture_id -> {hard: int, soft: int, info: int}",
+    "phase": "0 baseline (wolfxl 0.3.2). Each fixture below registered 0 hard/soft/info mismatches under the current harness; later phases that add SOFT-tier diffs (font/fill/border/alignment) must populate this file.",
+    "captured_at": "2026-04-14",
+    "captured_against": "wolfxl 0.3.2 + openpyxl (versionlessly pinned by CI)"
+  },
+  "aging/customer_ar_aging_buckets.xlsx":   {"hard": 0, "soft": 0, "info": 0},
+  "aging/holdout_ap_aging_buckets.xlsx":    {"hard": 0, "soft": 0, "info": 0},
+  "cross_ref/buried_header_entity_rollup.xlsx": {"hard": 0, "soft": 0, "info": 0},
+  "key_value/workbook_report_metadata_block.xlsx": {"hard": 0, "soft": 0, "info": 0},
+  "rollforward/excelx_budget_forecast.xlsx": {"hard": 0, "soft": 0, "info": 0},
+  "rollforward/holdout_fixed_asset_movements.xlsx": {"hard": 0, "soft": 0, "info": 0},
+  "stress/headcount_consolidation_looks_like_a5.xlsx": {"hard": 0, "soft": 0, "info": 0},
+  "stress/mixed_blank_semantics.xlsx": {"hard": 0, "soft": 0, "info": 0},
+  "stress/non_financial_scorecard_looks_like_a4.xlsx": {"hard": 0, "soft": 0, "info": 0},
+  "time_series/holdout_quarterly_ops_statement.xlsx": {"hard": 0, "soft": 0, "info": 0},
+  "time_series/sec_in_millions_except_per_share.xlsx": {"hard": 0, "soft": 0, "info": 0}
+}

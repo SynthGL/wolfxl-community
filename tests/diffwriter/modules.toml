@@ -1,0 +1,246 @@
+# Module / case status manifest for the differential writer harness.
+#
+# Updated by each wave's subagent PR. Conftest parameterizes pytest tests
+# from this file and applies xfail/xpass markers based on per-layer status.
+#
+# Status values: "pass", "fail", "xfail", "pending"
+# Route values:  "oracle" (rust_xlsxwriter), "native" (wolfxl-writer),
+#                "split"  (per-case routing — case bodies decide),
+#                "dual"   (both backends run, output diffed)
+#
+# W4C: every module flipped to "dual" — the harness now drives both
+# backends through DualWorkbook on every case and runs the 3-layer diff.
+# Layer 2 (structural) and Layer 3 (semantic HARD-tier) are blocking
+# gates; Layer 1 (byte-canonical) is gold-star and tracked at runtime
+# via pytest user_properties — its per-case status stays "pending"
+# in the manifest until a future status CLI surfaces it.
+#
+# At W4C close: 24 of 25 cases pass L2 + L3 cleanly. The 25th
+# (comments_multi_author_insertion_order) is xfail by design; see the
+# block-level comment immediately above its entry.
+
+# ----------------------------------------------------------------------
+# Wave 1 modules — foundations
+# ----------------------------------------------------------------------
+
+[module.model]
+route = "dual"
+source_paths = [
+    "crates/wolfxl-writer/src/model/cell.rs",
+    "crates/wolfxl-writer/src/model/workbook.rs",
+    "crates/wolfxl-writer/src/model/worksheet.rs",
+    "crates/wolfxl-writer/src/model/format.rs",
+    "crates/wolfxl-writer/src/model/date.rs",
+]
+
+[module.refs]
+route = "dual"
+source_paths = ["crates/wolfxl-writer/src/refs.rs"]
+
+[module.zip_container]
+route = "dual"
+source_paths = [
+    "crates/wolfxl-writer/src/zip.rs",
+    "crates/wolfxl-writer/src/emit/content_types.rs",
+    "crates/wolfxl-writer/src/emit/rels.rs",
+    "crates/wolfxl-writer/src/emit/doc_props.rs",
+]
+
+# ----------------------------------------------------------------------
+# Wave 2 modules — emitters
+# ----------------------------------------------------------------------
+
+[module.styles_xml]
+route = "dual"
+source_paths = ["crates/wolfxl-writer/src/emit/styles_xml.rs"]
+
+[[module.styles_xml.cases]]
+id = "fonts_combination"
+layer1_status = "pending"
+layer2_status = "pass"
+layer3_status = "pass"
+
+[[module.styles_xml.cases]]
+id = "fills_solid_rgb"
+layer1_status = "pending"
+layer2_status = "pass"
+layer3_status = "pass"
+
+[[module.styles_xml.cases]]
+id = "borders_all_sides"
+layer1_status = "pending"
+layer2_status = "pass"
+layer3_status = "pass"
+
+[[module.styles_xml.cases]]
+id = "alignment_horiz_vert_wrap"
+layer1_status = "pending"
+layer2_status = "pass"
+layer3_status = "pass"
+
+[[module.styles_xml.cases]]
+id = "number_format_builtin_and_custom"
+layer1_status = "pending"
+layer2_status = "pass"
+layer3_status = "pass"
+
+[module.sheet_xml]
+route = "dual"
+source_paths = ["crates/wolfxl-writer/src/emit/sheet_xml.rs"]
+
+[[module.sheet_xml.cases]]
+id = "cells_strings_basic"
+layer1_status = "pending"
+layer2_status = "pass"
+layer3_status = "pass"
+
+[[module.sheet_xml.cases]]
+id = "cells_strings_xml_unsafe"
+layer1_status = "pending"
+layer2_status = "pass"
+layer3_status = "pass"
+
+[[module.sheet_xml.cases]]
+id = "cells_numbers_int_float"
+layer1_status = "pending"
+layer2_status = "pass"
+layer3_status = "pass"
+
+[[module.sheet_xml.cases]]
+id = "cells_dates_1900_modern"
+layer1_status = "pending"
+layer2_status = "pass"
+layer3_status = "pass"
+
+[[module.sheet_xml.cases]]
+id = "cells_dates_1900_leap_sentinel"
+layer1_status = "pending"
+layer2_status = "pass"
+layer3_status = "pass"
+
+[[module.sheet_xml.cases]]
+id = "cells_booleans_true_false"
+layer1_status = "pending"
+layer2_status = "pass"
+layer3_status = "pass"
+
+[[module.sheet_xml.cases]]
+id = "cells_formulas_with_cached_result"
+layer1_status = "pending"
+layer2_status = "pass"
+layer3_status = "pass"
+
+[[module.sheet_xml.cases]]
+id = "cells_blank_no_s_attr"
+layer1_status = "pending"
+layer2_status = "pass"
+layer3_status = "pass"
+
+[[module.sheet_xml.cases]]
+id = "merges_single_and_multi"
+layer1_status = "pending"
+layer2_status = "pass"
+layer3_status = "pass"
+
+[[module.sheet_xml.cases]]
+id = "freeze_panes_row_col_both"
+layer1_status = "pending"
+layer2_status = "pass"
+layer3_status = "pass"
+
+[[module.sheet_xml.cases]]
+id = "row_height_column_width_variable"
+layer1_status = "pending"
+layer2_status = "pass"
+layer3_status = "pass"
+
+[[module.sheet_xml.cases]]
+id = "hyperlinks_external_https_mailto"
+layer1_status = "pending"
+layer2_status = "pass"
+layer3_status = "pass"
+
+[[module.sheet_xml.cases]]
+id = "hyperlinks_internal_sheet_local"
+layer1_status = "pending"
+layer2_status = "pass"
+layer3_status = "pass"
+
+[module.shared_strings_xml]
+route = "dual"
+source_paths = [
+    "crates/wolfxl-writer/src/emit/shared_strings_xml.rs",
+    "crates/wolfxl-writer/src/intern.rs",
+    "crates/wolfxl-writer/src/emit/workbook_xml.rs",
+]
+
+[[module.shared_strings_xml.cases]]
+id = "defined_names_workbook_and_sheet_scope"
+layer1_status = "pending"
+layer2_status = "pass"
+layer3_status = "pass"
+
+# ----------------------------------------------------------------------
+# Wave 3 modules — rich features
+# ----------------------------------------------------------------------
+
+[module.comments]
+route = "dual"
+source_paths = [
+    "crates/wolfxl-writer/src/emit/comments_xml.rs",
+    "crates/wolfxl-writer/src/emit/drawings_vml.rs",
+]
+
+[[module.comments.cases]]
+id = "comments_single_author"
+layer1_status = "pending"
+layer2_status = "pass"
+layer3_status = "pass"
+
+# comments_multi_author_insertion_order is the canonical regression test
+# for the rust_xlsxwriter BTreeMap-author bug native fixes. Dual-backend
+# parity is fundamentally impossible here — oracle alphabetizes authors,
+# native preserves IndexMap insertion order. Native-side correctness is
+# verified directly in tests/parity/test_write_parity.py and the Wave 3
+# integration test wave3_rich_features_roundtrip; this case is marked
+# xfail in test_cases.py via _ORACLE_BUGS_DOCUMENTED.
+[[module.comments.cases]]
+id = "comments_multi_author_insertion_order"
+layer1_status = "pending"
+layer2_status = "xfail"
+layer3_status = "xfail"
+
+[module.tables]
+route = "dual"
+source_paths = ["crates/wolfxl-writer/src/emit/tables_xml.rs"]
+
+[[module.tables.cases]]
+id = "tables_full_with_totals_row"
+layer1_status = "pending"
+layer2_status = "pass"
+layer3_status = "pass"
+
+[[module.tables.cases]]
+id = "tables_header_only"
+layer1_status = "pending"
+layer2_status = "pass"
+layer3_status = "pass"
+
+[module.conditional_validation]
+route = "dual"
+source_paths = [
+    "crates/wolfxl-writer/src/model/conditional.rs",
+    "crates/wolfxl-writer/src/model/validation.rs",
+]
+
+[[module.conditional_validation.cases]]
+id = "conditional_format_cellIs_with_dxf"
+layer1_status = "pending"
+layer2_status = "pass"
+layer3_status = "pass"
+
+[[module.conditional_validation.cases]]
+id = "data_validation_list_literal"
+layer1_status = "pending"
+layer2_status = "pass"
+layer3_status = "pass"

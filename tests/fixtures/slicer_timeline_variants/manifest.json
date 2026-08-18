@@ -1,0 +1,32 @@
+{
+  "description": "Sidecar slicer/timeline real-world variants used to harden evidence beyond the active external-oracle pack.",
+  "fixtures": [
+    {
+      "filename": "real-excel-shared-slicer-two-pivots.xlsx",
+      "tool": "excel",
+      "fixture_id": "real_excel_shared_slicer_two_pivots_myexcelonline",
+      "sha256": "84f02e11b683c5282aac22d75d0c714ad0eda7ceaa278ef4506207ea1d91b324",
+      "size_bytes": 79249,
+      "expected_parts": [
+        "xl/workbook.xml",
+        "xl/_rels/workbook.xml.rels",
+        "xl/worksheets/sheet1.xml",
+        "xl/worksheets/_rels/sheet1.xml.rels",
+        "xl/pivotCache/pivotCacheDefinition1.xml",
+        "xl/pivotCache/_rels/pivotCacheDefinition1.xml.rels",
+        "xl/pivotCache/pivotCacheRecords1.xml",
+        "xl/pivotTables/pivotTable1.xml",
+        "xl/pivotTables/pivotTable2.xml",
+        "xl/pivotTables/_rels/pivotTable1.xml.rels",
+        "xl/pivotTables/_rels/pivotTable2.xml.rels",
+        "xl/slicerCaches/slicerCache1.xml",
+        "xl/slicers/slicer1.xml",
+        "xl/drawings/drawing1.xml",
+        "xl/tables/table1.xml",
+        "xl/styles.xml",
+        "xl/theme/theme1.xml"
+      ],
+      "notes": "Public free practice workbook from https://www.myexcelonline.com/blog/use-one-slicer-for-two-pivot-tables/ (direct workbook Use-one-slicer-for-two-pivot-tables.xlsx). Workbook metadata reports Application=Microsoft Excel and Company=myexcelonline.com. Covers a real Excel-authored shared slicer cache connected to two pivot tables on the same pivot cache."
+    }
+  ]
+}

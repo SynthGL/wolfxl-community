@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "entries": [
+    {
+      "nodeid": "test_backend.py",
+      "category": "infra_mismatch",
+      "reason": "Upstream collection assumes optional lxml is importable; when lxml is absent, the upstream fallback references an undefined local."
+    },
+    {
+      "nodeid": "test_read_write_custom_doc_props.py",
+      "category": "infra_mismatch",
+      "reason": "Upstream helper imports lxml.doctestcompare at collection time; this environment does not install optional lxml."
+    },
+    {
+      "nodeid": "test_iter.py::test_file_descriptor_leak",
+      "category": "openpyxl_internal",
+      "reason": "Asserts private openpyxl workbook archive file-handle internals (`wb._archive.fp`) rather than user-visible workbook behavior."
+    }
+  ],
+  "categories": [
+    "openpyxl_internal",
+    "unsupported_out_of_scope",
+    "infra_mismatch",
+    "true_wolfxl_gap"
+  ]
+}

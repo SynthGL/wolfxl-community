@@ -1,0 +1,17 @@
+{
+  "_comment": "Elements/attributes that Layer 1 byte-diff tolerates as fuzzy. Keys are OOXML part paths (or '*' for any), values are XPath-ish selectors relative to the part root.",
+  "docProps/core.xml": [
+    "dcterms:created",
+    "dcterms:modified",
+    "cp:lastModifiedBy"
+  ],
+  "docProps/app.xml": [
+    "Application",
+    "AppVersion"
+  ],
+  "*": [
+    "@lastModifiedBy",
+    "@created",
+    "@modified"
+  ]
+}

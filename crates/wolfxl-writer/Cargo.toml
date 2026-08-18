@@ -1,0 +1,33 @@
+[package]
+name = "wolfxl-writer"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Native xlsx writer for wolfxl — pure-Rust OOXML emitter + ZIP packager, no rust_xlsxwriter dependency."
+
+[dependencies]
+chrono.workspace = true
+indexmap.workspace = true
+quick-xml.workspace = true
+tempfile.workspace = true
+zip.workspace = true
+wolfxl-rels = { path = "../wolfxl-rels", version = "0.1" }
+# Used for the ECMA-376 §18.3.1.99 child-element ordering table referenced
+# from `emit/sheet_xml.rs` section comments. The writer does not call
+# `merge_blocks` — it has full model state and emits everything in one
+# pass — but referencing the same `ECMA_ORDER` table guarantees the
+# writer (commit-time) and merger (modify-time) cannot drift on slot
+# numbers as the spec evolves.
+wolfxl-merger = { path = "../wolfxl-merger", version = "0.1" }
+# Sprint Ν Pod-δ (RFC-049). `wolfxl-pivot` is a leaf crate (no PyO3,
+# no writer back-link) so this dependency is acyclic — verified by
+# `cargo check -p wolfxl-writer`. The chart model re-exports
+# `PivotSource` so Pod-δ's emit only depends on this crate.
+wolfxl-pivot = { path = "../wolfxl-pivot", version = "2.0.0" }
+
+[dev-dependencies]
+# Integration tests re-parse the emitter output with quick-xml and crack open
+# the packaged xlsx with the zip crate. Both are already workspace deps.
+quick-xml.workspace = true
+zip.workspace = true

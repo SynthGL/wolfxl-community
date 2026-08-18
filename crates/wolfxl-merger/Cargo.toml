@@ -1,0 +1,14 @@
+[package]
+name = "wolfxl-merger"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Streaming insertion/replacement of sibling blocks inside a CT_Worksheet XML stream, preserving ECMA-376 §18.3.1.99 child-element order. Shared between the wolfxl writer and patcher."
+
+[dependencies]
+quick-xml.workspace = true
+
+[dev-dependencies]
+zip.workspace = true
+proptest = "1"

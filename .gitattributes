@@ -1,0 +1,15 @@
+# Generated trust / benchmark evidence corpus.
+#
+# Every file under these three trees is produced by the audit + benchmark
+# cascade (scripts/audit_*.py and scripts/benchmark_*.py), not hand-authored.
+# Marking them `linguist-generated` makes GitHub collapse them by default in pull
+# request diffs and excludes them from language statistics, so code review focuses
+# on the human-authored surface: python/, crates/, tests/, and scripts/.
+#
+# These files are still normal text to git itself (local `git diff` works); this
+# attribute only affects GitHub's diff rendering and language stats. Regenerate the
+# derived reports via the cascade and gate with:
+#     python scripts/audit_trust_report_freshness.py --strict   # ready: true, 0 issues
+docs/trust/** linguist-generated=true
+docs/performance/baselines/** linguist-generated=true
+docs/fidelity/evidence/** linguist-generated=true

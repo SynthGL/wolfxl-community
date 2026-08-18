@@ -1,0 +1,12 @@
+[package]
+name = "wolfxl-autofilter"
+version = "2.0.0"
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "OOXML autoFilter / sortState model + emit + filter evaluation engine. Pure Rust, no PyO3 — used by both the wolfxl patcher (modify mode, Phase 2.5o) and the native writer (write mode). See Plans/rfcs/056-autofilter-eval.md."
+
+[dependencies]
+quick-xml.workspace = true
+
+[dev-dependencies]
