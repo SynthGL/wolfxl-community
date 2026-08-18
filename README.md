@@ -108,6 +108,13 @@ the benchmark harnesses, and reproduction instructions are in
 [`benchmarks/`](benchmarks/README.md). All charts are generated from the
 committed results JSON files, never edited by hand.
 
+## Fidelity
+
+The [round-trip fidelity harness](fidelity-harness/README.md) compares workbook
+packages before and after a no-edit save. Run it on your own files, inspect the
+typed part and relationship differences, and add another engine through the
+documented adapter protocol.
+
 ## Development
 
 Prerequisites: a supported CPython, Rust, and `maturin`.

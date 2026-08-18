@@ -1,0 +1,730 @@
+{
+  "corpus": {
+    "workbooks": [
+      {
+        "name": "charts.xlsx",
+        "sha256": "8c6fcf9730de9e7ee1abb403cf0b1ec70918b322f8e71d268087b2af9989845b",
+        "tier": "openpyxl-authored"
+      },
+      {
+        "name": "custom-xml-and-media.xlsx",
+        "sha256": "0dd88fd5827d79d294a9c153f735e21bd6c1d450744d438e9603a370ccd0caab",
+        "tier": "synthetic-injection"
+      },
+      {
+        "name": "macros.xlsm",
+        "sha256": "1f9a4877ad6ee04b314818a03b00297037e3d9f927c7d14865f8bf7ff6587d75",
+        "tier": "synthetic-injection"
+      },
+      {
+        "name": "names-links-comments.xlsx",
+        "sha256": "fe42c9661fd7bc58199559eb6e78706a22782d3eeb22f48a3e28661b58ff94cf",
+        "tier": "openpyxl-authored"
+      },
+      {
+        "name": "pivot.xlsx",
+        "sha256": "308960b0eed62172816a13c2cce62da95ef1a70e2d8bed974e8425b07f129f2a",
+        "tier": "synthetic-injection"
+      },
+      {
+        "name": "slicers-and-timelines.xlsx",
+        "sha256": "35fe729c4ead34083586eeeaab72c3fc872494014816cb0d600083e2f8eb1e2f",
+        "tier": "synthetic-injection"
+      },
+      {
+        "name": "styles.xlsx",
+        "sha256": "3e7c38e9a434b7b2792b48e404ea03939f3d0cca08378fa9b034b1a3a4d37667",
+        "tier": "openpyxl-authored"
+      },
+      {
+        "name": "tables-and-validation.xlsx",
+        "sha256": "3bb0f3eb58950484e617f72b0adfbf61d3006efc5f68370af2e48c489675a868",
+        "tier": "openpyxl-authored"
+      }
+    ]
+  },
+  "engines": [
+    {
+      "name": "openpyxl",
+      "notes": "Full-DOM read and rewrite. Opened with every preservation flag openpyxl exposes, so any loss here reflects the parts openpyxl does not model.",
+      "settings": {
+        "data_only": false,
+        "keep_links": true,
+        "keep_vba": "auto (True for .xlsm/.xltm)",
+        "pillow": "12.3.0",
+        "rich_text": true
+      },
+      "version": "3.1.5"
+    },
+    {
+      "name": "wolfxl-modify",
+      "notes": "Surgical package patching. Parts that were not edited are carried over.",
+      "settings": {
+        "modify": true
+      },
+      "version": "2.0.1"
+    }
+  ],
+  "environment": {
+    "machine": "arm64",
+    "platform": "macOS-26.2-arm64-arm-64bit-Mach-O",
+    "python": "3.13.9"
+  },
+  "generated_at_utc": "2026-08-18T12:12:58Z",
+  "harness": "wolfxl round-trip fidelity harness",
+  "implementation": {
+    "corpus.py": "068e28f30ba677227e382971d07f5e74a83a927d25a4d6c0d943ff1b68784f02",
+    "engines.py": "f38acbec82938909e0a052a19b8359c7a4b146562d19c1e269ec6771906281f4",
+    "ooxml_fidelity.py": "f8e1481f243c5e4bf6a8382c78e4531e5101bc5a1dc7cc0f1d3ac5a0c64a71bc",
+    "roundtrip.py": "bab9a9b2b4581359ee6f539e7c081c24fabf8d7399765deaa080fe1bb0576f3f"
+  },
+  "operation": "load then save, with no edits",
+  "results": [
+    {
+      "detail": "",
+      "engine": "openpyxl",
+      "engine_warnings": [],
+      "features_lost": [],
+      "issue_count": 0,
+      "issues": [],
+      "issues_by_kind": {},
+      "lost_parts": [],
+      "parts_after": 19,
+      "parts_before": 19,
+      "parts_lost": 0,
+      "relationships_after": 12,
+      "relationships_before": 12,
+      "relationships_lost": 0,
+      "seconds": 0.00822975003393367,
+      "semantic_drift": [],
+      "status": "faithful",
+      "tier": "openpyxl-authored",
+      "workbook": "charts.xlsx"
+    },
+    {
+      "detail": "",
+      "engine": "openpyxl",
+      "engine_warnings": [],
+      "features_lost": [
+        "custom_xml"
+      ],
+      "issue_count": 10,
+      "issues": [
+        {
+          "kind": "missing_part",
+          "message": "Part existed before save and is missing after save: customXml/_rels/item1.xml.rels",
+          "part": "customXml/_rels/item1.xml.rels",
+          "severity": "error"
+        },
+        {
+          "kind": "missing_part",
+          "message": "Part existed before save and is missing after save: customXml/item1.xml",
+          "part": "customXml/item1.xml",
+          "severity": "error"
+        },
+        {
+          "kind": "missing_part",
+          "message": "Part existed before save and is missing after save: customXml/itemProps1.xml",
+          "part": "customXml/itemProps1.xml",
+          "severity": "error"
+        },
+        {
+          "kind": "missing_relationship",
+          "message": "Relationship existed before save and is missing after save: _rels/.rels rIdCustomXml1 http://schemas.openxmlformats.org/officeDocument/2006/relationships/customXml -> customXml/item1.xml",
+          "part": "_rels/.rels",
+          "severity": "error"
+        },
+        {
+          "kind": "missing_relationship",
+          "message": "Relationship existed before save and is missing after save: customXml/_rels/item1.xml.rels rIdProps1 http://schemas.openxmlformats.org/officeDocument/2006/relationships/customXmlProps -> itemProps1.xml",
+          "part": "customXml/_rels/item1.xml.rels",
+          "severity": "error"
+        },
+        {
+          "kind": "missing_relationship",
+          "message": "Relationship existed before save and is missing after save: xl/drawings/_rels/drawing1.xml.rels rIdImage1 http://schemas.openxmlformats.org/officeDocument/2006/relationships/image -> ../media/image1.png",
+          "part": "xl/drawings/_rels/drawing1.xml.rels",
+          "severity": "error"
+        },
+        {
+          "kind": "missing_relationship",
+          "message": "Relationship existed before save and is missing after save: xl/worksheets/_rels/sheet1.xml.rels rIdDrawing1 http://schemas.openxmlformats.org/officeDocument/2006/relationships/drawing -> ../drawings/drawing1.xml",
+          "part": "xl/worksheets/_rels/sheet1.xml.rels",
+          "severity": "error"
+        },
+        {
+          "kind": "feature_part_loss",
+          "message": "custom_xml parts disappeared after save: ['customXml/_rels/item1.xml.rels', 'customXml/item1.xml', 'customXml/itemProps1.xml']",
+          "part": "custom_xml",
+          "severity": "error"
+        },
+        {
+          "after_empty": false,
+          "before_empty": false,
+          "kind": "drawing_objects_semantic_drift",
+          "message": "drawing_objects semantic fingerprint changed after save: before={'xl/drawings/drawing1.xml': [('xml', ('wsDr', (), None, [('oneCellAnchor', (), None, [('from', (), None, [('col', (), '1', []), ('colOff', (), '0', []), ('row', (), '3', []), ('rowOff', (), '0', [])]), ('ext', (('cx', '914400'), ('cy', '914400')), None, []), ('pic', (), None, [('nvPicPr', (), None, [('cNvPr', (('id', '2'), ('name', 'Harness image')), None, []), ('cNvPicPr', (), None, [('picLocks', (('noChangeAspect', '1'),), None, [])])]), ('blipFill', (), None, [('blip', (('embed', 'rIdImage1'),), None, []), ('stretch', (), None, [('fillRect', (), None, [])])]), ('spPr', (), None, [('xfrm', (), None, [('off', (('x', '0'), ('y', '0')), None, []), ('ext', (('cx', '914400'), ('cy', '914400')), None, [])]), ('prstGeom', (('prst', 'rect'),), None, [('avLst', (), None, [])])])]), ('clientData', (), None, [])])])), ('rels', [('rIdImage1', 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/image', '../media/image1.png', None)])], 'xl/media/image1.png': [('bytes', 165, '248b07a3d0e1e0f67d43d18065be8f74434549c0fdde6b0bfc08a7835d41909f'), ('rels', [])]} after={'xl/drawings/drawing1.xml': [('xml', ('wsDr', (), None, [('oneCellAnchor', (), None, [('from', (), None, [('col', (), '1', []), ('colOff', (), '0', []), ('row', (), '3', []), ('rowOff', (), '0', [])]), ('ext', (('cx', '914400'), ('cy', '914400')), None, []), ('pic', (), None, [('nvPicPr', (), None, [('cNvPr', (('id', '2'), ('name', 'Harness image')), None, []), ('cNvPicPr', (), None, [('picLocks', (('noChangeAspect', '1'),), None, [])])]), ('blipFill', (), None, [('blip', (('embed', 'rId1'),), None, []), ('stretch', (), None, [('fillRect', (), None, [])])]), ('spPr', (), None, [('xfrm', (), None, [('off', (('x', '0'), ('y', '0')), None, []), ('ext', (('cx', '914400'), ('cy', '914400')), None, [])]), ('prstGeom', (('prst', 'rect'),), None, [('avLst', (), None, [])]), ('ln', (), None, [('prstDash', (('val', 'solid'),), None, [])])])]), ('clientData', (), None, [])])])), ('rels', [('rId1', 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/image', '/xl/media/image1.png', None)])], 'xl/media/image1.png': [('bytes', 165, '248b07a3d0e1e0f67d43d18065be8f74434549c0fdde6b0bfc08a7835d41909f'), ('rels', [])]}",
+          "part": "drawing_objects",
+          "severity": "error"
+        },
+        {
+          "after_empty": false,
+          "before_empty": false,
+          "kind": "workbook_globals_semantic_drift",
+          "message": "workbook_globals semantic fingerprint changed after save: before={'xl/workbook.xml': [('defined_names', []), ('workbook_protection', ()), ('calc_pr', (('calcId', '124519'), ('fullCalcOnLoad', '1'))), ('extensions', [])], 'package_parts': ['customXml/_rels/item1.xml.rels', 'customXml/item1.xml', 'customXml/itemProps1.xml'], 'package_payloads': {'customXml/item1.xml': ('xml', ('harnessMetadata', (), None, [('generator', (), 'corpus.py', []), ('tier', (), 'synthetic-injection', [])])), 'customXml/itemProps1.xml': ('xml', ('datastoreItem', (('itemID', '{4F2E1B7C-0A3D-4E5F-9C81-2B6D7E8F1A34}'),), None, [('schemaRefs', (), None, [('schemaRef', (('uri', 'urn:wolfxl:fidelity-harness'),), None, [])])]))}} after={'xl/workbook.xml': [('defined_names', []), ('workbook_protection', ()), ('calc_pr', (('calcId', '124519'), ('fullCalcOnLoad', '1'))), ('extensions', [])]}",
+          "part": "workbook_globals",
+          "severity": "error"
+        }
+      ],
+      "issues_by_kind": {
+        "drawing_objects_semantic_drift": 1,
+        "feature_part_loss": 1,
+        "missing_part": 3,
+        "missing_relationship": 4,
+        "workbook_globals_semantic_drift": 1
+      },
+      "lost_parts": [
+        "customXml/_rels/item1.xml.rels",
+        "customXml/item1.xml",
+        "customXml/itemProps1.xml"
+      ],
+      "parts_after": 13,
+      "parts_before": 16,
+      "parts_lost": 3,
+      "relationships_after": 8,
+      "relationships_before": 10,
+      "relationships_lost": 4,
+      "seconds": 0.01754349999828264,
+      "semantic_drift": [
+        "drawing_objects",
+        "workbook_globals"
+      ],
+      "status": "changed",
+      "tier": "synthetic-injection",
+      "workbook": "custom-xml-and-media.xlsx"
+    },
+    {
+      "detail": "",
+      "engine": "openpyxl",
+      "engine_warnings": [],
+      "features_lost": [],
+      "issue_count": 1,
+      "issues": [
+        {
+          "kind": "content_type_changed",
+          "message": "Content type for xl/vbaProject.bin changed from 'application/vnd.ms-office.vbaProject' to None",
+          "part": "xl/vbaProject.bin",
+          "severity": "error"
+        }
+      ],
+      "issues_by_kind": {
+        "content_type_changed": 1
+      },
+      "lost_parts": [],
+      "parts_after": 10,
+      "parts_before": 10,
+      "parts_lost": 0,
+      "relationships_after": 7,
+      "relationships_before": 7,
+      "relationships_lost": 0,
+      "seconds": 0.0063125420128926635,
+      "semantic_drift": [],
+      "status": "changed",
+      "tier": "synthetic-injection",
+      "workbook": "macros.xlsm"
+    },
+    {
+      "detail": "",
+      "engine": "openpyxl",
+      "engine_warnings": [],
+      "features_lost": [],
+      "issue_count": 1,
+      "issues": [
+        {
+          "after_empty": false,
+          "before_empty": false,
+          "kind": "drawing_objects_semantic_drift",
+          "message": "drawing_objects semantic fingerprint changed after save: before={'xl/comments/comment1.xml': [('xml', ('comments', (), None, [('authors', (), None, [('author', (), 'Harness', [])]), ('commentList', (), None, [('comment', (('authorId', '0'), ('ref', 'A4'), ('shapeId', '0')), None, [('text', (), None, [('t', (), 'Check this figure before sending.', [])])]), ('comment', (('authorId', '0'), ('ref', 'A5'), ('shapeId', '0')), None, [('text', (), None, [('t', (), 'Threaded comments are an Excel feature.', [])])])])])), ('rels', [])], 'xl/drawings/commentsDrawing1.vml': [('xml', ('xml', (), None, [('shapelayout', (('ext', 'edit'),), None, [('idmap', (('data', '1'), ('ext', 'edit')), None, [])]), ('shapetype', (('coordsize', '21600,21600'), ('id', '_x0000_t202'), ('path', 'm,l,21600r21600,l21600,xe'), ('spt', '202')), None, [('stroke', (('joinstyle', 'miter'),), None, []), ('path', (('connecttype', 'rect'), ('gradientshapeok', 't')), None, [])]), ('shape', (('fillcolor', '#ffffe1'), ('id', '_x0000_s1026'), ('insetmode', 'auto'), ('style', 'position:absolute; margin-left:59.25pt;margin-top:1.5pt;width:220px;height:90px;z-index:1;visibility:hidden'), ('type', '#_x0000_t202')), None, [('fill', (('color2', '#ffffe1'),), None, []), ('shadow', (('color', 'black'), ('obscured', 't')), None, []), ('path', (('connecttype', 'none'),), None, []), ('textbox', (('style', 'mso-direction-alt:auto'),), None, [('div', (('style', 'text-align:left'),), None, [])]), ('ClientData', (('ObjectType', 'Note'),), None, [('MoveWithCells', (), None, []), ('SizeWithCells', (), None, []), ('AutoFill', (), 'False', []), ('Row', (), '3', []), ('Column', (), '0', [])])]), ('shape', (('fillcolor', '#ffffe1'), ('id', '_x0000_s1027'), ('insetmode', 'auto'), ('style', 'position:absolute; margin-left:59.25pt;margin-top:1.5pt;width:144px;height:79px;z-index:1;visibility:hidden'), ('type', '#_x0000_t202')), None, [('fill', (('color2', '#ffffe1'),), None, []), ('shadow', (('color', 'black'), ('obscured', 't')), None, []), ('path', (('connecttype', 'none'),), None, []), ('textbox', (('style', 'mso-direction-alt:auto'),), None, [('div', (('style', 'text-align:left'),), None, [])]), ('ClientData', (('ObjectType', 'Note'),), None, [('MoveWithCells', (), None, []), ('SizeWithCells', (), None, []), ('AutoFill', (), 'False', []), ('Row', (), '4', []), ('Column', (), '0', [])])])])), ('rels', [])]} after={'xl/comments/comment1.xml': [('xml', ('comments', (), None, [('authors', (), None, [('author', (), 'Harness', [])]), ('commentList', (), None, [('comment', (('authorId', '0'), ('ref', 'A4'), ('shapeId', '0')), None, [('text', (), None, [('t', (), 'Check this figure before sending.', [])])]), ('comment', (('authorId', '0'), ('ref', 'A5'), ('shapeId', '0')), None, [('text', (), None, [('t', (), 'Threaded comments are an Excel feature.', [])])])])])), ('rels', [])], 'xl/drawings/commentsDrawing1.vml': [('xml', ('xml', (), None, [('shapelayout', (('ext', 'edit'),), None, [('idmap', (('data', '1'), ('ext', 'edit')), None, [])]), ('shapetype', (('coordsize', '21600,21600'), ('id', '_x0000_t202'), ('path', 'm,l,21600r21600,l21600,xe'), ('spt', '202')), None, [('stroke', (('joinstyle', 'miter'),), None, []), ('path', (('connecttype', 'rect'), ('gradientshapeok', 't')), None, [])]), ('shape', (('fillcolor', '#ffffe1'), ('id', '_x0000_s1026'), ('insetmode', 'auto'), ('style', 'position:absolute; margin-left:59.25pt;margin-top:1.5pt;width:144px;height:79px;z-index:1;visibility:hidden'), ('type', '#_x0000_t202')), None, [('fill', (('color2', '#ffffe1'),), None, []), ('shadow', (('color', 'black'), ('obscured', 't')), None, []), ('path', (('connecttype', 'none'),), None, []), ('textbox', (('style', 'mso-direction-alt:auto'),), None, [('div', (('style', 'text-align:left'),), None, [])]), ('ClientData', (('ObjectType', 'Note'),), None, [('MoveWithCells', (), None, []), ('SizeWithCells', (), None, []), ('AutoFill', (), 'False', []), ('Row', (), '3', []), ('Column', (), '0', [])])]), ('shape', (('fillcolor', '#ffffe1'), ('id', '_x0000_s1027'), ('insetmode', 'auto'), ('style', 'position:absolute; margin-left:59.25pt;margin-top:1.5pt;width:144px;height:79px;z-index:1;visibility:hidden'), ('type', '#_x0000_t202')), None, [('fill', (('color2', '#ffffe1'),), None, []), ('shadow', (('color', 'black'), ('obscured', 't')), None, []), ('path', (('connecttype', 'none'),), None, []), ('textbox', (('style', 'mso-direction-alt:auto'),), None, [('div', (('style', 'text-align:left'),), None, [])]), ('ClientData', (('ObjectType', 'Note'),), None, [('MoveWithCells', (), None, []), ('SizeWithCells', (), None, []), ('AutoFill', (), 'False', []), ('Row', (), '4', []), ('Column', (), '0', [])])])])), ('rels', [])]}",
+          "part": "drawing_objects",
+          "severity": "error"
+        }
+      ],
+      "issues_by_kind": {
+        "drawing_objects_semantic_drift": 1
+      },
+      "lost_parts": [],
+      "parts_after": 12,
+      "parts_before": 12,
+      "parts_lost": 0,
+      "relationships_after": 9,
+      "relationships_before": 9,
+      "relationships_lost": 0,
+      "seconds": 0.004106541979126632,
+      "semantic_drift": [
+        "drawing_objects"
+      ],
+      "status": "changed",
+      "tier": "openpyxl-authored",
+      "workbook": "names-links-comments.xlsx"
+    },
+    {
+      "detail": "",
+      "engine": "openpyxl",
+      "engine_warnings": [],
+      "features_lost": [],
+      "issue_count": 5,
+      "issues": [
+        {
+          "kind": "missing_relationship",
+          "message": "Relationship existed before save and is missing after save: xl/_rels/workbook.xml.rels rIdPivotCache1 http://schemas.openxmlformats.org/officeDocument/2006/relationships/pivotCacheDefinition -> pivotCache/pivotCacheDefinition1.xml",
+          "part": "xl/_rels/workbook.xml.rels",
+          "severity": "error"
+        },
+        {
+          "kind": "missing_relationship",
+          "message": "Relationship existed before save and is missing after save: xl/pivotCache/_rels/pivotCacheDefinition1.xml.rels rId1 http://schemas.openxmlformats.org/officeDocument/2006/relationships/pivotCacheRecords -> pivotCacheRecords1.xml",
+          "part": "xl/pivotCache/_rels/pivotCacheDefinition1.xml.rels",
+          "severity": "error"
+        },
+        {
+          "kind": "missing_relationship",
+          "message": "Relationship existed before save and is missing after save: xl/pivotTables/_rels/pivotTable1.xml.rels rId1 http://schemas.openxmlformats.org/officeDocument/2006/relationships/pivotCacheDefinition -> ../pivotCache/pivotCacheDefinition1.xml",
+          "part": "xl/pivotTables/_rels/pivotTable1.xml.rels",
+          "severity": "error"
+        },
+        {
+          "kind": "missing_relationship",
+          "message": "Relationship existed before save and is missing after save: xl/worksheets/_rels/sheet2.xml.rels rIdPivot1 http://schemas.openxmlformats.org/officeDocument/2006/relationships/pivotTable -> ../pivotTables/pivotTable1.xml",
+          "part": "xl/worksheets/_rels/sheet2.xml.rels",
+          "severity": "error"
+        },
+        {
+          "after_empty": false,
+          "before_empty": false,
+          "kind": "pivots_semantic_drift",
+          "message": "pivots semantic fingerprint changed after save: before={'xl/pivotTables/pivotTable1.xml': [('attrs', (('name', 'RegionPivot'), ('cacheId', '1'), ('dataOnRows', None))), ('rels', [('rId1', 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/pivotCacheDefinition', '../pivotCache/pivotCacheDefinition1.xml', None)]), ('data_fields', [(('name', 'Sum of Amount'), ('fld', '1'), ('subtotal', None), ('baseField', '0'), ('baseItem', '0'))]), ('row_fields', ['0']), ('col_fields', []), ('page_fields', []), ('calculated_items', []), ('formats', []), ('conditional_formats', [])], 'xl/pivotCache/pivotCacheDefinition1.xml': [('cacheSource', (('ref', 'A1:B5'), ('sheet', 'Source'), ('name', None))), ('refreshOnLoad', '0'), ('rels', [('rId1', 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/pivotCacheRecords', 'pivotCacheRecords1.xml', None)]), ('fields', [(('name', 'Region'), ('numFmtId', '0'), ('databaseField', None), ('formula', None)), (('name', 'Amount'), ('numFmtId', '0'), ('databaseField', None), ('formula', None))]), ('calculated_fields', []), ('field_groups', [])], 'xl/pivotCache/pivotCacheRecords1.xml': [('cacheSource', (('ref', None), ('sheet', None), ('name', None))), ('refreshOnLoad', None), ('rels', []), ('fields', []), ('calculated_fields', []), ('field_groups', [])]} after={'xl/pivotTables/pivotTable1.xml': [('attrs', (('name', 'RegionPivot'), ('cacheId', '1'), ('dataOnRows', '0'))), ('rels', [('rId1', 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/pivotCacheDefinition', '/xl/pivotCache/pivotCacheDefinition1.xml', None)]), ('data_fields', [(('name', 'Sum of Amount'), ('fld', '1'), ('subtotal', 'sum'), ('baseField', '0'), ('baseItem', '0'))]), ('row_fields', ['0']), ('col_fields', []), ('page_fields', []), ('calculated_items', []), ('formats', []), ('conditional_formats', [])], 'xl/pivotCache/pivotCacheDefinition1.xml': [('cacheSource', (('ref', 'A1:B5'), ('sheet', 'Source'), ('name', None))), ('refreshOnLoad', '0'), ('rels', [('rId1', 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/pivotCacheRecords', '/xl/pivotCache/pivotCacheRecords1.xml', None)]), ('fields', [(('name', 'Region'), ('numFmtId', '0'), ('databaseField', '1'), ('formula', None)), (('name', 'Amount'), ('numFmtId', '0'), ('databaseField', '1'), ('formula', None))]), ('calculated_fields', []), ('field_groups', [])], 'xl/pivotCache/pivotCacheRecords1.xml': [('cacheSource', (('ref', None), ('sheet', None), ('name', None))), ('refreshOnLoad', None), ('rels', []), ('fields', []), ('calculated_fields', []), ('field_groups', [])]}",
+          "part": "pivots",
+          "severity": "error"
+        }
+      ],
+      "issues_by_kind": {
+        "missing_relationship": 4,
+        "pivots_semantic_drift": 1
+      },
+      "lost_parts": [],
+      "parts_after": 16,
+      "parts_before": 16,
+      "parts_lost": 0,
+      "relationships_after": 11,
+      "relationships_before": 11,
+      "relationships_lost": 4,
+      "seconds": 0.00501787499524653,
+      "semantic_drift": [
+        "pivots"
+      ],
+      "status": "changed",
+      "tier": "synthetic-injection",
+      "workbook": "pivot.xlsx"
+    },
+    {
+      "detail": "",
+      "engine": "openpyxl",
+      "engine_warnings": [
+        "Unknown extension is not supported and will be removed"
+      ],
+      "features_lost": [
+        "slicer",
+        "timeline"
+      ],
+      "issue_count": 19,
+      "issues": [
+        {
+          "kind": "missing_part",
+          "message": "Part existed before save and is missing after save: xl/slicerCaches/slicerCache1.xml",
+          "part": "xl/slicerCaches/slicerCache1.xml",
+          "severity": "error"
+        },
+        {
+          "kind": "missing_part",
+          "message": "Part existed before save and is missing after save: xl/slicers/slicer1.xml",
+          "part": "xl/slicers/slicer1.xml",
+          "severity": "error"
+        },
+        {
+          "kind": "missing_part",
+          "message": "Part existed before save and is missing after save: xl/timelineCaches/timelineCache1.xml",
+          "part": "xl/timelineCaches/timelineCache1.xml",
+          "severity": "error"
+        },
+        {
+          "kind": "missing_part",
+          "message": "Part existed before save and is missing after save: xl/timelines/timeline1.xml",
+          "part": "xl/timelines/timeline1.xml",
+          "severity": "error"
+        },
+        {
+          "kind": "missing_relationship",
+          "message": "Relationship existed before save and is missing after save: xl/_rels/workbook.xml.rels rIdSlicerCache1 http://schemas.microsoft.com/office/2007/relationships/slicerCache -> slicerCaches/slicerCache1.xml",
+          "part": "xl/_rels/workbook.xml.rels",
+          "severity": "error"
+        },
+        {
+          "kind": "missing_relationship",
+          "message": "Relationship existed before save and is missing after save: xl/_rels/workbook.xml.rels rIdTimelineCache1 http://schemas.microsoft.com/office/2011/relationships/timelineCache -> timelineCaches/timelineCache1.xml",
+          "part": "xl/_rels/workbook.xml.rels",
+          "severity": "error"
+        },
+        {
+          "kind": "missing_relationship",
+          "message": "Relationship existed before save and is missing after save: xl/_rels/workbook.xml.rels rIdPivotCache1 http://schemas.openxmlformats.org/officeDocument/2006/relationships/pivotCacheDefinition -> pivotCache/pivotCacheDefinition1.xml",
+          "part": "xl/_rels/workbook.xml.rels",
+          "severity": "error"
+        },
+        {
+          "kind": "missing_relationship",
+          "message": "Relationship existed before save and is missing after save: xl/pivotCache/_rels/pivotCacheDefinition1.xml.rels rId1 http://schemas.openxmlformats.org/officeDocument/2006/relationships/pivotCacheRecords -> pivotCacheRecords1.xml",
+          "part": "xl/pivotCache/_rels/pivotCacheDefinition1.xml.rels",
+          "severity": "error"
+        },
+        {
+          "kind": "missing_relationship",
+          "message": "Relationship existed before save and is missing after save: xl/pivotTables/_rels/pivotTable1.xml.rels rId1 http://schemas.openxmlformats.org/officeDocument/2006/relationships/pivotCacheDefinition -> ../pivotCache/pivotCacheDefinition1.xml",
+          "part": "xl/pivotTables/_rels/pivotTable1.xml.rels",
+          "severity": "error"
+        },
+        {
+          "kind": "missing_relationship",
+          "message": "Relationship existed before save and is missing after save: xl/worksheets/_rels/sheet2.xml.rels rIdSlicer1 http://schemas.microsoft.com/office/2007/relationships/slicer -> ../slicers/slicer1.xml",
+          "part": "xl/worksheets/_rels/sheet2.xml.rels",
+          "severity": "error"
+        },
+        {
+          "kind": "missing_relationship",
+          "message": "Relationship existed before save and is missing after save: xl/worksheets/_rels/sheet2.xml.rels rIdTimeline1 http://schemas.microsoft.com/office/2011/relationships/timeline -> ../timelines/timeline1.xml",
+          "part": "xl/worksheets/_rels/sheet2.xml.rels",
+          "severity": "error"
+        },
+        {
+          "kind": "missing_relationship",
+          "message": "Relationship existed before save and is missing after save: xl/worksheets/_rels/sheet2.xml.rels rIdPivot1 http://schemas.openxmlformats.org/officeDocument/2006/relationships/pivotTable -> ../pivotTables/pivotTable1.xml",
+          "part": "xl/worksheets/_rels/sheet2.xml.rels",
+          "severity": "error"
+        },
+        {
+          "kind": "feature_part_loss",
+          "message": "slicer parts disappeared after save: ['xl/slicerCaches/slicerCache1.xml', 'xl/slicers/slicer1.xml']",
+          "part": "slicer",
+          "severity": "error"
+        },
+        {
+          "kind": "feature_part_loss",
+          "message": "timeline parts disappeared after save: ['xl/timelineCaches/timelineCache1.xml', 'xl/timelines/timeline1.xml']",
+          "part": "timeline",
+          "severity": "error"
+        },
+        {
+          "after_empty": false,
+          "before_empty": false,
+          "kind": "extensions_semantic_drift",
+          "message": "extensions semantic fingerprint changed after save: before={'xl/worksheets/sheet2.xml': [('ext', (('uri', '{A8765BA9-456A-4dab-B4F3-ACF1C6B7E3CD}'),), None, [('slicerList', (), None, [('slicer', (('id', 'rIdSlicer1'),), None, [])])]), ('ext', (('uri', '{7E03D99C-DC04-49d9-9315-930204A7B6E9}'),), None, [('timelineRefs', (), None, [('timelineRef', (('id', 'rIdTimeline1'),), None, [])])])]} after={'xl/worksheets/sheet2.xml': None}",
+          "part": "extensions",
+          "severity": "error"
+        },
+        {
+          "after_empty": false,
+          "before_empty": false,
+          "kind": "pivots_semantic_drift",
+          "message": "pivots semantic fingerprint changed after save: before={'xl/pivotTables/pivotTable1.xml': [('attrs', (('name', 'RegionPivot'), ('cacheId', '1'), ('dataOnRows', None))), ('rels', [('rId1', 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/pivotCacheDefinition', '../pivotCache/pivotCacheDefinition1.xml', None)]), ('data_fields', [(('name', 'Sum of Amount'), ('fld', '1'), ('subtotal', None), ('baseField', '0'), ('baseItem', '0'))]), ('row_fields', ['0']), ('col_fields', []), ('page_fields', []), ('calculated_items', []), ('formats', []), ('conditional_formats', [])], 'xl/pivotCache/pivotCacheDefinition1.xml': [('cacheSource', (('ref', 'A1:B5'), ('sheet', 'Source'), ('name', None))), ('refreshOnLoad', '0'), ('rels', [('rId1', 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/pivotCacheRecords', 'pivotCacheRecords1.xml', None)]), ('fields', [(('name', 'Region'), ('numFmtId', '0'), ('databaseField', None), ('formula', None)), (('name', 'Amount'), ('numFmtId', '0'), ('databaseField', None), ('formula', None))]), ('calculated_fields', []), ('field_groups', [])], 'xl/pivotCache/pivotCacheRecords1.xml': [('cacheSource', (('ref', None), ('sheet', None), ('name', None))), ('refreshOnLoad', None), ('rels', []), ('fields', []), ('calculated_fields', []), ('field_groups', [])]} after={'xl/pivotTables/pivotTable1.xml': [('attrs', (('name', 'RegionPivot'), ('cacheId', '1'), ('dataOnRows', '0'))), ('rels', [('rId1', 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/pivotCacheDefinition', '/xl/pivotCache/pivotCacheDefinition1.xml', None)]), ('data_fields', [(('name', 'Sum of Amount'), ('fld', '1'), ('subtotal', 'sum'), ('baseField', '0'), ('baseItem', '0'))]), ('row_fields', ['0']), ('col_fields', []), ('page_fields', []), ('calculated_items', []), ('formats', []), ('conditional_formats', [])], 'xl/pivotCache/pivotCacheDefinition1.xml': [('cacheSource', (('ref', 'A1:B5'), ('sheet', 'Source'), ('name', None))), ('refreshOnLoad', '0'), ('rels', [('rId1', 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/pivotCacheRecords', '/xl/pivotCache/pivotCacheRecords1.xml', None)]), ('fields', [(('name', 'Region'), ('numFmtId', '0'), ('databaseField', '1'), ('formula', None)), (('name', 'Amount'), ('numFmtId', '0'), ('databaseField', '1'), ('formula', None))]), ('calculated_fields', []), ('field_groups', [])], 'xl/pivotCache/pivotCacheRecords1.xml': [('cacheSource', (('ref', None), ('sheet', None), ('name', None))), ('refreshOnLoad', None), ('rels', []), ('fields', []), ('calculated_fields', []), ('field_groups', [])]}",
+          "part": "pivots",
+          "severity": "error"
+        },
+        {
+          "after_empty": true,
+          "before_empty": false,
+          "kind": "slicers_semantic_drift",
+          "message": "slicers semantic fingerprint changed after save: before={'xl/workbook.xml': [('extensions', [('ext', (('uri', '{BBE1A952-AA13-448e-AADC-164F8A28A991}'),), None, [('slicerCaches', (), None, [('slicerCache', (('id', 'rIdSlicerCache1'),), None, [])])])])], 'xl/worksheets/sheet2.xml': [('extensions', [('ext', (('uri', '{A8765BA9-456A-4dab-B4F3-ACF1C6B7E3CD}'),), None, [('slicerList', (), None, [('slicer', (('id', 'rIdSlicer1'),), None, [])])])])], 'xl/slicerCaches/slicerCache1.xml': [('attrs', (('name', 'Slicer_Region'), ('pivotCacheId', None))), ('rels', []), ('data', (('pivotCacheId', None),)), ('items', [])], 'xl/slicers/slicer1.xml': [('attrs', (('name', None), ('cache', None), ('caption', None), ('style', None))), ('rels', []), ('slicers', [(('name', 'Region'), ('cache', 'Slicer_Region'), ('caption', 'Region'))])]} after={}",
+          "part": "slicers",
+          "severity": "error"
+        },
+        {
+          "after_empty": true,
+          "before_empty": false,
+          "kind": "timelines_semantic_drift",
+          "message": "timelines semantic fingerprint changed after save: before={'xl/workbook.xml': [('extensions', [('ext', (('uri', '{9260A510-F301-46a8-8635-F512D64BE5F5}'),), None, [('timelineCacheRefs', (), None, [('timelineCacheRef', (('id', 'rIdTimelineCache1'),), None, [])])])])], 'xl/worksheets/sheet2.xml': [('extensions', [('ext', (('uri', '{7E03D99C-DC04-49d9-9315-930204A7B6E9}'),), None, [('timelineRefs', (), None, [('timelineRef', (('id', 'rIdTimeline1'),), None, [])])])])], 'xl/timelineCaches/timelineCache1.xml': [('attrs', (('name', 'NativeTimeline_Date'), ('pivotCacheId', None), ('cache', None))), ('rels', []), ('xml', ('timelineCacheDefinition', (('name', 'NativeTimeline_Date'), ('sourceName', 'Date')), None, [('pivotTables', (), None, [('pivotTable', (('name', 'RegionPivot'), ('tabId', '1')), None, [])]), ('state', (('filterType', 'unknown'), ('lastRefreshVersion', '6'), ('minimalRefreshVersion', '6'), ('pivotCacheId', '1')), None, [])]))], 'xl/timelines/timeline1.xml': [('attrs', (('name', None), ('pivotCacheId', None), ('cache', None))), ('rels', []), ('xml', ('timelines', (), None, [('timeline', (('cache', 'NativeTimeline_Date'), ('caption', 'Date'), ('level', '2'), ('name', 'Date'), ('selectionLevel', '2')), None, [])]))]} after={}",
+          "part": "timelines",
+          "severity": "error"
+        },
+        {
+          "after_empty": false,
+          "before_empty": false,
+          "kind": "workbook_globals_semantic_drift",
+          "message": "workbook_globals semantic fingerprint changed after save: before={'xl/workbook.xml': [('defined_names', []), ('workbook_protection', ()), ('calc_pr', (('calcId', '124519'), ('fullCalcOnLoad', '1'))), ('extensions', [('ext', (('uri', '{BBE1A952-AA13-448e-AADC-164F8A28A991}'),), None, [('slicerCaches', (), None, [('slicerCache', (('id', 'rIdSlicerCache1'),), None, [])])]), ('ext', (('uri', '{9260A510-F301-46a8-8635-F512D64BE5F5}'),), None, [('timelineCacheRefs', (), None, [('timelineCacheRef', (('id', 'rIdTimelineCache1'),), None, [])])])])]} after={'xl/workbook.xml': [('defined_names', []), ('workbook_protection', ()), ('calc_pr', (('calcId', '124519'), ('fullCalcOnLoad', '1'))), ('extensions', [])]}",
+          "part": "workbook_globals",
+          "severity": "error"
+        }
+      ],
+      "issues_by_kind": {
+        "extensions_semantic_drift": 1,
+        "feature_part_loss": 2,
+        "missing_part": 4,
+        "missing_relationship": 8,
+        "pivots_semantic_drift": 1,
+        "slicers_semantic_drift": 1,
+        "timelines_semantic_drift": 1,
+        "workbook_globals_semantic_drift": 1
+      },
+      "lost_parts": [
+        "xl/slicerCaches/slicerCache1.xml",
+        "xl/slicers/slicer1.xml",
+        "xl/timelineCaches/timelineCache1.xml",
+        "xl/timelines/timeline1.xml"
+      ],
+      "parts_after": 16,
+      "parts_before": 20,
+      "parts_lost": 4,
+      "relationships_after": 11,
+      "relationships_before": 15,
+      "relationships_lost": 8,
+      "seconds": 0.0057153329835273325,
+      "semantic_drift": [
+        "extensions",
+        "pivots",
+        "slicers",
+        "timelines",
+        "workbook_globals"
+      ],
+      "status": "changed",
+      "tier": "synthetic-injection",
+      "workbook": "slicers-and-timelines.xlsx"
+    },
+    {
+      "detail": "",
+      "engine": "openpyxl",
+      "engine_warnings": [],
+      "features_lost": [],
+      "issue_count": 0,
+      "issues": [],
+      "issues_by_kind": {},
+      "lost_parts": [],
+      "parts_after": 10,
+      "parts_before": 10,
+      "parts_lost": 0,
+      "relationships_after": 7,
+      "relationships_before": 7,
+      "relationships_lost": 0,
+      "seconds": 0.0051245829672552645,
+      "semantic_drift": [],
+      "status": "faithful",
+      "tier": "openpyxl-authored",
+      "workbook": "styles.xlsx"
+    },
+    {
+      "detail": "",
+      "engine": "openpyxl",
+      "engine_warnings": [],
+      "features_lost": [],
+      "issue_count": 0,
+      "issues": [],
+      "issues_by_kind": {},
+      "lost_parts": [],
+      "parts_after": 12,
+      "parts_before": 12,
+      "parts_lost": 0,
+      "relationships_after": 8,
+      "relationships_before": 8,
+      "relationships_lost": 0,
+      "seconds": 0.006197582988534123,
+      "semantic_drift": [],
+      "status": "faithful",
+      "tier": "openpyxl-authored",
+      "workbook": "tables-and-validation.xlsx"
+    },
+    {
+      "detail": "",
+      "engine": "wolfxl-modify",
+      "engine_warnings": [],
+      "features_lost": [],
+      "issue_count": 0,
+      "issues": [],
+      "issues_by_kind": {},
+      "lost_parts": [],
+      "parts_after": 19,
+      "parts_before": 19,
+      "parts_lost": 0,
+      "relationships_after": 12,
+      "relationships_before": 12,
+      "relationships_lost": 0,
+      "seconds": 0.028844999964348972,
+      "semantic_drift": [],
+      "status": "faithful",
+      "tier": "openpyxl-authored",
+      "workbook": "charts.xlsx"
+    },
+    {
+      "detail": "",
+      "engine": "wolfxl-modify",
+      "engine_warnings": [],
+      "features_lost": [],
+      "issue_count": 0,
+      "issues": [],
+      "issues_by_kind": {},
+      "lost_parts": [],
+      "parts_after": 16,
+      "parts_before": 16,
+      "parts_lost": 0,
+      "relationships_after": 10,
+      "relationships_before": 10,
+      "relationships_lost": 0,
+      "seconds": 0.015050999994855374,
+      "semantic_drift": [],
+      "status": "faithful",
+      "tier": "synthetic-injection",
+      "workbook": "custom-xml-and-media.xlsx"
+    },
+    {
+      "detail": "",
+      "engine": "wolfxl-modify",
+      "engine_warnings": [],
+      "features_lost": [],
+      "issue_count": 0,
+      "issues": [],
+      "issues_by_kind": {},
+      "lost_parts": [],
+      "parts_after": 10,
+      "parts_before": 10,
+      "parts_lost": 0,
+      "relationships_after": 7,
+      "relationships_before": 7,
+      "relationships_lost": 0,
+      "seconds": 0.01112487498903647,
+      "semantic_drift": [],
+      "status": "faithful",
+      "tier": "synthetic-injection",
+      "workbook": "macros.xlsm"
+    },
+    {
+      "detail": "",
+      "engine": "wolfxl-modify",
+      "engine_warnings": [],
+      "features_lost": [],
+      "issue_count": 0,
+      "issues": [],
+      "issues_by_kind": {},
+      "lost_parts": [],
+      "parts_after": 12,
+      "parts_before": 12,
+      "parts_lost": 0,
+      "relationships_after": 9,
+      "relationships_before": 9,
+      "relationships_lost": 0,
+      "seconds": 0.011756292020436376,
+      "semantic_drift": [],
+      "status": "faithful",
+      "tier": "openpyxl-authored",
+      "workbook": "names-links-comments.xlsx"
+    },
+    {
+      "detail": "",
+      "engine": "wolfxl-modify",
+      "engine_warnings": [],
+      "features_lost": [],
+      "issue_count": 0,
+      "issues": [],
+      "issues_by_kind": {},
+      "lost_parts": [],
+      "parts_after": 16,
+      "parts_before": 16,
+      "parts_lost": 0,
+      "relationships_after": 11,
+      "relationships_before": 11,
+      "relationships_lost": 0,
+      "seconds": 0.011170332960318774,
+      "semantic_drift": [],
+      "status": "faithful",
+      "tier": "synthetic-injection",
+      "workbook": "pivot.xlsx"
+    },
+    {
+      "detail": "",
+      "engine": "wolfxl-modify",
+      "engine_warnings": [],
+      "features_lost": [],
+      "issue_count": 0,
+      "issues": [],
+      "issues_by_kind": {},
+      "lost_parts": [],
+      "parts_after": 20,
+      "parts_before": 20,
+      "parts_lost": 0,
+      "relationships_after": 15,
+      "relationships_before": 15,
+      "relationships_lost": 0,
+      "seconds": 0.01308474998222664,
+      "semantic_drift": [],
+      "status": "faithful",
+      "tier": "synthetic-injection",
+      "workbook": "slicers-and-timelines.xlsx"
+    },
+    {
+      "detail": "",
+      "engine": "wolfxl-modify",
+      "engine_warnings": [],
+      "features_lost": [],
+      "issue_count": 0,
+      "issues": [],
+      "issues_by_kind": {},
+      "lost_parts": [],
+      "parts_after": 10,
+      "parts_before": 10,
+      "parts_lost": 0,
+      "relationships_after": 7,
+      "relationships_before": 7,
+      "relationships_lost": 0,
+      "seconds": 0.011627250001765788,
+      "semantic_drift": [],
+      "status": "faithful",
+      "tier": "openpyxl-authored",
+      "workbook": "styles.xlsx"
+    },
+    {
+      "detail": "",
+      "engine": "wolfxl-modify",
+      "engine_warnings": [],
+      "features_lost": [],
+      "issue_count": 0,
+      "issues": [],
+      "issues_by_kind": {},
+      "lost_parts": [],
+      "parts_after": 12,
+      "parts_before": 12,
+      "parts_lost": 0,
+      "relationships_after": 8,
+      "relationships_before": 8,
+      "relationships_lost": 0,
+      "seconds": 0.011702332994900644,
+      "semantic_drift": [],
+      "status": "faithful",
+      "tier": "openpyxl-authored",
+      "workbook": "tables-and-validation.xlsx"
+    }
+  ],
+  "totals": {
+    "openpyxl": {
+      "changed": 5,
+      "error": 0,
+      "faithful": 3,
+      "parts_lost": 7,
+      "relationships_lost": 16,
+      "unsupported": 0,
+      "workbooks": 8
+    },
+    "wolfxl-modify": {
+      "changed": 0,
+      "error": 0,
+      "faithful": 8,
+      "parts_lost": 0,
+      "relationships_lost": 0,
+      "unsupported": 0,
+      "workbooks": 8
+    }
+  }
+}
