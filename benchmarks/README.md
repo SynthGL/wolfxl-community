@@ -117,6 +117,13 @@ produces byte-identical SVGs.
   DuckDB) avoid materializing Python cell objects; wolfxl and python-calamine
   return Python cell values, and only wolfxl, openpyxl, pylightxl, Tablib, and
   pyexcel can also write.
+- DuckDB's excel extension wins the small mixed-type write outright; it is
+  timed from a registered DataFrame, so DataFrame-construction cost is
+  excluded from its number.
+- pylightxl's writer scales quadratically with cell count. With the 12-hour
+  budget it finishes every round (241 s plain, 1,438 s unique strings), and
+  the chart axis is clipped at the second-slowest engine so the remaining
+  bars stay readable; the printed value is always the true measurement.
 - PyExcelerate, Tablib, and pyexcel serialize floats with fewer significant
   digits than the other writers (a value like `8/7` does not round-trip
   bit-exactly), so their write numbers come with a precision tradeoff.

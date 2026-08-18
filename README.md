@@ -110,11 +110,14 @@ read-only, DataFrame, and SQL specialists are labeled:
 
 ![Peak memory: read 200,000 x 8](assets/benchmarks/ecosystem-memory-read.svg)
 
-In the read case, fastexcel and Polars are about 5-8% faster than wolfxl but
-return Arrow-backed tables rather than Python cell values, and neither can
-edit an existing workbook. PyExcelerate has the lowest write peak memory.
-pylightxl exceeded the 240 s per-round budget on the large writes and is
-recorded as DNF rather than omitted.
+wolfxl leads every case in this run, including reads (387 ms vs 394 ms for
+Polars and 403 ms for fastexcel, which return Arrow-backed tables rather than
+Python cell values). The closest overall rival is DuckDB's excel extension,
+which wins the small mixed-type write outright (25 ms vs 35 ms, timed from a
+registered DataFrame) and stays within 1.4x elsewhere. pyexcel and
+PyExcelerate have the lowest write peak memory; pylightxl's pure-Python writer
+scales quadratically (241 s on the large plain write, 1,438 s on unique
+strings) and its bars are clipped to keep the charts readable.
 
 Speedups vary by workload, and small workbooks see smaller wins. Raw results,
 the benchmark harnesses, and reproduction instructions are in

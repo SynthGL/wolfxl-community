@@ -183,7 +183,22 @@ def main() -> None:
         is_memory = case.startswith("memory_")
         value_key = "peak_rss_bytes" if is_memory else "median_seconds"
         ranked = sorted(finished, key=lambda r: r[value_key])
-        max_value = max(r[value_key] for r in finished)
+        values = [r[value_key] for r in ranked]
+        max_value = values[-1]
+        clip_notes: list[str] = []
+        # A single extreme outlier (e.g. a quadratic engine hundreds of times
+        # slower) would flatten every other bar. Clip the axis and say so; the
+        # printed value is always the true measurement.
+        if len(values) >= 3 and values[-1] > 8 * values[-2]:
+            max_value = values[-2] * 1.25
+            clipped = [r for r in ranked if r[value_key] > max_value]
+            names = ", ".join(
+                engine_label(r["engine"], versions)[0] for r in clipped
+            )
+            clip_notes.append(
+                f"Axis clipped: the {names} bar extends far beyond the chart; "
+                "the printed value is the true measurement."
+            )
         bars = []
         for row in ranked:
             label, _ = engine_label(row["engine"], versions)
@@ -192,9 +207,11 @@ def main() -> None:
                 if is_memory
                 else fmt_seconds(row["median_seconds"])
             )
-            bars.append((label, row["scope"], row[value_key], value_text))
+            bars.append(
+                (label, row["scope"], min(row[value_key], max_value), value_text)
+            )
         subtitle = memory_subtitle if is_memory else timing_subtitle
-        notes = EXTRA_NOTES.get(case, []) + dnf_notes + provenance
+        notes = EXTRA_NOTES.get(case, []) + clip_notes + dnf_notes + provenance
         chart = render_bars(title, subtitle, notes, bars, max_value)
         (output_dir / filename).write_text(chart, encoding="utf-8")
         written += 1

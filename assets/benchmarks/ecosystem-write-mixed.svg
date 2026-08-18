@@ -1,34 +1,46 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="920" height="376" viewBox="0 0 920 376" role="img" aria-label="Write 10,000 x 5 mixed types (str/int/float/bool/datetime)">
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="478" viewBox="0 0 920 478" role="img" aria-label="Write 10,000 x 5 mixed types (str/int/float/bool/datetime)">
 <defs>
 <linearGradient id="wolfxl" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#f59e0b"/><stop offset="1" stop-color="#fbbf24"/></linearGradient>
 </defs>
-<rect x="0.5" y="0.5" width="919" height="375" rx="14" fill="#0f172a" stroke="#1e293b"/>
+<rect x="0.5" y="0.5" width="919" height="477" rx="14" fill="#0f172a" stroke="#1e293b"/>
 <text x="36" y="42" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="21" font-weight="700" fill="#e2e8f0">Write 10,000 x 5 mixed types (str/int/float/bool/datetime)</text>
-<text x="36" y="66" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13" fill="#94a3b8">AMD EPYC 9654 96-Core Processor | x86_64 Linux | Python 3.13.15 | median of 5 rounds | lower is better</text>
-<text x="36" y="108" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13" font-weight="700" fill="#e2e8f0">WolfXL Community 2.0.1</text>
-<text x="36" y="122" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="10.5" fill="#94a3b8">full read/write</text>
-<rect x="336" y="96" width="35.4" height="24" rx="12.0" fill="url(#wolfxl)"/>
-<text x="381.4" y="113" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13.5" font-weight="700" fill="#fbbf24">50 ms</text>
-<text x="36" y="142" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13" font-weight="600" fill="#94a3b8">PyExcelerate 0.13.0</text>
-<text x="36" y="156" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="10.5" fill="#94a3b8">write-only</text>
-<rect x="336" y="130" width="121.8" height="24" rx="12.0" fill="#64748b"/>
-<text x="467.8" y="147" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13.5" font-weight="700" fill="#94a3b8">171 ms</text>
-<text x="36" y="176" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13" font-weight="600" fill="#94a3b8">XlsxWriter 3.2.9</text>
+<text x="36" y="66" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13" fill="#94a3b8">AMD EPYC 9655 96-Core Processor | x86_64 Linux | Python 3.13.15 | median of 5 rounds | lower is better</text>
+<text x="36" y="108" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13" font-weight="600" fill="#94a3b8">DuckDB 1.5.5</text>
+<text x="36" y="122" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="10.5" fill="#94a3b8">SQL engine; DataFrame in, Arrow out</text>
+<rect x="336" y="96" width="24.7" height="24" rx="12.0" fill="#64748b"/>
+<text x="370.7" y="113" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13.5" font-weight="700" fill="#94a3b8">25 ms</text>
+<text x="36" y="142" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13" font-weight="700" fill="#e2e8f0">WolfXL Community 2.0.1</text>
+<text x="36" y="156" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="10.5" fill="#94a3b8">full read/write</text>
+<rect x="336" y="130" width="33.5" height="24" rx="12.0" fill="url(#wolfxl)"/>
+<text x="379.5" y="147" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13.5" font-weight="700" fill="#fbbf24">34 ms</text>
+<text x="36" y="176" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13" font-weight="600" fill="#94a3b8">PyExcelerate 0.13.0</text>
 <text x="36" y="190" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="10.5" fill="#94a3b8">write-only</text>
-<rect x="336" y="164" width="143.1" height="24" rx="12.0" fill="#64748b"/>
-<text x="489.1" y="181" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13.5" font-weight="700" fill="#94a3b8">200 ms</text>
-<text x="36" y="210" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13" font-weight="600" fill="#94a3b8">Polars 1.43.2</text>
-<text x="36" y="224" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="10.5" fill="#94a3b8">DataFrame I/O, wraps XlsxWriter/fastexcel</text>
-<rect x="336" y="198" width="178.7" height="24" rx="12.0" fill="#64748b"/>
-<text x="524.7" y="215" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13.5" font-weight="700" fill="#94a3b8">250 ms</text>
+<rect x="336" y="164" width="116.8" height="24" rx="12.0" fill="#64748b"/>
+<text x="462.8" y="181" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13.5" font-weight="700" fill="#94a3b8">120 ms</text>
+<text x="36" y="210" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13" font-weight="600" fill="#94a3b8">XlsxWriter 3.2.9</text>
+<text x="36" y="224" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="10.5" fill="#94a3b8">write-only</text>
+<rect x="336" y="198" width="135.4" height="24" rx="12.0" fill="#64748b"/>
+<text x="481.4" y="215" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13.5" font-weight="700" fill="#94a3b8">139 ms</text>
 <text x="36" y="244" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13" font-weight="600" fill="#94a3b8">openpyxl 3.1.5</text>
 <text x="36" y="258" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="10.5" fill="#94a3b8">full read/write</text>
-<rect x="336" y="232" width="262.8" height="24" rx="12.0" fill="#475569"/>
-<text x="608.8" y="249" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13.5" font-weight="700" fill="#94a3b8">368 ms</text>
-<text x="36" y="278" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13" font-weight="600" fill="#94a3b8">pandas 3.0.5</text>
-<text x="36" y="292" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="10.5" fill="#94a3b8">DataFrame I/O, openpyxl engine</text>
-<rect x="336" y="266" width="438.0" height="24" rx="12.0" fill="#64748b"/>
-<text x="784.0" y="283" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13.5" font-weight="700" fill="#94a3b8">613 ms</text>
-<text x="36" y="342" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="11.5" fill="#94a3b8">Raw data: benchmarks/results/2026-08-18-ecosystem-linux-epyc.json (run 2026-08-18)</text>
-<text x="36" y="358" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="11.5" fill="#94a3b8">Reproduce: python benchmarks/benchmark_python_excel_ecosystem.py (see benchmarks/README.md)</text>
+<rect x="336" y="232" width="237.5" height="24" rx="12.0" fill="#475569"/>
+<text x="583.5" y="249" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13.5" font-weight="700" fill="#94a3b8">244 ms</text>
+<text x="36" y="278" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13" font-weight="600" fill="#94a3b8">pyexcel 0.7.6</text>
+<text x="36" y="292" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="10.5" fill="#94a3b8">wrapper, openpyxl backend</text>
+<rect x="336" y="266" width="238.7" height="24" rx="12.0" fill="#64748b"/>
+<text x="584.7" y="283" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13.5" font-weight="700" fill="#94a3b8">245 ms</text>
+<text x="36" y="312" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13" font-weight="600" fill="#94a3b8">Polars 1.43.2</text>
+<text x="36" y="326" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="10.5" fill="#94a3b8">DataFrame I/O, wraps XlsxWriter/fastexcel</text>
+<rect x="336" y="300" width="259.1" height="24" rx="12.0" fill="#64748b"/>
+<text x="605.1" y="317" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13.5" font-weight="700" fill="#94a3b8">266 ms</text>
+<text x="36" y="346" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13" font-weight="600" fill="#94a3b8">pandas 3.0.5</text>
+<text x="36" y="360" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="10.5" fill="#94a3b8">DataFrame I/O, openpyxl engine</text>
+<rect x="336" y="334" width="327.4" height="24" rx="12.0" fill="#64748b"/>
+<text x="673.4" y="351" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13.5" font-weight="700" fill="#94a3b8">337 ms</text>
+<text x="36" y="380" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13" font-weight="600" fill="#94a3b8">Tablib 3.10.0</text>
+<text x="36" y="394" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="10.5" fill="#94a3b8">Dataset wrapper, openpyxl backend</text>
+<rect x="336" y="368" width="438.0" height="24" rx="12.0" fill="#64748b"/>
+<text x="784.0" y="385" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13.5" font-weight="700" fill="#94a3b8">450 ms</text>
+<text x="36" y="444" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="11.5" fill="#94a3b8">Raw data: benchmarks/results/2026-08-18-ecosystem-full-linux-epyc.json (run 2026-08-18)</text>
+<text x="36" y="460" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="11.5" fill="#94a3b8">Reproduce: python benchmarks/benchmark_python_excel_ecosystem.py (see benchmarks/README.md)</text>
 </svg>
