@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="444" viewBox="0 0 920 444" role="img" aria-label="Peak memory: read 200,000 x 8, all values">
+<defs>
+<linearGradient id="wolfxl" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#f59e0b"/><stop offset="1" stop-color="#fbbf24"/></linearGradient>
+</defs>
+<rect x="0.5" y="0.5" width="919" height="443" rx="14" fill="#0f172a" stroke="#1e293b"/>
+<text x="36" y="42" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="21" font-weight="700" fill="#e2e8f0">Peak memory: read 200,000 x 8, all values</text>
+<text x="36" y="66" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13" fill="#94a3b8">AMD EPYC 9654 96-Core Processor | x86_64 Linux | Python 3.13.15 | peak RSS, fresh process per engine | lower is better</text>
+<text x="36" y="108" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13" font-weight="700" fill="#e2e8f0">WolfXL Community 2.0.1</text>
+<text x="36" y="122" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="10.5" fill="#94a3b8">full read/write</text>
+<rect x="336" y="96" width="45.2" height="24" rx="12.0" fill="url(#wolfxl)"/>
+<text x="391.2" y="113" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13.5" font-weight="700" fill="#fbbf24">153 MiB</text>
+<text x="36" y="142" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13" font-weight="600" fill="#94a3b8">openpyxl 3.1.5</text>
+<text x="36" y="156" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="10.5" fill="#94a3b8">full read/write</text>
+<rect x="336" y="130" width="49.8" height="24" rx="12.0" fill="#475569"/>
+<text x="395.8" y="147" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13.5" font-weight="700" fill="#94a3b8">169 MiB</text>
+<text x="36" y="176" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13" font-weight="600" fill="#94a3b8">fastexcel 0.20.2</text>
+<text x="36" y="190" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="10.5" fill="#94a3b8">read-only, Arrow tables</text>
+<rect x="336" y="164" width="78.6" height="24" rx="12.0" fill="#64748b"/>
+<text x="424.6" y="181" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13.5" font-weight="700" fill="#94a3b8">266 MiB</text>
+<text x="36" y="210" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13" font-weight="600" fill="#94a3b8">Polars 1.43.2</text>
+<text x="36" y="224" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="10.5" fill="#94a3b8">DataFrame I/O, wraps XlsxWriter/fastexcel</text>
+<rect x="336" y="198" width="78.6" height="24" rx="12.0" fill="#64748b"/>
+<text x="424.6" y="215" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13.5" font-weight="700" fill="#94a3b8">266 MiB</text>
+<text x="36" y="244" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13" font-weight="600" fill="#94a3b8">python-calamine 0.8.2</text>
+<text x="36" y="258" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="10.5" fill="#94a3b8">read-only, Python values</text>
+<rect x="336" y="232" width="84.4" height="24" rx="12.0" fill="#64748b"/>
+<text x="430.4" y="249" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13.5" font-weight="700" fill="#94a3b8">286 MiB</text>
+<text x="36" y="278" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13" font-weight="600" fill="#94a3b8">pandas 3.0.5</text>
+<text x="36" y="292" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="10.5" fill="#94a3b8">DataFrame I/O, openpyxl engine</text>
+<rect x="336" y="266" width="86.3" height="24" rx="12.0" fill="#64748b"/>
+<text x="432.3" y="283" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13.5" font-weight="700" fill="#94a3b8">293 MiB</text>
+<text x="36" y="312" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13" font-weight="600" fill="#94a3b8">pandas 3.0.5</text>
+<text x="36" y="326" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="10.5" fill="#94a3b8">DataFrame read, calamine engine</text>
+<rect x="336" y="300" width="114.5" height="24" rx="12.0" fill="#64748b"/>
+<text x="460.5" y="317" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13.5" font-weight="700" fill="#94a3b8">388 MiB</text>
+<text x="36" y="346" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13" font-weight="600" fill="#94a3b8">pylightxl 1.61</text>
+<text x="36" y="360" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="10.5" fill="#94a3b8">pure-Python read/write</text>
+<rect x="336" y="334" width="438.0" height="24" rx="12.0" fill="#64748b"/>
+<text x="784.0" y="351" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13.5" font-weight="700" fill="#94a3b8">1,485 MiB</text>
+<text x="36" y="394" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="11.5" fill="#94a3b8">One fresh process per engine, single run, peak RSS including the returned values.</text>
+<text x="36" y="410" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="11.5" fill="#94a3b8">Raw data: benchmarks/results/2026-08-18-ecosystem-linux-epyc.json (run 2026-08-18)</text>
+<text x="36" y="426" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="11.5" fill="#94a3b8">Reproduce: python benchmarks/benchmark_python_excel_ecosystem.py (see benchmarks/README.md)</text>
+</svg>

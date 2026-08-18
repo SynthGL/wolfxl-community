@@ -91,17 +91,28 @@ Median speedups over openpyxl 3.1.5, from the committed benchmark run
 ### Against other open-source Python Excel libraries
 
 Cross-library comparison on a separate machine (AMD EPYC 9654, x86_64 Linux,
-Python 3.13.15, median of 5 rounds). Each library is measured only inside its
-supported scope; write-only and read-only specialists are labeled:
+Python 3.13.15, median of 5 rounds) against openpyxl, XlsxWriter,
+PyExcelerate, pylightxl, pandas, Polars, python-calamine, and fastexcel. Each
+library is measured only inside its supported scope; write-only, read-only,
+and DataFrame specialists are labeled:
 
 ![Write 200,000 x 8 plain values](assets/benchmarks/ecosystem-write-large.svg)
 
 ![Write 10,000 x 5 mixed types](assets/benchmarks/ecosystem-write-mixed.svg)
 
+![Write 100,000 x 5 unique strings](assets/benchmarks/ecosystem-write-strings.svg)
+
 ![Read 200,000 x 8, all values](assets/benchmarks/ecosystem-read-large.svg)
 
-In the read case, fastexcel is about 5% faster than wolfxl but returns Arrow
-tables rather than Python cell values, and it cannot write workbooks.
+![Peak memory: write 200,000 x 8](assets/benchmarks/ecosystem-memory-write.svg)
+
+![Peak memory: read 200,000 x 8](assets/benchmarks/ecosystem-memory-read.svg)
+
+In the read case, fastexcel and Polars are about 5-8% faster than wolfxl but
+return Arrow-backed tables rather than Python cell values, and neither can
+edit an existing workbook. PyExcelerate has the lowest write peak memory.
+pylightxl exceeded the 240 s per-round budget on the large writes and is
+recorded as DNF rather than omitted.
 
 Speedups vary by workload, and small workbooks see smaller wins. Raw results,
 the benchmark harnesses, and reproduction instructions are in

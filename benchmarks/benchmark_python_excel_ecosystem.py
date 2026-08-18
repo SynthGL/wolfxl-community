@@ -6,12 +6,19 @@ Engines and their honest scope:
 - openpyxl         full read/write (the de-facto standard, baseline)
 - XlsxWriter       write-only
 - PyExcelerate     write-only
+- pylightxl        pure-Python read/write (no native datetime support)
+- pandas           DataFrame to_excel/read_excel (openpyxl and calamine engines)
+- polars           DataFrame write_excel/read_excel (wraps XlsxWriter/fastexcel)
 - python-calamine  read-only, returns Python values
 - fastexcel        read-only, returns Arrow tables (not Python cell objects)
 
 Write-only libraries appear only in write cases and read-only libraries only
-in read cases. Read cases share one fixture written by openpyxl so no reader
-is parsing its own writer's output.
+in read cases. pandas and polars are timed from a prebuilt DataFrame, which is
+their primary use case; DataFrame construction is excluded from their timings.
+Read cases share one fixture written by openpyxl so no reader is parsing its
+own writer's output. A separate peak-RSS pass runs each large case once per
+engine in a fresh process; a grid-only baseline child shows how much of the
+peak is the input data itself.
 
 Usage:
 
@@ -27,6 +34,7 @@ import importlib.metadata
 import json
 import platform
 import statistics
+import subprocess
 import sys
 import tempfile
 from pathlib import Path
@@ -34,7 +42,10 @@ from time import perf_counter
 from typing import Any, Callable
 
 import openpyxl
+import pandas as pd
+import polars as pl
 import pyexcelerate
+import pylightxl
 import xlsxwriter
 import wolfxl
 from python_calamine import CalamineWorkbook
@@ -62,6 +73,10 @@ def mixed_row(row_idx: int) -> list[Any]:
         row_idx % 2 == 0,
         BASE_DT + dt.timedelta(minutes=row_idx),
     ]
+
+
+def unique_string_row(row_idx: int, cols: int) -> list[str]:
+    return [f"u{row_idx}-{col}-{row_idx * 2654435761 % 100000:05d}" for col in range(cols)]
 
 
 # --- write engines ---------------------------------------------------------
@@ -96,6 +111,24 @@ def write_pyexcelerate(path: Path, grid: list[list[Any]]) -> None:
     wb = pyexcelerate.Workbook()
     wb.new_sheet("Sheet1", data=grid)
     wb.save(str(path))
+
+
+def write_pylightxl(path: Path, grid: list[list[Any]]) -> None:
+    db = pylightxl.Database()
+    db.add_ws("Sheet1")
+    ws = db.ws("Sheet1")
+    for row_idx, row in enumerate(grid, start=1):
+        for col_idx, value in enumerate(row, start=1):
+            ws.update_index(row_idx, col_idx, value)
+    pylightxl.writexl(db, str(path))
+
+
+def write_pandas(path: Path, frame: "pd.DataFrame") -> None:
+    frame.to_excel(str(path), index=False, header=False, engine="openpyxl")
+
+
+def write_polars(path: Path, frame: "pl.DataFrame") -> None:
+    frame.write_excel(str(path), include_header=False)
 
 
 # --- read engines ----------------------------------------------------------
@@ -135,18 +168,36 @@ def read_fastexcel(path: Path) -> int:
     return table.num_rows * table.num_columns
 
 
-WRITE_ENGINES: dict[str, Callable[[Path, list[list[Any]]], None]] = {
-    "wolfxl": write_wolfxl,
-    "openpyxl": write_openpyxl,
-    "xlsxwriter": write_xlsxwriter,
-    "pyexcelerate": write_pyexcelerate,
-}
+def read_pylightxl(path: Path) -> int:
+    db = pylightxl.readxl(str(path))
+    ws = db.ws(db.ws_names[0])
+    return sum(len(row) for row in ws.rows)
+
+
+def read_pandas_openpyxl(path: Path) -> int:
+    frame = pd.read_excel(str(path), header=None, engine="openpyxl")
+    return int(frame.shape[0] * frame.shape[1])
+
+
+def read_pandas_calamine(path: Path) -> int:
+    frame = pd.read_excel(str(path), header=None, engine="calamine")
+    return int(frame.shape[0] * frame.shape[1])
+
+
+def read_polars(path: Path) -> int:
+    frame = pl.read_excel(str(path), has_header=False)
+    return frame.height * frame.width
+
 
 READ_ENGINES: dict[str, Callable[[Path], int]] = {
     "wolfxl": read_wolfxl,
     "openpyxl": read_openpyxl,
     "python_calamine": read_python_calamine,
     "fastexcel": read_fastexcel,
+    "pylightxl": read_pylightxl,
+    "pandas_openpyxl": read_pandas_openpyxl,
+    "pandas_calamine": read_pandas_calamine,
+    "polars": read_polars,
 }
 
 ENGINE_SCOPE = {
@@ -154,9 +205,84 @@ ENGINE_SCOPE = {
     "openpyxl": "full read/write",
     "xlsxwriter": "write-only",
     "pyexcelerate": "write-only",
+    "pylightxl": "pure-Python read/write",
+    "pandas_openpyxl": "DataFrame I/O, openpyxl engine",
+    "pandas_calamine": "DataFrame read, calamine engine",
+    "polars": "DataFrame I/O, wraps XlsxWriter/fastexcel",
     "python_calamine": "read-only, Python values",
     "fastexcel": "read-only, Arrow tables",
 }
+
+# pylightxl has no native datetime support, so it is excluded from the mixed
+# case rather than measured on a workload it cannot represent.
+WRITE_CASE_ENGINES = {
+    "write_plain_large": (
+        "wolfxl",
+        "openpyxl",
+        "xlsxwriter",
+        "pyexcelerate",
+        "pylightxl",
+        "pandas_openpyxl",
+        "polars",
+    ),
+    "write_mixed": (
+        "wolfxl",
+        "openpyxl",
+        "xlsxwriter",
+        "pyexcelerate",
+        "pandas_openpyxl",
+        "polars",
+    ),
+    "write_unique_strings": (
+        "wolfxl",
+        "openpyxl",
+        "xlsxwriter",
+        "pyexcelerate",
+        "pylightxl",
+        "pandas_openpyxl",
+        "polars",
+    ),
+}
+
+READ_CASE_ENGINES = {
+    "read_values_large": (
+        "wolfxl",
+        "openpyxl",
+        "python_calamine",
+        "fastexcel",
+        "pylightxl",
+        "pandas_openpyxl",
+        "pandas_calamine",
+        "polars",
+    ),
+}
+
+MEMORY_WRITE_ENGINES = WRITE_CASE_ENGINES["write_plain_large"]
+MEMORY_READ_ENGINES = READ_CASE_ENGINES["read_values_large"]
+
+
+def build_write_engines(
+    names: tuple[str, ...], grid: list[list[Any]], workdir: Path, case: str
+) -> dict[str, Callable[[], None]]:
+    pandas_frame = pd.DataFrame(grid) if "pandas_openpyxl" in names else None
+    polars_frame = pl.DataFrame(grid, orient="row") if "polars" in names else None
+    engines: dict[str, Callable[[], None]] = {}
+    for name in names:
+        target = workdir / f"{case}-{name}.xlsx"
+        if name == "pandas_openpyxl":
+            engines[name] = lambda t=target, f=pandas_frame: write_pandas(t, f)
+        elif name == "polars":
+            engines[name] = lambda t=target, f=polars_frame: write_polars(t, f)
+        else:
+            writer = {
+                "wolfxl": write_wolfxl,
+                "openpyxl": write_openpyxl,
+                "xlsxwriter": write_xlsxwriter,
+                "pyexcelerate": write_pyexcelerate,
+                "pylightxl": write_pylightxl,
+            }[name]
+            engines[name] = lambda w=writer, t=target, g=grid: w(t, g)
+    return engines
 
 
 def cpu_brand() -> str:
@@ -166,8 +292,6 @@ def cpu_brand() -> str:
             if line.lower().startswith("model name"):
                 return line.split(":", 1)[1].strip()
     try:
-        import subprocess
-
         return subprocess.run(
             ["sysctl", "-n", "machdep.cpu.brand_string"],
             capture_output=True,
@@ -185,6 +309,9 @@ def library_versions() -> dict[str, str]:
         "openpyxl",
         "XlsxWriter",
         "PyExcelerate",
+        "pylightxl",
+        "pandas",
+        "polars",
         "python-calamine",
         "fastexcel",
         "pyarrow",
@@ -196,14 +323,145 @@ def library_versions() -> dict[str, str]:
     return versions
 
 
-def measure(fn: Callable[[], Any], rounds: int) -> list[float]:
-    fn()  # warmup, discarded
+class RoundBudgetExceeded(Exception):
+    """One benchmark round did not finish inside the wall-clock budget."""
+
+
+_ALARM_ARMED = False
+
+
+def _on_alarm(signum: int, frame: Any) -> None:
+    if _ALARM_ARMED:
+        raise RoundBudgetExceeded()
+    # A late SIGALRM delivered after the timed window closed is ignored;
+    # restoring the default handler instead would kill the whole process.
+
+
+def install_round_budget_handler() -> None:
+    import signal
+
+    signal.signal(signal.SIGALRM, _on_alarm)
+
+
+def measure(fn: Callable[[], Any], rounds: int, budget_seconds: int) -> list[float]:
+    """Time ``rounds`` runs of ``fn`` after one discarded warmup.
+
+    Every run (warmup included) must finish within ``budget_seconds`` of wall
+    clock, enforced with SIGALRM so a pathologically slow pure-Python engine
+    cannot stall the whole suite. Raises :class:`RoundBudgetExceeded`.
+    ``install_round_budget_handler`` must have been called first.
+    """
+    import signal
+
+    global _ALARM_ARMED
     samples = []
-    for _ in range(rounds):
-        started = perf_counter()
-        fn()
-        samples.append(perf_counter() - started)
+    for idx in range(rounds + 1):  # first run is the discarded warmup
+        _ALARM_ARMED = True
+        signal.alarm(budget_seconds)
+        try:
+            started = perf_counter()
+            fn()
+            elapsed = perf_counter() - started
+        finally:
+            _ALARM_ARMED = False
+            signal.alarm(0)
+        if idx:
+            samples.append(elapsed)
     return samples
+
+
+# --- peak-RSS child mode ----------------------------------------------------
+
+
+def peak_rss_bytes() -> int:
+    if sys.platform.startswith("linux"):
+        # ru_maxrss is unusable here: the kernel folds the parent's resident
+        # set at fork time into the child's accounting, so a child spawned by
+        # a large parent inherits the parent's high-water mark even after
+        # exec. VmHWM belongs to this process's own address space only.
+        with open("/proc/self/status", encoding="ascii") as status:
+            for line in status:
+                if line.startswith("VmHWM:"):
+                    return int(line.split()[1]) * 1024
+        raise RuntimeError("VmHWM not found in /proc/self/status")
+    import resource
+
+    return resource.getrusage(resource.RUSAGE_SELF).ru_maxrss  # bytes on macOS
+
+
+def run_memory_child(spec: str, rows: int, cols: int, fixture: str | None) -> None:
+    kind, engine = spec.split(":", 1)
+    if kind == "write":
+        grid = [plain_row(idx, cols) for idx in range(1, rows + 1)]
+        if engine == "grid_baseline":
+            pass
+        else:
+            with tempfile.TemporaryDirectory() as tmp:
+                engines = build_write_engines(
+                    (engine,), grid, Path(tmp), "memory_write"
+                )
+                engines[engine]()
+    elif kind == "read":
+        assert fixture is not None
+        expected = rows * cols
+        count = READ_ENGINES[engine](Path(fixture))
+        if count != expected:
+            raise AssertionError(f"read {count} cells, expected {expected}")
+    else:
+        raise ValueError(f"unknown memory child kind: {kind}")
+    print(json.dumps({"peak_rss_bytes": peak_rss_bytes()}))
+
+
+def run_memory_pass(
+    rows: int, cols: int, fixture: Path, budget_seconds: int
+) -> list[dict[str, Any]]:
+    records: list[dict[str, Any]] = []
+    specs: list[tuple[str, str, str | None]] = [
+        ("memory_write_large", f"write:grid_baseline", None)
+    ]
+    specs += [("memory_write_large", f"write:{e}", None) for e in MEMORY_WRITE_ENGINES]
+    specs += [
+        ("memory_read_large", f"read:{e}", str(fixture)) for e in MEMORY_READ_ENGINES
+    ]
+    for case, spec, fixture_arg in specs:
+        engine = spec.split(":", 1)[1]
+        print(f"[{case}] {engine} ...", flush=True)
+        cmd = [
+            sys.executable,
+            __file__,
+            "--memory-child",
+            spec,
+            "--rows",
+            str(rows),
+            "--cols",
+            str(cols),
+        ]
+        if fixture_arg:
+            cmd += ["--fixture", fixture_arg]
+        base = {
+            "case": case,
+            "engine": engine,
+            "scope": ENGINE_SCOPE.get(engine, "input grid only, no Excel library"),
+            "rows": rows,
+            "cols": cols,
+        }
+        try:
+            proc = subprocess.run(
+                cmd, capture_output=True, text=True, check=True,
+                timeout=budget_seconds,
+            )
+        except subprocess.TimeoutExpired:
+            print(
+                f"[{case}] {engine} DID NOT FINISH within {budget_seconds} s",
+                flush=True,
+            )
+            records.append(
+                base | {"timed_out": True, "round_budget_seconds": budget_seconds}
+            )
+            continue
+        payload = json.loads(proc.stdout.strip().splitlines()[-1])
+        records.append(base | {"peak_rss_bytes": payload["peak_rss_bytes"]})
+    return records
 
 
 def main() -> None:
@@ -211,21 +469,39 @@ def main() -> None:
     parser.add_argument("--rows", type=int, default=200_000)
     parser.add_argument("--cols", type=int, default=8)
     parser.add_argument("--mixed-rows", type=int, default=10_000)
+    parser.add_argument("--string-rows", type=int, default=100_000)
+    parser.add_argument("--string-cols", type=int, default=5)
     parser.add_argument("--rounds", type=int, default=5)
+    parser.add_argument(
+        "--round-budget",
+        type=int,
+        default=240,
+        help="max wall-clock seconds per round; slower engines are recorded as DNF",
+    )
     parser.add_argument("--output-dir", type=Path, default=Path("/tmp/ecosystem-results"))
     parser.add_argument("--prefix", default="ecosystem")
     parser.add_argument("--case", default=None, help="comma-separated case filter")
+    parser.add_argument("--no-memory", action="store_true", help="skip the peak-RSS pass")
+    parser.add_argument("--memory-child", default=None, help=argparse.SUPPRESS)
+    parser.add_argument("--fixture", default=None, help=argparse.SUPPRESS)
     args = parser.parse_args()
 
+    if args.memory_child:
+        run_memory_child(args.memory_child, args.rows, args.cols, args.fixture)
+        return
+
     case_filter = set(args.case.split(",")) if args.case else None
+
+    def include(case: str) -> bool:
+        return case_filter is None or case in case_filter
+
     args.output_dir.mkdir(parents=True, exist_ok=True)
     workdir = Path(tempfile.mkdtemp(prefix="wolfxl-ecosystem-"))
 
     plain_grid = [plain_row(idx, args.cols) for idx in range(1, args.rows + 1)]
-    mixed_grid = [mixed_row(idx) for idx in range(1, args.mixed_rows + 1)]
 
     cases: list[dict[str, Any]] = []
-    if case_filter is None or "write_plain_large" in case_filter:
+    if include("write_plain_large"):
         cases.append(
             {
                 "case": "write_plain_large",
@@ -235,19 +511,35 @@ def main() -> None:
                 "grid": plain_grid,
             }
         )
-    if case_filter is None or "write_mixed" in case_filter:
+    if include("write_mixed"):
         cases.append(
             {
                 "case": "write_mixed",
                 "kind": "write",
                 "rows": args.mixed_rows,
                 "cols": 5,
-                "grid": mixed_grid,
+                "grid": [mixed_row(idx) for idx in range(1, args.mixed_rows + 1)],
             }
         )
-    if case_filter is None or "read_values_large" in case_filter:
-        fixture = workdir / "read-fixture.xlsx"
+    if include("write_unique_strings"):
+        cases.append(
+            {
+                "case": "write_unique_strings",
+                "kind": "write",
+                "rows": args.string_rows,
+                "cols": args.string_cols,
+                "grid": [
+                    unique_string_row(idx, args.string_cols)
+                    for idx in range(1, args.string_rows + 1)
+                ],
+            }
+        )
+
+    fixture = workdir / "read-fixture.xlsx"
+    needs_fixture = include("read_values_large") or not args.no_memory
+    if needs_fixture:
         write_openpyxl(fixture, plain_grid)
+    if include("read_values_large"):
         cases.append(
             {
                 "case": "read_values_large",
@@ -258,21 +550,20 @@ def main() -> None:
             }
         )
 
+    install_round_budget_handler()
     results: list[dict[str, Any]] = []
     for spec in cases:
         units = spec["rows"] * spec["cols"]
         if spec["kind"] == "write":
-            engines: dict[str, Callable[[], Any]] = {}
-            for name, writer in WRITE_ENGINES.items():
-                target = workdir / f"{spec['case']}-{name}.xlsx"
-                engines[name] = (lambda w=writer, t=target, g=spec["grid"]: w(t, g))
+            engines = build_write_engines(
+                WRITE_CASE_ENGINES[spec["case"]], spec["grid"], workdir, spec["case"]
+            )
         else:
-            fixture = spec["fixture"]
             expected = units
             engines = {}
-            for name, reader in READ_ENGINES.items():
+            for name in READ_CASE_ENGINES[spec["case"]]:
 
-                def run_read(r=reader, f=fixture, e=expected) -> None:
+                def run_read(r=READ_ENGINES[name], f=spec["fixture"], e=expected) -> None:
                     count = r(f)
                     if count != e:
                         raise AssertionError(f"read {count} cells, expected {e}")
@@ -281,25 +572,51 @@ def main() -> None:
 
         for name, fn in engines.items():
             print(f"[{spec['case']}] {name} ...", flush=True)
-            samples = measure(fn, args.rounds)
+            base = {
+                "case": spec["case"],
+                "engine": name,
+                "scope": ENGINE_SCOPE[name],
+                "rows": spec["rows"],
+                "cols": spec["cols"],
+                "units": units,
+            }
+            try:
+                samples = measure(fn, args.rounds, args.round_budget)
+            except RoundBudgetExceeded:
+                print(
+                    f"[{spec['case']}] {name} DID NOT FINISH one round "
+                    f"within {args.round_budget} s",
+                    flush=True,
+                )
+                results.append(
+                    base
+                    | {
+                        "timed_out": True,
+                        "round_budget_seconds": args.round_budget,
+                    }
+                )
+                continue
             median = statistics.median(samples)
             results.append(
-                {
-                    "case": spec["case"],
-                    "engine": name,
-                    "scope": ENGINE_SCOPE[name],
-                    "rows": spec["rows"],
-                    "cols": spec["cols"],
+                base
+                | {
                     "samples_seconds": [round(s, 6) for s in samples],
                     "median_seconds": round(median, 6),
-                    "units": units,
                     "units_per_second": round(units / median, 2) if median else None,
                 }
             )
 
+    memory_records: list[dict[str, Any]] = []
+    if not args.no_memory:
+        memory_records = run_memory_pass(
+            args.rows, args.cols, fixture, args.round_budget
+        )
+
     comparisons = []
     by_case: dict[str, dict[str, float]] = {}
     for row in results:
+        if row.get("timed_out"):
+            continue
         by_case.setdefault(row["case"], {})[row["engine"]] = row["median_seconds"]
     for case, engines_medians in sorted(by_case.items()):
         baseline = engines_medians.get("openpyxl")
@@ -325,11 +642,15 @@ def main() -> None:
             "cpu_brand": cpu_brand(),
             "rounds": args.rounds,
             "warmup_rounds": 1,
+            "round_budget_seconds": args.round_budget,
             "read_fixture_writer": "openpyxl",
+            "dataframe_timing": "pandas/polars timed from a prebuilt DataFrame",
+            "memory_pass": "one fresh process per engine, single run, peak RSS",
             "versions": library_versions(),
             "engine_scope": ENGINE_SCOPE,
         },
         "results": results,
+        "memory": memory_records,
         "comparisons": comparisons,
     }
 
@@ -350,11 +671,37 @@ def main() -> None:
         for row in results:
             if row["case"] != case:
                 continue
+            if row.get("timed_out"):
+                lines.append(
+                    f"| {row['engine']} | {row['scope']} | DNF "
+                    f"(> {row['round_budget_seconds']} s/round) | - |"
+                )
+                continue
             lines.append(
                 f"| {row['engine']} | {row['scope']} | {row['median_seconds']:.4f} "
                 f"| {row['units_per_second']:,.0f} |"
             )
         lines.append("")
+    if memory_records:
+        for case in ("memory_write_large", "memory_read_large"):
+            rows_for_case = [r for r in memory_records if r["case"] == case]
+            if not rows_for_case:
+                continue
+            lines.append(f"## {case}")
+            lines.append("")
+            lines.append("| engine | peak RSS MiB |")
+            lines.append("|---|---|")
+            for row in rows_for_case:
+                if row.get("timed_out"):
+                    lines.append(
+                        f"| {row['engine']} | DNF "
+                        f"(> {row['round_budget_seconds']} s) |"
+                    )
+                    continue
+                lines.append(
+                    f"| {row['engine']} | {row['peak_rss_bytes'] / 1048576:,.0f} |"
+                )
+            lines.append("")
     md_path = args.output_dir / f"{args.prefix}.md"
     md_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
     print(f"Wrote {json_path}")
