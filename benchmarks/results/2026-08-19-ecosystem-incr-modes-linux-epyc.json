@@ -1,0 +1,131 @@
+{
+ "metadata": {
+  "timestamp_utc": "2026-08-19T02:29:21.895466+00:00",
+  "python": "3.13.15",
+  "platform": "Linux-6.8.0-100-generic-x86_64-with-glibc2.39",
+  "machine": "x86_64",
+  "cpu_brand": "AMD EPYC 9655 96-Core Processor",
+  "rounds": 5,
+  "warmup_rounds": 1,
+  "round_budget_seconds": 43200,
+  "read_fixture_writer": "openpyxl",
+  "dataframe_timing": "pandas/polars/duckdb timed from a prebuilt DataFrame; tablib from a prebuilt Dataset",
+  "memory_pass": "one fresh process per engine, single run, peak RSS",
+  "versions": {
+   "wolfxl": "2.0.1",
+   "openpyxl": "3.1.5",
+   "XlsxWriter": "3.2.9",
+   "PyExcelerate": "0.13.0",
+   "pylightxl": "1.61",
+   "pandas": "3.0.5",
+   "polars": "1.43.2",
+   "python-calamine": "0.8.2",
+   "fastexcel": "0.20.2",
+   "pyarrow": "25.0.1",
+   "duckdb": "1.5.5",
+   "tablib": "3.10.0",
+   "pyexcel": "0.7.6",
+   "pyexcel-xlsx": "0.6.1",
+   "xlsx2csv": "0.8.6"
+  },
+  "engine_scope": {
+   "wolfxl": "full read/write",
+   "openpyxl": "full read/write",
+   "openpyxl_wo": "openpyxl write_only mode",
+   "xlsxwriter": "write-only",
+   "xlsxwriter_cm": "XlsxWriter constant_memory mode",
+   "pyexcelerate": "write-only",
+   "pylightxl": "pure-Python read/write",
+   "pandas_openpyxl": "DataFrame I/O, openpyxl engine",
+   "pandas_xlsxwriter": "DataFrame I/O, xlsxwriter engine",
+   "pandas_calamine": "DataFrame read, calamine engine",
+   "polars": "DataFrame I/O, wraps XlsxWriter/fastexcel",
+   "python_calamine": "read-only, Python values",
+   "fastexcel": "read-only, Arrow tables",
+   "duckdb": "SQL engine; DataFrame in, Arrow out",
+   "tablib": "Dataset wrapper, openpyxl backend",
+   "pyexcel": "wrapper, openpyxl backend",
+   "xlsx2csv": "read-only, transcodes to CSV text"
+  }
+ },
+ "results": [
+  {
+   "case": "write_plain_large",
+   "engine": "openpyxl_wo",
+   "scope": "openpyxl write_only mode",
+   "rows": 200000,
+   "cols": 8,
+   "units": 1600000,
+   "samples_seconds": [
+    6.030113,
+    6.056813,
+    6.053744,
+    6.115771,
+    6.051791
+   ],
+   "median_seconds": 6.053744,
+   "units_per_second": 264299.26
+  },
+  {
+   "case": "write_plain_large",
+   "engine": "xlsxwriter_cm",
+   "scope": "XlsxWriter constant_memory mode",
+   "rows": 200000,
+   "cols": 8,
+   "units": 1600000,
+   "samples_seconds": [
+    3.785076,
+    3.688561,
+    3.638557,
+    3.856981,
+    3.737172
+   ],
+   "median_seconds": 3.737172,
+   "units_per_second": 428131.24
+  },
+  {
+   "case": "write_plain_large",
+   "engine": "pandas_xlsxwriter",
+   "scope": "DataFrame I/O, xlsxwriter engine",
+   "rows": 200000,
+   "cols": 8,
+   "units": 1600000,
+   "samples_seconds": [
+    7.5676,
+    7.77758,
+    7.817218,
+    7.789407,
+    7.757889
+   ],
+   "median_seconds": 7.77758,
+   "units_per_second": 205719.51
+  }
+ ],
+ "memory": [
+  {
+   "case": "memory_write_large",
+   "engine": "openpyxl_wo",
+   "scope": "openpyxl write_only mode",
+   "rows": 200000,
+   "cols": 8,
+   "peak_rss_bytes": 245043200
+  },
+  {
+   "case": "memory_write_large",
+   "engine": "xlsxwriter_cm",
+   "scope": "XlsxWriter constant_memory mode",
+   "rows": 200000,
+   "cols": 8,
+   "peak_rss_bytes": 244924416
+  },
+  {
+   "case": "memory_write_large",
+   "engine": "pandas_xlsxwriter",
+   "scope": "DataFrame I/O, xlsxwriter engine",
+   "rows": 200000,
+   "cols": 8,
+   "peak_rss_bytes": 551010304
+  }
+ ],
+ "comparisons": []
+}

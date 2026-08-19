@@ -41,6 +41,6 @@
 <text x="36" y="394" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="10.5" fill="#94a3b8">Dataset wrapper, openpyxl backend</text>
 <rect x="336" y="368" width="438.0" height="24" rx="12.0" fill="#64748b"/>
 <text x="784.0" y="385" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13.5" font-weight="700" fill="#94a3b8">450 ms</text>
-<text x="36" y="444" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="11.5" fill="#94a3b8">Raw data: benchmarks/results/2026-08-18-ecosystem-full-linux-epyc.json (run 2026-08-18)</text>
+<text x="36" y="444" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="11.5" fill="#94a3b8">Raw data: benchmarks/results/2026-08-19-ecosystem-full-linux-epyc-merged.json (run 2026-08-18)</text>
 <text x="36" y="460" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="11.5" fill="#94a3b8">Reproduce: python benchmarks/benchmark_python_excel_ecosystem.py (see benchmarks/README.md)</text>
 </svg>

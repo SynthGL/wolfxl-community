@@ -95,8 +95,11 @@ Python 3.13, median of 5 rounds) against twelve other libraries: openpyxl,
 XlsxWriter, PyExcelerate, pylightxl, pandas, Polars, DuckDB, Tablib, pyexcel,
 python-calamine, fastexcel, and xlsx2csv. The bar for inclusion is xlsx
 support, no external application, and roughly one million PyPI downloads per
-month. Each library is measured only inside its supported scope; write-only,
-read-only, DataFrame, and SQL specialists are labeled:
+month. To keep the baselines honest, the large plain write and the memory
+pass also measure openpyxl in write_only mode, XlsxWriter in constant_memory
+mode, and pandas with the xlsxwriter engine. Each library is measured only
+inside its supported scope; write-only, read-only, DataFrame, and SQL
+specialists are labeled:
 
 ![Write 200,000 x 8 plain values](assets/benchmarks/ecosystem-write-large.svg)
 
@@ -114,10 +117,13 @@ wolfxl leads every case in this run, including reads (387 ms vs 394 ms for
 Polars and 403 ms for fastexcel, which return Arrow-backed tables rather than
 Python cell values). The closest overall rival is DuckDB's excel extension,
 which wins the small mixed-type write outright (25 ms vs 35 ms, timed from a
-registered DataFrame) and stays within 1.4x elsewhere. pyexcel and
-PyExcelerate have the lowest write peak memory; pylightxl's pure-Python writer
-scales quadratically (241 s on the large plain write, 1,438 s on unique
-strings) and its bars are clipped to keep the charts readable.
+registered DataFrame) and stays within 1.4x elsewhere. The streaming modes
+own write memory: openpyxl write_only and XlsxWriter constant_memory peak at
+234 MiB, effectively the cost of the input grid itself, where wolfxl's fully
+materialized workbook peaks at 610 MiB while writing 5-8x faster than
+either. pylightxl's pure-Python writer scales quadratically (241 s on the
+large plain write, 1,438 s on unique strings) and its bars are clipped to
+keep the charts readable.
 
 Speedups vary by workload, and small workbooks see smaller wins. Raw results,
 the benchmark harnesses, and reproduction instructions are in

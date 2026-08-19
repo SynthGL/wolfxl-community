@@ -66,6 +66,15 @@ adoption (roughly one million PyPI downloads per month). Excluded for scope:
 xlrd/xlwt (.xls only), pyxlsb (.xlsb only), xlwings (drives a running Excel
 installation), and commercial SDKs.
 
+Excluded pending adoption: excelize-py (the Python binding of Go's Excelize;
+pre-1.0 and far below the download bar as of this run).
+
+To steelman the baselines, three mode variants are measured on the large
+plain write and the memory pass only: openpyxl in write_only mode, XlsxWriter
+in constant_memory mode, and pandas with the xlsxwriter engine. They exist
+because mode choice matters on exactly that workload; adding them to every
+chart would only duplicate bars.
+
 Cases: large plain write, mixed-type write, unique-strings write
 (shared-strings stress), large value read, and a peak-RSS pass that runs each
 large case in a fresh process. Write-only libraries appear only in write cases
@@ -96,12 +105,33 @@ python benchmarks/render_charts.py \
     benchmarks/results/2026-08-18-community-2.0.1-vs-openpyxl-3.1.5.json \
     assets/benchmarks
 python benchmarks/render_ecosystem_charts.py \
-    benchmarks/results/2026-08-18-ecosystem-full-linux-epyc.json \
+    benchmarks/results/2026-08-19-ecosystem-full-linux-epyc-merged.json \
     assets/benchmarks
 ```
 
 Both renderers are deterministic and stdlib-only: the same input JSON always
 produces byte-identical SVGs.
+
+## Incremental runs
+
+Engines are measured in isolation, so a new engine or variant does not
+require rerunning the whole suite. On the *same machine, Python, and pinned
+library versions* as the committed run:
+
+```bash
+.bench/bin/python benchmarks/benchmark_python_excel_ecosystem.py \
+    --rounds 5 --engines new_engine --output-dir /tmp/results --prefix incr
+python benchmarks/merge_ecosystem_results.py \
+    benchmarks/results/<base>.json /tmp/results/incr.json \
+    benchmarks/results/<merged>.json
+```
+
+`merge_ecosystem_results.py` refuses to merge unless CPU, machine, platform,
+Python, round count, round budget, and every shared library version match
+exactly, and it records each increment's source and timestamp in the merged
+metadata. If the environment changed, rerun the full suite instead; with
+pylightxl's numbers already on record, a full rerun without it takes well
+under an hour.
 
 ## Reading the results honestly
 

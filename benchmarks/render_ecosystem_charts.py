@@ -38,10 +38,13 @@ OTHER_FILL = "#64748b"
 ENGINE_META = {
     "wolfxl": ("WolfXL Community", "wolfxl"),
     "openpyxl": ("openpyxl", "openpyxl"),
+    "openpyxl_wo": ("openpyxl, write_only mode", "openpyxl"),
     "xlsxwriter": ("XlsxWriter", "XlsxWriter"),
+    "xlsxwriter_cm": ("XlsxWriter, constant_memory", "XlsxWriter"),
     "pyexcelerate": ("PyExcelerate", "PyExcelerate"),
     "pylightxl": ("pylightxl", "pylightxl"),
     "pandas_openpyxl": ("pandas", "pandas"),
+    "pandas_xlsxwriter": ("pandas + XlsxWriter", "pandas"),
     "pandas_calamine": ("pandas", "pandas"),
     "polars": ("Polars", "polars"),
     "python_calamine": ("python-calamine", "python-calamine"),

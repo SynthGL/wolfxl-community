@@ -46,6 +46,6 @@
 <rect x="336" y="402" width="438.0" height="24" rx="12.0" fill="#64748b"/>
 <text x="784.0" y="419" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13.5" font-weight="700" fill="#94a3b8">1437.7 s</text>
 <text x="36" y="462" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="11.5" fill="#94a3b8">Axis clipped: the pylightxl 1.61 bar extends far beyond the chart; the printed value is the true measurement.</text>
-<text x="36" y="478" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="11.5" fill="#94a3b8">Raw data: benchmarks/results/2026-08-18-ecosystem-full-linux-epyc.json (run 2026-08-18)</text>
+<text x="36" y="478" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="11.5" fill="#94a3b8">Raw data: benchmarks/results/2026-08-19-ecosystem-full-linux-epyc-merged.json (run 2026-08-18)</text>
 <text x="36" y="494" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="11.5" fill="#94a3b8">Reproduce: python benchmarks/benchmark_python_excel_ecosystem.py (see benchmarks/README.md)</text>
 </svg>

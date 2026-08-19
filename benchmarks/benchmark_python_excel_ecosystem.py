@@ -112,8 +112,27 @@ def write_openpyxl(path: Path, grid: list[list[Any]]) -> None:
     wb.save(str(path))
 
 
+def write_openpyxl_wo(path: Path, grid: list[list[Any]]) -> None:
+    wb = openpyxl.Workbook(write_only=True)
+    ws = wb.create_sheet()
+    for row in grid:
+        ws.append(row)
+    wb.save(str(path))
+
+
 def write_xlsxwriter(path: Path, grid: list[list[Any]]) -> None:
     wb = xlsxwriter.Workbook(str(path), {"default_date_format": "yyyy-mm-dd hh:mm:ss"})
+    ws = wb.add_worksheet()
+    for row_idx, row in enumerate(grid):
+        ws.write_row(row_idx, 0, row)
+    wb.close()
+
+
+def write_xlsxwriter_cm(path: Path, grid: list[list[Any]]) -> None:
+    wb = xlsxwriter.Workbook(
+        str(path),
+        {"constant_memory": True, "default_date_format": "yyyy-mm-dd hh:mm:ss"},
+    )
     ws = wb.add_worksheet()
     for row_idx, row in enumerate(grid):
         ws.write_row(row_idx, 0, row)
@@ -138,6 +157,10 @@ def write_pylightxl(path: Path, grid: list[list[Any]]) -> None:
 
 def write_pandas(path: Path, frame: "pd.DataFrame") -> None:
     frame.to_excel(str(path), index=False, header=False, engine="openpyxl")
+
+
+def write_pandas_xlsxwriter(path: Path, frame: "pd.DataFrame") -> None:
+    frame.to_excel(str(path), index=False, header=False, engine="xlsxwriter")
 
 
 def write_polars(path: Path, frame: "pl.DataFrame") -> None:
@@ -297,10 +320,13 @@ READ_ENGINES: dict[str, Callable[[Path], int]] = {
 ENGINE_SCOPE = {
     "wolfxl": "full read/write",
     "openpyxl": "full read/write",
+    "openpyxl_wo": "openpyxl write_only mode",
     "xlsxwriter": "write-only",
+    "xlsxwriter_cm": "XlsxWriter constant_memory mode",
     "pyexcelerate": "write-only",
     "pylightxl": "pure-Python read/write",
     "pandas_openpyxl": "DataFrame I/O, openpyxl engine",
+    "pandas_xlsxwriter": "DataFrame I/O, xlsxwriter engine",
     "pandas_calamine": "DataFrame read, calamine engine",
     "polars": "DataFrame I/O, wraps XlsxWriter/fastexcel",
     "python_calamine": "read-only, Python values",
@@ -312,15 +338,22 @@ ENGINE_SCOPE = {
 }
 
 # pylightxl has no native datetime support, so it is excluded from the mixed
-# case rather than measured on a workload it cannot represent.
+# case rather than measured on a workload it cannot represent. The mode
+# variants (openpyxl write_only, XlsxWriter constant_memory, pandas with the
+# xlsxwriter engine) are measured on the large plain write and the memory pass
+# only: they exist to steelman the baselines on the workload where mode choice
+# matters, not to add near-duplicate bars to every chart.
 WRITE_CASE_ENGINES = {
     "write_plain_large": (
         "wolfxl",
         "openpyxl",
+        "openpyxl_wo",
         "xlsxwriter",
+        "xlsxwriter_cm",
         "pyexcelerate",
         "pylightxl",
         "pandas_openpyxl",
+        "pandas_xlsxwriter",
         "polars",
         "duckdb",
         "tablib",
@@ -375,7 +408,9 @@ MEMORY_READ_ENGINES = READ_CASE_ENGINES["read_values_large"]
 def build_write_engines(
     names: tuple[str, ...], grid: list[list[Any]], workdir: Path, case: str
 ) -> dict[str, Callable[[], None]]:
-    needs_pandas = "pandas_openpyxl" in names or "duckdb" in names
+    needs_pandas = bool(
+        {"pandas_openpyxl", "pandas_xlsxwriter", "duckdb"} & set(names)
+    )
     pandas_frame = pd.DataFrame(grid) if needs_pandas else None
     polars_frame = pl.DataFrame(grid, orient="row") if "polars" in names else None
     engines: dict[str, Callable[[], None]] = {}
@@ -383,6 +418,10 @@ def build_write_engines(
         target = workdir / f"{case}-{name}.xlsx"
         if name == "pandas_openpyxl":
             engines[name] = lambda t=target, f=pandas_frame: write_pandas(t, f)
+        elif name == "pandas_xlsxwriter":
+            engines[name] = lambda t=target, f=pandas_frame: write_pandas_xlsxwriter(
+                t, f
+            )
         elif name == "polars":
             engines[name] = lambda t=target, f=polars_frame: write_polars(t, f)
         elif name == "duckdb":
@@ -399,7 +438,9 @@ def build_write_engines(
             writer = {
                 "wolfxl": write_wolfxl,
                 "openpyxl": write_openpyxl,
+                "openpyxl_wo": write_openpyxl_wo,
                 "xlsxwriter": write_xlsxwriter,
+                "xlsxwriter_cm": write_xlsxwriter_cm,
                 "pyexcelerate": write_pyexcelerate,
                 "pylightxl": write_pylightxl,
             }[name]
@@ -540,15 +581,28 @@ def run_memory_child(spec: str, rows: int, cols: int, fixture: str | None) -> No
 
 
 def run_memory_pass(
-    rows: int, cols: int, fixture: Path, budget_seconds: int
+    rows: int,
+    cols: int,
+    fixture: Path,
+    budget_seconds: int,
+    engine_filter: set[str] | None = None,
 ) -> list[dict[str, Any]]:
+    def selected(engine: str) -> bool:
+        return engine_filter is None or engine in engine_filter
+
     records: list[dict[str, Any]] = []
-    specs: list[tuple[str, str, str | None]] = [
-        ("memory_write_large", f"write:grid_baseline", None)
-    ]
-    specs += [("memory_write_large", f"write:{e}", None) for e in MEMORY_WRITE_ENGINES]
+    specs: list[tuple[str, str, str | None]] = []
+    if selected("grid_baseline"):
+        specs.append(("memory_write_large", "write:grid_baseline", None))
     specs += [
-        ("memory_read_large", f"read:{e}", str(fixture)) for e in MEMORY_READ_ENGINES
+        ("memory_write_large", f"write:{e}", None)
+        for e in MEMORY_WRITE_ENGINES
+        if selected(e)
+    ]
+    specs += [
+        ("memory_read_large", f"read:{e}", str(fixture))
+        for e in MEMORY_READ_ENGINES
+        if selected(e)
     ]
     for case, spec, fixture_arg in specs:
         engine = spec.split(":", 1)[1]
@@ -608,6 +662,13 @@ def main() -> None:
     parser.add_argument("--output-dir", type=Path, default=Path("/tmp/ecosystem-results"))
     parser.add_argument("--prefix", default="ecosystem")
     parser.add_argument("--case", default=None, help="comma-separated case filter")
+    parser.add_argument(
+        "--engines",
+        default=None,
+        help="comma-separated engine filter for incremental runs; results must "
+        "be merged with merge_ecosystem_results.py, which enforces an "
+        "identical environment",
+    )
     parser.add_argument("--no-memory", action="store_true", help="skip the peak-RSS pass")
     parser.add_argument("--memory-child", default=None, help=argparse.SUPPRESS)
     parser.add_argument("--fixture", default=None, help=argparse.SUPPRESS)
@@ -618,6 +679,7 @@ def main() -> None:
         return
 
     case_filter = set(args.case.split(",")) if args.case else None
+    engine_filter = set(args.engines.split(",")) if args.engines else None
 
     def include(case: str) -> bool:
         return case_filter is None or case in case_filter
@@ -679,16 +741,24 @@ def main() -> None:
 
     install_round_budget_handler()
     results: list[dict[str, Any]] = []
+    def selected_engines(names: tuple[str, ...]) -> tuple[str, ...]:
+        if engine_filter is None:
+            return names
+        return tuple(n for n in names if n in engine_filter)
+
     for spec in cases:
         units = spec["rows"] * spec["cols"]
         if spec["kind"] == "write":
             engines = build_write_engines(
-                WRITE_CASE_ENGINES[spec["case"]], spec["grid"], workdir, spec["case"]
+                selected_engines(WRITE_CASE_ENGINES[spec["case"]]),
+                spec["grid"],
+                workdir,
+                spec["case"],
             )
         else:
             expected = units
             engines = {}
-            for name in READ_CASE_ENGINES[spec["case"]]:
+            for name in selected_engines(READ_CASE_ENGINES[spec["case"]]):
 
                 def run_read(r=READ_ENGINES[name], f=spec["fixture"], e=expected) -> None:
                     count = r(f)
@@ -736,7 +806,7 @@ def main() -> None:
     memory_records: list[dict[str, Any]] = []
     if not args.no_memory:
         memory_records = run_memory_pass(
-            args.rows, args.cols, fixture, args.round_budget
+            args.rows, args.cols, fixture, args.round_budget, engine_filter
         )
 
     comparisons = []
