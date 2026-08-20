@@ -1,0 +1,291 @@
+name: SOTA audit benchmark (PR-visible)
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - synchronize
+      - reopened
+
+permissions:
+  contents: read
+
+jobs:
+  benchmark:
+    name: Fresh Linux SOTA audit
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+          cache: pip
+
+      - name: Install pinned libraries
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install \
+            "wolfxl==2.0.1" \
+            "openpyxl==3.1.5" \
+            "XlsxWriter==3.2.9" \
+            "PyExcelerate==0.13.0" \
+            "pylightxl==1.61" \
+            "pandas==3.0.5" \
+            "polars==1.43.2" \
+            "python-calamine==0.8.2" \
+            "fastexcel==0.20.2" \
+            "pyarrow==25.0.1" \
+            "jetxl==0.3.0"
+
+      - name: Matched openpyxl-compatible benchmark
+        run: |
+          mkdir -p audit-results
+          python benchmarks/benchmark_openpyxl_vs_wolfxl.py \
+            --rounds 5 \
+            --large-rounds 3 \
+            --no-memory \
+            --case write_append_plain,read_values_plain,read_only_values_plain,modify_two_cells_plain,large_write_append_plain,large_read_values_plain,large_read_only_values_plain,large_modify_two_cells_plain \
+            --output-dir audit-results \
+            --prefix fresh-openpyxl
+
+      - name: Mainstream ecosystem benchmark
+        run: |
+          python benchmarks/benchmark_python_excel_ecosystem.py \
+            --rounds 5 \
+            --round-budget 600 \
+            --no-memory \
+            --case write_plain_large,write_mixed,write_unique_strings,read_values_large \
+            --engines wolfxl,openpyxl,openpyxl_wo,xlsxwriter,xlsxwriter_cm,pyexcelerate,polars,python_calamine,fastexcel \
+            --output-dir audit-results \
+            --prefix fresh-ecosystem
+
+      - name: Category-boundary benchmark against Jetxl Arrow
+        run: |
+          python - <<'PY'
+          from __future__ import annotations
+
+          import gc
+          import importlib.metadata
+          import json
+          import platform
+          import statistics
+          import tempfile
+          from datetime import datetime, timezone
+          from pathlib import Path
+          from time import perf_counter
+          from typing import Any, Callable
+
+          import jetxl
+          import openpyxl
+          import pyarrow as pa
+          import wolfxl
+
+          ROWS = 200_000
+          COLS = 8
+          ROUNDS = 5
+
+          def row(i: int) -> list[Any]:
+              return [
+                  f"acct-{i % 997}",
+                  i,
+                  i * 1.25,
+                  i % 2 == 0,
+                  f"region-{i % 8}",
+                  i % 31,
+                  i / 7.0,
+                  i * 17,
+              ]
+
+          grid = [row(i) for i in range(1, ROWS + 1)]
+          columns = {f"c{col}": [record[col] for record in grid] for col in range(COLS)}
+          table = pa.table(columns)
+
+          with tempfile.TemporaryDirectory(prefix="wolfxl-sota-") as tmp:
+              root = Path(tmp)
+              targets = {
+                  "wolfxl_grid": root / "wolfxl.xlsx",
+                  "jetxl_arrow": root / "jetxl.xlsx",
+              }
+
+              def write_wolfxl() -> None:
+                  path = targets["wolfxl_grid"]
+                  path.unlink(missing_ok=True)
+                  wb = wolfxl.Workbook()
+                  ws = wb.active
+                  ws.write_rows(grid, copy=False, plain_values_only=True)
+                  wb.save(str(path))
+                  wb.close()
+
+              def write_jetxl() -> None:
+                  path = targets["jetxl_arrow"]
+                  path.unlink(missing_ok=True)
+                  jetxl.write_sheet_arrow(table, str(path), write_header_row=False)
+
+              writers: dict[str, Callable[[], None]] = {
+                  "wolfxl_grid": write_wolfxl,
+                  "jetxl_arrow": write_jetxl,
+              }
+
+              for writer in writers.values():
+                  writer()
+
+              samples = {name: [] for name in writers}
+              for round_idx in range(ROUNDS):
+                  order = (
+                      ("wolfxl_grid", "jetxl_arrow")
+                      if round_idx % 2 == 0
+                      else ("jetxl_arrow", "wolfxl_grid")
+                  )
+                  for name in order:
+                      gc.collect()
+                      enabled = gc.isenabled()
+                      if enabled:
+                          gc.disable()
+                      started = perf_counter()
+                      try:
+                          writers[name]()
+                      finally:
+                          samples[name].append(perf_counter() - started)
+                          if enabled:
+                              gc.enable()
+
+              validations = {}
+              for name, path in targets.items():
+                  wb = openpyxl.load_workbook(path, read_only=True, data_only=False)
+                  ws = wb.active
+                  validations[name] = {
+                      "max_row": int(ws.max_row or 0),
+                      "max_column": int(ws.max_column or 0),
+                      "output_bytes": path.stat().st_size,
+                  }
+                  wb.close()
+                  assert validations[name]["max_row"] >= ROWS
+                  assert validations[name]["max_column"] >= COLS
+
+              results = []
+              for name in writers:
+                  values = samples[name]
+                  results.append(
+                      {
+                          "engine": name,
+                          "input_shape": (
+                              "prebuilt Python list-of-rows"
+                              if name == "wolfxl_grid"
+                              else "prebuilt Arrow table"
+                          ),
+                          "samples_seconds": values,
+                          "median_seconds": statistics.median(values),
+                          "min_seconds": min(values),
+                          "max_seconds": max(values),
+                          "validation": validations[name],
+                      }
+                  )
+
+              by_name = {result["engine"]: result for result in results}
+              ratio = (
+                  by_name["wolfxl_grid"]["median_seconds"]
+                  / by_name["jetxl_arrow"]["median_seconds"]
+              )
+              cpu = "unknown"
+              cpuinfo = Path("/proc/cpuinfo")
+              if cpuinfo.exists():
+                  for line in cpuinfo.read_text(encoding="utf-8").splitlines():
+                      if line.lower().startswith("model name"):
+                          cpu = line.split(":", 1)[1].strip()
+                          break
+
+              payload = {
+                  "metadata": {
+                      "timestamp_utc": datetime.now(timezone.utc).isoformat(),
+                      "python": platform.python_version(),
+                      "platform": platform.platform(),
+                      "cpu_brand": cpu,
+                      "rows": ROWS,
+                      "cols": COLS,
+                      "rounds": ROUNDS,
+                      "timing_boundary": "prebuilt natural input object to closed XLSX",
+                      "comparability_note": (
+                          "The values and output dimensions match, but the input containers "
+                          "differ. This tests the boundary of an unqualified fastest-library "
+                          "claim; it is not an openpyxl-API equivalence benchmark."
+                      ),
+                      "versions": {
+                          package: importlib.metadata.version(package)
+                          for package in ("wolfxl", "jetxl", "pyarrow", "openpyxl")
+                      },
+                  },
+                  "jetxl_speed_vs_wolfxl": ratio,
+                  "winner": (
+                      "jetxl_arrow"
+                      if ratio > 1.0
+                      else "wolfxl_grid"
+                  ),
+                  "results": results,
+              }
+
+              output = Path("audit-results")
+              output.mkdir(exist_ok=True)
+              (output / "fresh-jetxl-boundary.json").write_text(
+                  json.dumps(payload, indent=2) + "\n",
+                  encoding="utf-8",
+              )
+              lines = [
+                  "# WolfXL vs Jetxl category-boundary benchmark",
+                  "",
+                  f"- CPU: `{cpu}`",
+                  f"- Workload: `{ROWS:,} x {COLS}` mixed primitive cells",
+                  f"- Timing boundary: {payload['metadata']['timing_boundary']}",
+                  f"- Caveat: {payload['metadata']['comparability_note']}",
+                  "",
+                  "| Engine | Natural input | Median s | Min-Max s | Output dimensions |",
+                  "|---|---|---:|---:|---:|",
+              ]
+              for result in results:
+                  validation = result["validation"]
+                  lines.append(
+                      "| {engine} | {shape} | {median:.6f} | {minimum:.6f}-{maximum:.6f} | "
+                      "{rows}x{cols} |".format(
+                          engine=result["engine"],
+                          shape=result["input_shape"],
+                          median=result["median_seconds"],
+                          minimum=result["min_seconds"],
+                          maximum=result["max_seconds"],
+                          rows=validation["max_row"],
+                          cols=validation["max_column"],
+                      )
+                  )
+              lines.extend(
+                  [
+                      "",
+                      f"Jetxl speed relative to WolfXL: **{ratio:.2f}x** "
+                      "(>1 means Jetxl is faster).",
+                      "",
+                  ]
+              )
+              (output / "fresh-jetxl-boundary.md").write_text(
+                  "\n".join(lines),
+                  encoding="utf-8",
+              )
+              print(json.dumps(payload, indent=2))
+          PY
+
+      - name: Publish run summary
+        if: always()
+        run: |
+          for report in audit-results/*.md; do
+            cat "$report" >> "$GITHUB_STEP_SUMMARY"
+            echo >> "$GITHUB_STEP_SUMMARY"
+          done
+
+      - name: Upload raw audit artifacts
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: sota-audit-pr-results
+          path: audit-results
+          if-no-files-found: error
