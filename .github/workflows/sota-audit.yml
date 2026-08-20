@@ -1,0 +1,419 @@
+name: SOTA audit benchmark
+
+on:
+  push:
+    branches:
+      - sota-audit-2026-08-19
+
+permissions:
+  contents: read
+
+jobs:
+  benchmark:
+    name: Fresh Linux benchmark
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+
+    steps:
+      - name: Check out benchmark harness
+        uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+          cache: pip
+
+      - name: Install pinned benchmark dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install \
+            "wolfxl==2.0.1" \
+            "openpyxl==3.1.5" \
+            "XlsxWriter==3.2.9" \
+            "PyExcelerate==0.13.0" \
+            "pylightxl==1.61" \
+            "pandas==3.0.5" \
+            "polars==1.43.2" \
+            "python-calamine==0.8.2" \
+            "fastexcel==0.20.2" \
+            "pyarrow==25.0.1" \
+            "jetxl==0.3.0" \
+            "rustpy-xlsxwriter==0.5.2" \
+            "xlsxturbo==1.1.0"
+
+      - name: Benchmark matched openpyxl-compatible workflows
+        run: |
+          mkdir -p audit-results
+          python benchmarks/benchmark_openpyxl_vs_wolfxl.py \
+            --rounds 5 \
+            --large-rounds 3 \
+            --no-memory \
+            --case write_append_plain,read_values_plain,read_only_values_plain,modify_two_cells_plain,large_write_append_plain,large_read_values_plain,large_read_only_values_plain,large_modify_two_cells_plain \
+            --output-dir audit-results \
+            --prefix fresh-openpyxl
+
+      - name: Benchmark maintained Python ecosystem paths
+        run: |
+          python benchmarks/benchmark_python_excel_ecosystem.py \
+            --rounds 5 \
+            --round-budget 600 \
+            --no-memory \
+            --case write_plain_large,write_mixed,write_unique_strings,read_values_large \
+            --engines wolfxl,openpyxl,openpyxl_wo,xlsxwriter,xlsxwriter_cm,pyexcelerate,polars,python_calamine,fastexcel \
+            --output-dir audit-results \
+            --prefix fresh-ecosystem
+
+      - name: Benchmark omitted specialist writers in their natural APIs
+        run: |
+          cat > /tmp/benchmark_specialists.py <<'PY'
+          from __future__ import annotations
+
+          import argparse
+          import gc
+          import importlib.metadata
+          import json
+          import platform
+          import resource
+          import statistics
+          import subprocess
+          import sys
+          import tempfile
+          import zipfile
+          from pathlib import Path
+          from time import perf_counter
+          from typing import Any, Callable
+
+          ROWS = 200_000
+          COLS = 8
+          ROUNDS = 5
+          ENGINES = (
+              "wolfxl_grid",
+              "jetxl_arrow",
+              "jetxl_dict",
+              "rustpy_records",
+              "rustpy_dataframe",
+              "xlsxturbo_dataframe",
+          )
+
+          def row_values(i: int) -> list[Any]:
+              return [
+                  f"acct-{i % 997}",
+                  i,
+                  i * 1.25,
+                  i % 2 == 0,
+                  f"region-{i % 8}",
+                  i % 31,
+                  i / 7.0,
+                  i * 17,
+              ]
+
+          def column_data() -> dict[str, list[Any]]:
+              columns = {f"c{idx}": [] for idx in range(COLS)}
+              for i in range(1, ROWS + 1):
+                  for idx, value in enumerate(row_values(i)):
+                      columns[f"c{idx}"].append(value)
+              return columns
+
+          def time_operation(fn: Callable[[Path], None], directory: Path) -> tuple[list[float], Path]:
+              target = directory / "output.xlsx"
+
+              def once() -> None:
+                  target.unlink(missing_ok=True)
+                  fn(target)
+                  if not target.exists() or target.stat().st_size == 0:
+                      raise AssertionError("writer did not create a non-empty XLSX")
+
+              once()
+              samples: list[float] = []
+              for _ in range(ROUNDS):
+                  gc.collect()
+                  enabled = gc.isenabled()
+                  if enabled:
+                      gc.disable()
+                  started = perf_counter()
+                  try:
+                      once()
+                  finally:
+                      samples.append(perf_counter() - started)
+                      if enabled:
+                          gc.enable()
+              return samples, target
+
+          def validate(path: Path) -> dict[str, Any]:
+              import openpyxl
+
+              with zipfile.ZipFile(path) as archive:
+                  bad_member = archive.testzip()
+                  if bad_member is not None:
+                      raise AssertionError(f"corrupt ZIP member: {bad_member}")
+              wb = openpyxl.load_workbook(path, read_only=True, data_only=False)
+              ws = wb.active
+              dimensions = {
+                  "max_row": int(ws.max_row or 0),
+                  "max_column": int(ws.max_column or 0),
+              }
+              first = next(ws.iter_rows(min_row=1, max_row=1, values_only=True))
+              dimensions["first_row_preview"] = [repr(value) for value in first[:3]]
+              wb.close()
+              if dimensions["max_row"] < ROWS or dimensions["max_column"] < COLS:
+                  raise AssertionError(f"unexpected dimensions: {dimensions}")
+              return dimensions
+
+          def run_engine(engine: str) -> dict[str, Any]:
+              with tempfile.TemporaryDirectory(prefix=f"sota-{engine}-") as tmp:
+                  directory = Path(tmp)
+
+                  if engine == "wolfxl_grid":
+                      import wolfxl
+                      grid = [row_values(i) for i in range(1, ROWS + 1)]
+
+                      def writer(path: Path) -> None:
+                          wb = wolfxl.Workbook()
+                          ws = wb.active
+                          ws.write_rows(grid, copy=False, plain_values_only=True)
+                          wb.save(str(path))
+                          wb.close()
+
+                      input_shape = "prebuilt Python list-of-rows"
+
+                  elif engine == "jetxl_arrow":
+                      import jetxl
+                      import pyarrow as pa
+                      table = pa.table(column_data())
+
+                      def writer(path: Path) -> None:
+                          jetxl.write_sheet_arrow(
+                              table,
+                              str(path),
+                              write_header_row=False,
+                          )
+
+                      input_shape = "prebuilt Arrow table"
+
+                  elif engine == "jetxl_dict":
+                      import jetxl
+                      data = column_data()
+
+                      def writer(path: Path) -> None:
+                          jetxl.write_sheet(
+                              data,
+                              str(path),
+                              write_header_row=False,
+                          )
+
+                      input_shape = "prebuilt dict-of-columns"
+
+                  elif engine == "rustpy_records":
+                      from rustpy_xlsxwriter import FastExcel
+                      records = [
+                          {f"c{idx}": value for idx, value in enumerate(row_values(i))}
+                          for i in range(1, ROWS + 1)
+                      ]
+
+                      def writer(path: Path) -> None:
+                          FastExcel(str(path)).sheet("Sheet1", records).save()
+
+                      input_shape = "prebuilt list-of-record-dicts"
+
+                  elif engine == "rustpy_dataframe":
+                      import pandas as pd
+                      from rustpy_xlsxwriter import FastExcel
+                      frame = pd.DataFrame(column_data())
+
+                      def writer(path: Path) -> None:
+                          FastExcel(str(path)).sheet("Sheet1", frame).save()
+
+                      input_shape = "prebuilt pandas DataFrame"
+
+                  elif engine == "xlsxturbo_dataframe":
+                      import pandas as pd
+                      from xlsxturbo import df_to_xlsx
+                      frame = pd.DataFrame(column_data())
+
+                      def writer(path: Path) -> None:
+                          df_to_xlsx(frame, str(path))
+
+                      input_shape = "prebuilt pandas DataFrame"
+
+                  else:
+                      raise ValueError(engine)
+
+                  samples, target = time_operation(writer, directory)
+                  validation = validate(target)
+                  peak_rss = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss * 1024
+                  return {
+                      "engine": engine,
+                      "rows": ROWS,
+                      "cols": COLS,
+                      "units": ROWS * COLS,
+                      "rounds": ROUNDS,
+                      "input_shape": input_shape,
+                      "samples_seconds": samples,
+                      "median_seconds": statistics.median(samples),
+                      "min_seconds": min(samples),
+                      "max_seconds": max(samples),
+                      "peak_rss_bytes": int(peak_rss),
+                      "output_bytes": target.stat().st_size,
+                      "validation": validation,
+                  }
+
+          def package_versions() -> dict[str, str]:
+              versions: dict[str, str] = {}
+              for package in (
+                  "wolfxl",
+                  "openpyxl",
+                  "jetxl",
+                  "rustpy-xlsxwriter",
+                  "xlsxturbo",
+                  "pandas",
+                  "pyarrow",
+              ):
+                  try:
+                      versions[package] = importlib.metadata.version(package)
+                  except importlib.metadata.PackageNotFoundError:
+                      versions[package] = "not installed"
+              return versions
+
+          def cpu_brand() -> str:
+              path = Path("/proc/cpuinfo")
+              if path.exists():
+                  for line in path.read_text(encoding="utf-8").splitlines():
+                      if line.lower().startswith("model name"):
+                          return line.split(":", 1)[1].strip()
+              return platform.processor() or "unknown"
+
+          def parent(output_dir: Path) -> None:
+              results: list[dict[str, Any]] = []
+              for engine in ENGINES:
+                  print(f"[specialist] {engine}", flush=True)
+                  process = subprocess.run(
+                      [sys.executable, __file__, "--worker", engine],
+                      capture_output=True,
+                      text=True,
+                      timeout=900,
+                  )
+                  if process.returncode != 0:
+                      results.append(
+                          {
+                              "engine": engine,
+                              "error": process.stderr[-4000:] or process.stdout[-4000:],
+                          }
+                      )
+                      continue
+                  results.append(json.loads(process.stdout.strip().splitlines()[-1]))
+
+              successful = [r for r in results if "median_seconds" in r]
+              winner = min(successful, key=lambda r: r["median_seconds"]) if successful else None
+              wolfxl = next((r for r in successful if r["engine"] == "wolfxl_grid"), None)
+              for result in successful:
+                  if wolfxl is not None:
+                      result["speed_vs_wolfxl"] = (
+                          wolfxl["median_seconds"] / result["median_seconds"]
+                      )
+
+              payload = {
+                  "metadata": {
+                      "timestamp_utc": __import__("datetime").datetime.now(
+                          __import__("datetime").timezone.utc
+                      ).isoformat(),
+                      "python": platform.python_version(),
+                      "platform": platform.platform(),
+                      "machine": platform.machine(),
+                      "cpu_brand": cpu_brand(),
+                      "workload": "200,000 rows x 8 mixed primitive cells",
+                      "timing_boundary": "prebuilt natural input object to closed XLSX file",
+                      "comparability_note": (
+                          "Natural APIs use different input containers and may emit headers; "
+                          "this is a category-boundary test, not a semantic-equivalence ranking."
+                      ),
+                      "versions": package_versions(),
+                  },
+                  "winner": winner["engine"] if winner else None,
+                  "results": results,
+              }
+
+              output_dir.mkdir(parents=True, exist_ok=True)
+              (output_dir / "fresh-specialists.json").write_text(
+                  json.dumps(payload, indent=2) + "\n",
+                  encoding="utf-8",
+              )
+
+              lines = [
+                  "# Omitted specialist writer benchmark",
+                  "",
+                  f"- CPU: `{payload['metadata']['cpu_brand']}`",
+                  f"- Python: `{payload['metadata']['python']}`",
+                  f"- Workload: `{payload['metadata']['workload']}`",
+                  f"- Boundary: {payload['metadata']['timing_boundary']}",
+                  f"- Caveat: {payload['metadata']['comparability_note']}",
+                  "",
+                  "| Engine | Natural input | Median s | Min-Max s | Peak RSS MiB | Relative to WolfXL | Validation |",
+                  "|---|---|---:|---:|---:|---:|---|",
+              ]
+              for result in results:
+                  if "median_seconds" not in result:
+                      lines.append(
+                          f"| {result['engine']} | - | ERROR | - | - | - | {result['error'][:160]} |"
+                      )
+                      continue
+                  ratio = result.get("speed_vs_wolfxl")
+                  relative = "" if ratio is None else f"{ratio:.2f}x"
+                  validation = result["validation"]
+                  lines.append(
+                      "| {engine} | {shape} | {median:.6f} | {minimum:.6f}-{maximum:.6f} | "
+                      "{rss:.1f} | {relative} | {rows}x{cols} |".format(
+                          engine=result["engine"],
+                          shape=result["input_shape"],
+                          median=result["median_seconds"],
+                          minimum=result["min_seconds"],
+                          maximum=result["max_seconds"],
+                          rss=result["peak_rss_bytes"] / 1048576,
+                          relative=relative,
+                          rows=validation["max_row"],
+                          cols=validation["max_column"],
+                      )
+                  )
+              lines.append("")
+              (output_dir / "fresh-specialists.md").write_text(
+                  "\n".join(lines),
+                  encoding="utf-8",
+              )
+              print(json.dumps(payload, indent=2))
+
+          if __name__ == "__main__":
+              parser = argparse.ArgumentParser()
+              parser.add_argument("--worker")
+              parser.add_argument("--output-dir", type=Path, default=Path("audit-results"))
+              arguments = parser.parse_args()
+              if arguments.worker:
+                  try:
+                      print(json.dumps(run_engine(arguments.worker)))
+                  except Exception as exc:
+                      import traceback
+                      traceback.print_exc()
+                      raise SystemExit(1) from exc
+              else:
+                  parent(arguments.output_dir)
+          PY
+          python /tmp/benchmark_specialists.py --output-dir audit-results
+
+      - name: Publish benchmark summary
+        if: always()
+        run: |
+          {
+            echo "# WolfXL SOTA audit"
+            echo
+            for report in audit-results/*.md; do
+              echo
+              cat "$report"
+            done
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload raw benchmark results
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: sota-audit-results
+          path: audit-results
+          if-no-files-found: error
