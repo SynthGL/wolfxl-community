@@ -5,8 +5,8 @@ build-backend = "maturin"
 [project]
 name = "wolfxl"
 version = "2.0.1"
-description = "MIT-licensed, openpyxl-compatible Excel I/O with a Rust backend"
-readme = "README.md"
+description = "MIT-licensed Excel I/O for Python with openpyxl-shaped APIs and a Rust backend"
+readme = "PYPI.md"
 requires-python = ">=3.9"
 dependencies = ["defusedxml>=0.7.1,<1.0"]
 license = { text = "MIT" }
