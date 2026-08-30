@@ -33,7 +33,7 @@ def test_pypi_description_is_version_independent_and_uses_only_pypi_attribution(
     description = PYPI_DESCRIPTION.read_text(encoding="utf-8")
     urls = re.findall(r"\]\((https://wolfxl\.com[^)]+)\)", description)
 
-    assert "2.0.1" not in description
+    assert _project_field("version") not in description
     assert "free product, not a trial" in description
     assert "Community 2.0 line" in description
     assert "Commercial 2.1+" in description
