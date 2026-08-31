@@ -35,6 +35,11 @@ pub fn run(args: PeekArgs) -> Result<()> {
         } else {
             Some(args.max_rows)
         },
+        max_columns: if args.max_columns == 0 {
+            None
+        } else {
+            Some(args.max_columns)
+        },
         max_width: args.max_width.max(3),
         all_sheets: &sheet_names,
     };

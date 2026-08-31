@@ -10,7 +10,7 @@ mod render;
 ///
 /// `wolfxl peek <file>` prints a styled, token-efficient view of a workbook or
 /// delimited file: box / text / csv / json / markdown output, sheet
-/// selection, row and width caps.
+/// selection, row and column caps, and width caps.
 /// `wolfxl map <file>` prints a one-page summary of every sheet.
 /// `wolfxl agent <file> --max-tokens N` composes a token-budgeted briefing.
 /// `wolfxl schema <file>` emits per-column type, cardinality, and format.
@@ -95,6 +95,10 @@ struct PeekArgs {
     /// Maximum number of rows to display (0 = all).
     #[arg(short = 'n', long = "max-rows", default_value_t = 50)]
     max_rows: usize,
+
+    /// Maximum number of columns in JSON output (0 = all).
+    #[arg(long = "max-columns", default_value_t = 0)]
+    max_columns: usize,
 
     /// Maximum column width in characters.
     #[arg(short = 'w', long = "max-width", default_value_t = 30)]
