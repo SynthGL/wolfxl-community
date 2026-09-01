@@ -214,12 +214,10 @@ impl Worksheet {
         let ((r1, c1), (r2, c2)) =
             refs::parse_range(range).ok_or_else(|| format!("invalid A1 range: {range:?}"))?;
         self.merges.retain(|merge| {
-            !(
-                merge.top_row == r1
-                    && merge.left_col == c1
-                    && merge.bottom_row == r2
-                    && merge.right_col == c2
-            )
+            !(merge.top_row == r1
+                && merge.left_col == c1
+                && merge.bottom_row == r2
+                && merge.right_col == c2)
         });
         Ok(())
     }

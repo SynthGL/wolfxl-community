@@ -27,6 +27,7 @@ jobs:
         uses: PyO3/maturin-action@86b9d133d34bc1b40018696f782949dac11bd380
         with:
           maturin-version: v1.14.1
+          sccache: true
           target: ${{ matrix.target }}
           manylinux: "2_28"
           args: --release --locked --compatibility pypi --out dist --find-interpreter
@@ -73,6 +74,7 @@ jobs:
         uses: PyO3/maturin-action@86b9d133d34bc1b40018696f782949dac11bd380
         with:
           maturin-version: v1.14.1
+          sccache: true
           target: ${{ matrix.target }}
           args: --release --locked --compatibility pypi --out dist --find-interpreter
       - name: Smoke CPython 3.12 wheel
@@ -108,6 +110,7 @@ jobs:
         uses: PyO3/maturin-action@86b9d133d34bc1b40018696f782949dac11bd380
         with:
           maturin-version: v1.14.1
+          sccache: true
           target: x86_64-pc-windows-msvc
           args: --release --locked --compatibility pypi --out dist --find-interpreter
       - name: Smoke CPython 3.12 wheel

@@ -1,0 +1,94 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_INCREMENTAL: "0"
+  CARGO_PROFILE_RELEASE_LTO: "false"
+  CARGO_PROFILE_RELEASE_CODEGEN_UNITS: "8"
+  RUSTC_WRAPPER: sccache
+  SCCACHE_GHA_ENABLED: "true"
+
+jobs:
+  lint:
+    name: lint
+    runs-on: blacksmith-4vcpu-ubuntu-2404
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - uses: astral-sh/setup-uv@v8.2.0
+        with:
+          version: "0.12.3"
+      - name: Check Python sources
+        run: uvx --from ruff==0.16.5 ruff check python tests
+
+  test-python:
+    name: test-python
+    runs-on: blacksmith-8vcpu-ubuntu-2404
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - uses: astral-sh/setup-uv@v8.2.0
+        with:
+          version: "0.12.3"
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: mozilla-actions/sccache-action@v0.0.11
+      - name: Install test dependencies
+        run: >-
+          uv pip install --system maturin
+          "pytest>=7.4" "pytest-xdist>=3.3"
+          "openpyxl>=3.1" "Pillow>=10.0" "defusedxml>=0.7.1,<1.0"
+      - name: Build and install the extension
+        run: |
+          maturin build --release --locked --out dist
+          uv pip install --system --no-index --find-links dist wolfxl
+      - name: Run Python tests
+        # The Community mirror intentionally omits private audit scripts and
+        # evidence docs while retaining their source-level regression tests.
+        # Run the distributable product suite and skip those private-only
+        # test families until the public cut stops carrying them.
+        run: |
+          pytest tests -q -n auto --dist worksteal \
+            --ignore=tests/vendored_openpyxl \
+            --ignore-glob='tests/test_ooxml_*.py' \
+            --ignore-glob='tests/test_*audit*.py' \
+            --ignore-glob='tests/test_*benchmark*.py' \
+            --ignore-glob='tests/test_release_*.py' \
+            --ignore-glob='tests/test_*sota*.py' \
+            --ignore=tests/test_compatibility_matrix_render.py \
+            --ignore=tests/test_external_oracle_preservation.py \
+            --ignore=tests/test_import_release_artifact_proof_reports.py \
+            --ignore=tests/test_openpyxl_compat_oracle.py \
+            --ignore=tests/test_openpyxl_corpus_runner_summary.py \
+            --deselect=tests/test_calc_functions.py::TestWhitelist::test_public_formula_counts_match_whitelist
+
+  test-rust:
+    name: test-rust
+    runs-on: blacksmith-8vcpu-ubuntu-2404
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+      - uses: mozilla-actions/sccache-action@v0.0.11
+      - name: Verify Rust formatting
+        run: cargo fmt --all -- --check
+      - name: Run Rust workspace tests
+        run: cargo test --workspace --all-targets --locked
