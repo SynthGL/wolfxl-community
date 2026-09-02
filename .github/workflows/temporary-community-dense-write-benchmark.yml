@@ -1,0 +1,218 @@
+name: Temporary Community dense write benchmark
+
+on:
+  push:
+    branches: [perf/community-dense-write-parity]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  benchmark:
+    runs-on: blacksmith-8vcpu-ubuntu-2404
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - uses: astral-sh/setup-uv@v8.2.0
+        with:
+          version: "0.12.3"
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Build exact base and candidate production wheels
+        shell: bash
+        run: |
+          set -euo pipefail
+          uv pip install --system maturin
+          git worktree add --detach /tmp/wolfxl-community-before cc624eabd6f65301ccc5d9adb24a6cb6b0d271d5
+
+          (
+            cd /tmp/wolfxl-community-before
+            CARGO_TARGET_DIR=/tmp/target-before \
+            CARGO_PROFILE_RELEASE_LTO=fat \
+            CARGO_PROFILE_RELEASE_CODEGEN_UNITS=1 \
+              maturin build --release --locked --out /tmp/wheels-before
+          )
+          CARGO_TARGET_DIR=/tmp/target-after \
+          CARGO_PROFILE_RELEASE_LTO=fat \
+          CARGO_PROFILE_RELEASE_CODEGEN_UNITS=1 \
+            maturin build --release --locked --out /tmp/wheels-after
+
+          uv venv /tmp/venv-before
+          uv venv /tmp/venv-after
+          uv pip install --python /tmp/venv-before/bin/python /tmp/wheels-before/*.whl
+          uv pip install --python /tmp/venv-after/bin/python /tmp/wheels-after/*.whl
+
+          CARGO_TARGET_DIR=/tmp/target-after \
+          CARGO_PROFILE_RELEASE_LTO=fat \
+          CARGO_PROFILE_RELEASE_CODEGEN_UNITS=1 \
+            cargo build --release --locked -p wolfxl-writer --example dense_write_hotpaths
+          cp /tmp/target-after/release/examples/dense_write_hotpaths /tmp/dense-write-hotpaths
+
+      - name: Run 25-sample alternating public API matrix
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p benchmark-results
+
+          run_sample() {
+            local side="$1"
+            local lane="$2"
+            local rows="$3"
+            local cols="$4"
+            local iteration="$5"
+            WOLFXL_TEST_EPOCH=0 "/tmp/venv-${side}/bin/python" \
+              benchmarks/benchmark_dense_write_parity.py \
+              "$lane" "$rows" "$cols" \
+              "benchmark-results/${side}-${lane}-${iteration}.xlsx" \
+              >> "benchmark-results/${side}-${lane}.jsonl"
+          }
+
+          run_lane() {
+            local lane="$1"
+            local rows="$2"
+            local cols="$3"
+            : > "benchmark-results/before-${lane}.jsonl"
+            : > "benchmark-results/after-${lane}.jsonl"
+            for iteration in $(seq 1 25); do
+              if (( iteration % 2 == 1 )); then
+                order="before after"
+              else
+                order="after before"
+              fi
+              for side in $order; do
+                run_sample "$side" "$lane" "$rows" "$cols" "$iteration"
+              done
+              cmp "benchmark-results/before-${lane}-${iteration}.xlsx" \
+                  "benchmark-results/after-${lane}-${iteration}.xlsx"
+            done
+          }
+
+          run_lane append-numeric 20000 20
+          run_lane append-mixed 20000 20
+          run_lane write-rows-numeric 20000 20
+          run_lane write-rows-unique 20000 20
+
+      - name: Run allocation and RSS evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          /tmp/dense-write-hotpaths sparse 20000 20 25 \
+            > benchmark-results/direct-sparse.csv
+          /tmp/dense-write-hotpaths dense 20000 20 25 \
+            > benchmark-results/direct-dense.csv
+
+          for iteration in 1 2 3; do
+            if (( iteration % 2 == 1 )); then
+              order="before after"
+            else
+              order="after before"
+            fi
+            for side in $order; do
+              /usr/bin/time -v \
+                -o "benchmark-results/${side}-rss-${iteration}.txt" \
+                env WOLFXL_TEST_EPOCH=0 "/tmp/venv-${side}/bin/python" \
+                benchmarks/benchmark_dense_write_parity.py \
+                write-rows-unique 30000 20 \
+                "benchmark-results/${side}-rss-${iteration}.xlsx" \
+                > "benchmark-results/${side}-rss-${iteration}.json"
+            done
+            cmp "benchmark-results/before-rss-${iteration}.xlsx" \
+                "benchmark-results/after-rss-${iteration}.xlsx"
+          done
+
+          sha256sum benchmark-results/*.xlsx > benchmark-results/SHA256SUMS
+
+      - name: Print evidence report
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json
+          import math
+          import statistics
+          from pathlib import Path
+
+          root = Path("benchmark-results")
+          lanes = (
+              "append-numeric",
+              "append-mixed",
+              "write-rows-numeric",
+              "write-rows-unique",
+          )
+
+          def percentile(values, pct):
+              ordered = sorted(values)
+              return ordered[math.ceil(len(ordered) * pct) - 1]
+
+          def summarize(values):
+              return {
+                  "median": statistics.median(values),
+                  "min": min(values),
+                  "p95": percentile(values, 0.95),
+                  "cv": statistics.stdev(values) / statistics.mean(values),
+              }
+
+          print("Public Python API, exact base vs candidate (25 alternating isolated samples):")
+          print("| lane | phase | before median ms | after median ms | change | speedup | before/after p95 ms | CV before/after |")
+          print("|---|---|---:|---:|---:|---:|---:|---:|")
+          for lane in lanes:
+              before = [json.loads(line) for line in (root / f"before-{lane}.jsonl").read_text().splitlines()]
+              after = [json.loads(line) for line in (root / f"after-{lane}.jsonl").read_text().splitlines()]
+              assert len(before) == len(after) == 25
+              assert {x["output_bytes"] for x in before + after}.__len__() == 1
+              for field, label in (("save_ns", "save"), ("total_ns", "total")):
+                  b = summarize([x[field] for x in before])
+                  a = summarize([x[field] for x in after])
+                  change = (a["median"] / b["median"] - 1) * 100
+                  speedup = b["median"] / a["median"]
+                  print(
+                      f"| {lane} | {label} | {b['median']/1e6:.3f} | {a['median']/1e6:.3f} | "
+                      f"{change:+.1f}% | {speedup:.3f}x | {b['p95']/1e6:.3f}/{a['p95']/1e6:.3f} | "
+                      f"{b['cv']*100:.1f}%/{a['cv']*100:.1f}% |"
+                  )
+
+          def direct(path):
+              rows = []
+              for line in path.read_text().splitlines():
+                  fields = line.split(",")
+                  rows.append(tuple(map(int, fields[3:])))
+              return rows
+
+          sparse = direct(root / "direct-sparse.csv")
+          dense = direct(root / "direct-dense.csv")
+          assert len(sparse) == len(dense) == 25
+          assert {x[3:] for x in sparse + dense}.__len__() == 1
+          print("\nDirect Rust storage + sheetData emission (400k numeric cells):")
+          for index, label in ((0, "time ns"), (1, "allocation calls"), (2, "allocated bytes")):
+              b = statistics.median(x[index] for x in sparse)
+              a = statistics.median(x[index] for x in dense)
+              print(f"- {label}: {b:.0f} -> {a:.0f} ({(a/b-1)*100:+.1f}%, {b/a:.3f}x)")
+
+          rss = {}
+          for side in ("before", "after"):
+              values = []
+              for iteration in (1, 2, 3):
+                  text = (root / f"{side}-rss-{iteration}.txt").read_text()
+                  values.append(next(
+                      int(line.split(":", 1)[1].strip())
+                      for line in text.splitlines()
+                      if "Maximum resident set size" in line
+                  ))
+              rss[side] = values
+          b = statistics.median(rss["before"])
+          a = statistics.median(rss["after"])
+          print("\nPeak RSS, 600k unique-string cells (three isolated samples):")
+          print(f"- median: {b:.0f} -> {a:.0f} KiB ({(a/b-1)*100:+.1f}%)")
+          print(f"- before samples: {rss['before']}")
+          print(f"- after samples: {rss['after']}")
+          print("\nAll corresponding base/candidate XLSX archives are byte-identical.")
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: community-dense-write-before-after
+          path: benchmark-results
