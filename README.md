@@ -1,4 +1,4 @@
-# WolfXL Community
+# WolfXL
 
 Openpyxl-compatible Excel I/O for Python, backed by Rust.
 
