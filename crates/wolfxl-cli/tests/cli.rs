@@ -105,6 +105,29 @@ fn json_export_matches_golden_wide() {
 }
 
 #[test]
+fn json_export_bounds_rows_and_columns_without_hiding_sheet_dimensions() {
+    let path = fixture("wide-table.xlsx");
+    let out = run(&[
+        "peek",
+        path.to_str().unwrap(),
+        "-e",
+        "json",
+        "--max-rows",
+        "2",
+        "--max-columns",
+        "3",
+    ]);
+    let value: serde_json::Value = serde_json::from_str(&out).expect("json parses");
+
+    assert_eq!(value["rows"], 24, "rows remains the full-sheet count");
+    assert_eq!(value["columns"], 29, "columns remains the full-sheet count");
+    assert_eq!(value["headers"].as_array().unwrap().len(), 3);
+    let data = value["data"].as_array().unwrap();
+    assert_eq!(data.len(), 2);
+    assert!(data.iter().all(|row| row.as_array().unwrap().len() <= 3));
+}
+
+#[test]
 fn text_export_respects_number_formats_on_human_surface() {
     let path = fixture("formatted-values.xlsx");
     let out = run(&["peek", path.to_str().unwrap(), "-e", "text"]);

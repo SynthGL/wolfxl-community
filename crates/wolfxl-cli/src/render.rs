@@ -19,6 +19,7 @@ use wolfxl_core::{classify_format, format_cell, Cell, CellValue, FormatCategory,
 
 pub struct RenderOptions<'a> {
     pub max_rows: Option<usize>,
+    pub max_columns: Option<usize>,
     pub max_width: usize,
     pub all_sheets: &'a [String],
 }
@@ -76,10 +77,16 @@ pub fn markdown<W: Write>(w: &mut W, sheet: &Sheet, _opts: &RenderOptions) -> st
 ///   space after every comma. The shape is a contract — token-cost figures
 ///   in `spreadsheet-peek/benchmarks/measure_tokens.py` are computed against
 ///   it — so changes here move the published "tokens per row" numbers.
-pub fn json<W: Write>(w: &mut W, sheet: &Sheet, _opts: &RenderOptions) -> std::io::Result<()> {
+pub fn json<W: Write>(w: &mut W, sheet: &Sheet, opts: &RenderOptions) -> std::io::Result<()> {
     let (total_rows, cols) = sheet.dimensions();
     let data_rows = total_rows.saturating_sub(1);
-    let headers: Vec<String> = sheet.headers();
+    let returned_rows = opts.max_rows.unwrap_or(data_rows).min(data_rows);
+    let returned_columns = opts.max_columns.unwrap_or(cols).min(cols);
+    let headers: Vec<String> = sheet
+        .headers()
+        .into_iter()
+        .take(returned_columns)
+        .collect();
     let sheet_name_json = serde_json::to_string(&sheet.name).expect("string is JSON-safe");
 
     writeln!(w, "{{")?;
@@ -99,14 +106,19 @@ pub fn json<W: Write>(w: &mut W, sheet: &Sheet, _opts: &RenderOptions) -> std::i
         writeln!(w, "  ],")?;
     }
 
-    let body: Vec<&Vec<Cell>> = sheet.rows().iter().skip(1).collect();
+    let body: Vec<&Vec<Cell>> = sheet
+        .rows()
+        .iter()
+        .skip(1)
+        .take(returned_rows)
+        .collect();
     if body.is_empty() {
         writeln!(w, "  \"data\": []")?;
     } else {
         writeln!(w, "  \"data\": [")?;
         let n = body.len();
         for (i, row) in body.iter().enumerate() {
-            let inline = format_row_inline(row);
+            let inline = format_row_inline(&row[..row.len().min(returned_columns)]);
             let comma = if i + 1 == n { "" } else { "," };
             writeln!(w, "    {inline}{comma}")?;
         }
@@ -497,6 +509,7 @@ mod tests {
             &sheet,
             &RenderOptions {
                 max_rows: Some(5),
+                max_columns: None,
                 max_width: 20,
                 all_sheets: &[],
             },
