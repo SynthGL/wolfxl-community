@@ -107,8 +107,8 @@ pub(crate) fn write_value_grid(
         checked_grid_last_col(base_col, cols.len())?;
         let mut cells = Vec::with_capacity(cols.len());
         for (ci, val) in cols.iter().enumerate() {
-            let value = raw_python_to_write_cell_value(val, date1904)?
-                .unwrap_or(WriteCellValue::Blank);
+            let value =
+                raw_python_to_write_cell_value(val, date1904)?.unwrap_or(WriteCellValue::Blank);
             cells.push(WriteCell {
                 value,
                 style_id: None,
@@ -149,8 +149,8 @@ pub(crate) fn write_value_style_id_grid(
                 Some(style) if !style.is_none() => Some(style.extract::<u32>()?),
                 _ => None,
             };
-            let value = raw_python_to_write_cell_value(val, date1904)?
-                .unwrap_or(WriteCellValue::Blank);
+            let value =
+                raw_python_to_write_cell_value(val, date1904)?.unwrap_or(WriteCellValue::Blank);
             cells.push(WriteCell { value, style_id });
         }
         staged.push((row, base_col, cells));
@@ -180,8 +180,8 @@ fn checked_grid_last_col(base_col: u32, width: usize) -> PyResult<()> {
     if width == 0 {
         return Ok(());
     }
-    let width = u32::try_from(width)
-        .map_err(|_| PyValueError::new_err("value grid width is too large"))?;
+    let width =
+        u32::try_from(width).map_err(|_| PyValueError::new_err("value grid width is too large"))?;
     let last_col = base_col
         .checked_add(width - 1)
         .ok_or_else(|| PyValueError::new_err("value grid column overflow"))?;
@@ -194,22 +194,19 @@ fn checked_grid_last_col(base_col: u32, width: usize) -> PyResult<()> {
     Ok(())
 }
 
-fn commit_staged_grid(
-    ws: &mut Worksheet,
-    staged: Vec<(u32, u32, Vec<WriteCell>)>,
-) -> PyResult<()> {
+fn commit_staged_grid(ws: &mut Worksheet, staged: Vec<(u32, u32, Vec<WriteCell>)>) -> PyResult<()> {
     let first_emittable = staged.iter().find(|(_, _, cells)| {
-        cells.iter().any(|cell| {
-            !matches!(cell.value, WriteCellValue::Blank) || cell.style_id.is_some()
-        })
+        cells
+            .iter()
+            .any(|cell| !matches!(cell.value, WriteCellValue::Blank) || cell.style_id.is_some())
     });
-    let use_dense = first_emittable
-        .is_some_and(|(row, first_col, _)| ws.can_append_dense_at(*row, *first_col));
+    let use_dense =
+        first_emittable.is_some_and(|(row, first_col, _)| ws.can_append_dense_at(*row, *first_col));
 
     for (row, first_col, cells) in staged {
-        let has_emittable = cells.iter().any(|cell| {
-            !matches!(cell.value, WriteCellValue::Blank) || cell.style_id.is_some()
-        });
+        let has_emittable = cells
+            .iter()
+            .any(|cell| !matches!(cell.value, WriteCellValue::Blank) || cell.style_id.is_some());
         if !has_emittable {
             continue;
         }

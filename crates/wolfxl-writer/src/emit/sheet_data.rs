@@ -27,9 +27,7 @@ pub fn emit(out: &mut String, sheet: &Worksheet, sst: &mut SstBuilder) {
 
     out.push_str("<sheetData>");
     sheet
-        .visit_logical_rows(|row_num, row, dense| {
-            emit_merged_row_to(out, row_num, row, dense, sst)
-        })
+        .visit_logical_rows(|row_num, row, dense| emit_merged_row_to(out, row_num, row, dense, sst))
         .expect("formatting into a String is infallible");
     out.push_str("</sheetData>");
 }
@@ -74,9 +72,8 @@ fn emit_merged_row_to<W: fmt::Write>(
         .expect("row cell scan is infallible");
         (has_cells, has_real_cells)
     };
-    let has_attrs = row.is_some_and(|row| {
-        row.custom_height.is_some() || row.hidden || row.style_id.is_some()
-    });
+    let has_attrs =
+        row.is_some_and(|row| row.custom_height.is_some() || row.hidden || row.style_id.is_some());
 
     if !has_cells && !has_attrs {
         return Ok(());
@@ -555,6 +552,9 @@ mod tests {
         emit(&mut dense_xml, &dense, &mut dense_sst);
 
         assert_eq!(dense_xml, sparse_xml);
-        assert_eq!(dense_sst.iter().collect::<Vec<_>>(), sparse_sst.iter().collect::<Vec<_>>());
+        assert_eq!(
+            dense_sst.iter().collect::<Vec<_>>(),
+            sparse_sst.iter().collect::<Vec<_>>()
+        );
     }
 }

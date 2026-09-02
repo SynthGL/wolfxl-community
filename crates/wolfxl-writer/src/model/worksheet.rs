@@ -240,9 +240,7 @@ impl Worksheet {
         }
         let emittable_cells = cells
             .iter()
-            .filter(|cell| {
-                !matches!(cell.value, WriteCellValue::Blank) || cell.style_id.is_some()
-            })
+            .filter(|cell| !matches!(cell.value, WriteCellValue::Blank) || cell.style_id.is_some())
             .count() as u32;
         self.dense_rows.push(DenseRow {
             row,
@@ -255,10 +253,7 @@ impl Worksheet {
 
     pub fn dense_tail(&self) -> Option<(u32, u32)> {
         let dense = self.dense_rows.last()?;
-        Some((
-            dense.row,
-            dense.first_col + dense.cells.len() as u32 - 1,
-        ))
+        Some((dense.row, dense.first_col + dense.cells.len() as u32 - 1))
     }
 
     pub fn dense_cell(&self, row: u32, col: u32) -> Option<&WriteCell> {
@@ -750,18 +745,10 @@ mod tests {
     #[test]
     fn dense_rows_require_monotonic_valid_coordinates() {
         let mut s = Worksheet::new("S");
-        s.append_dense_row(
-            1,
-            1,
-            vec![WriteCell::new(WriteCellValue::Number(1.0))],
-        )
-        .unwrap();
+        s.append_dense_row(1, 1, vec![WriteCell::new(WriteCellValue::Number(1.0))])
+            .unwrap();
         assert!(s
-            .append_dense_row(
-                1,
-                1,
-                vec![WriteCell::new(WriteCellValue::Number(2.0))]
-            )
+            .append_dense_row(1, 1, vec![WriteCell::new(WriteCellValue::Number(2.0))])
             .is_err());
         assert!(s
             .append_dense_row(
