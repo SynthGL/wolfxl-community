@@ -34,9 +34,7 @@ pub(crate) fn install_autofilter(ws: &mut Worksheet, d: &Bound<'_, PyDict>) -> P
     }
     let data_top = top_row + 1;
     for r in data_top..=bot_row {
-        if let Some(row) = ws.rows.get_mut(&r) {
-            row.hidden = false;
-        }
+        ws.rows.entry(r).or_default().hidden = false;
     }
 
     let grid = autofilter_grid(ws, data_top, bot_row, left_col, right_col);
@@ -63,14 +61,12 @@ fn autofilter_grid(
     let mut grid: Vec<Vec<AfCell>> = Vec::with_capacity((bot_row - data_top + 1) as usize);
     for r in data_top..=bot_row {
         let mut row_cells: Vec<AfCell> = vec![AfCell::Empty; n_cols];
-        if let Some(row) = ws.rows.get(&r) {
-            for (col_1based, wc) in row.cells.iter() {
-                if *col_1based < left_col || *col_1based > right_col {
-                    continue;
-                }
-                let idx = (*col_1based - left_col) as usize;
-                row_cells[idx] = write_cell_to_autofilter_cell(&wc.value);
-            }
+        for col_1based in left_col..=right_col {
+            let Some(wc) = ws.cell(r, col_1based) else {
+                continue;
+            };
+            let idx = (col_1based - left_col) as usize;
+            row_cells[idx] = write_cell_to_autofilter_cell(&wc.value);
         }
         grid.push(row_cells);
     }

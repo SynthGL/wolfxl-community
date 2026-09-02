@@ -24,16 +24,16 @@ pub const REL_CALC_CHAIN: &str =
 /// short-circuit used by the caller to decide whether to emit the
 /// part + register the Override + add the workbook rel.
 pub fn has_any_formula(wb: &Workbook) -> bool {
-    for sheet in &wb.sheets {
-        for row in sheet.rows.values() {
-            for cell in row.cells.values() {
-                if matches!(cell.value, WriteCellValue::Formula { .. }) {
-                    return true;
-                }
-            }
-        }
-    }
-    false
+    wb.sheets.iter().any(|sheet| {
+        let mut found = false;
+        sheet
+            .visit_cells_row_major::<()>(|_, _, cell| {
+                found |= matches!(cell.value, WriteCellValue::Formula { .. });
+                Ok(())
+            })
+            .expect("formula scan is infallible");
+        found
+    })
 }
 
 /// Emit `xl/calcChain.xml` bytes. Returns `None` when there are no
@@ -46,17 +46,16 @@ pub fn emit(wb: &Workbook) -> Option<Vec<u8>> {
     out.push_str("<calcChain xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\">");
     for (sheet_idx, sheet) in wb.sheets.iter().enumerate() {
         let i = (sheet_idx as u32) + 1;
-        // BTreeMap iteration is row-then-column ascending — matches
-        // the natural calcChain order.
-        for (&row, row_data) in sheet.rows.iter() {
-            for (&col, cell) in row_data.cells.iter() {
+        sheet
+            .visit_cells_row_major::<()>(|row, col, cell| {
                 if let WriteCellValue::Formula { .. } = cell.value {
                     let cell_ref = crate::refs::format_a1(row, col);
                     out.push_str(&format!("<c r=\"{}\" i=\"{}\"/>", cell_ref, i));
                     wrote_any = true;
                 }
-            }
-        }
+                Ok(())
+            })
+            .expect("calc-chain scan is infallible");
     }
     out.push_str("</calcChain>");
     if !wrote_any {
@@ -68,7 +67,7 @@ pub fn emit(wb: &Workbook) -> Option<Vec<u8>> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::model::cell::{FormulaResult, WriteCellValue};
+    use crate::model::cell::{FormulaResult, WriteCell, WriteCellValue};
     use crate::model::worksheet::Worksheet;
 
     #[test]
@@ -175,5 +174,37 @@ mod tests {
             i_a2 < i_c2 && i_c2 < i_e5,
             "got order: A2={i_a2}, C2={i_c2}, E5={i_e5}, full: {s}"
         );
+    }
+
+    #[test]
+    fn dense_formulas_are_included_and_sparse_overlays_win() {
+        let mut wb = Workbook::new();
+        let mut sheet = Worksheet::new("S");
+        sheet
+            .append_dense_row(
+                4,
+                2,
+                vec![WriteCell::new(WriteCellValue::Formula {
+                    expr: "1+1".into(),
+                    result: None,
+                })],
+            )
+            .unwrap();
+        sheet.set_cell(4, 2, WriteCell::new(WriteCellValue::Number(2.0)));
+        sheet
+            .append_dense_row(
+                5,
+                2,
+                vec![WriteCell::new(WriteCellValue::Formula {
+                    expr: "2+2".into(),
+                    result: None,
+                })],
+            )
+            .unwrap();
+        wb.add_sheet(sheet);
+
+        let xml = String::from_utf8(emit(&wb).unwrap()).unwrap();
+        assert!(!xml.contains("B4"), "{xml}");
+        assert!(xml.contains("<c r=\"B5\" i=\"1\"/>"), "{xml}");
     }
 }
