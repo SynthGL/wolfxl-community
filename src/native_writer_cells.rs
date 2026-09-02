@@ -6,7 +6,7 @@ use pyo3::types::{PyBool, PyDict, PyFloat, PyInt, PyList, PyString};
 use wolfxl_writer::model::date::{
     date_to_excel_serial_with_epoch, datetime_to_excel_serial_with_epoch,
 };
-use wolfxl_writer::model::{FormatSpec, Worksheet, WriteCellValue};
+use wolfxl_writer::model::{FormatSpec, Worksheet, WriteCell, WriteCellValue};
 use wolfxl_writer::refs;
 use wolfxl_writer::Workbook;
 
@@ -99,24 +99,26 @@ pub(crate) fn write_value_grid(
 ) -> PyResult<()> {
     let (base_row, base_col) = parse_a1_to_row_col(start_a1)?;
     let date1904 = wb.date1904;
-    let ws = require_sheet(wb, sheet)?;
     let rows: Vec<Bound<'_, PyAny>> = values.extract()?;
-
+    let mut staged = Vec::with_capacity(rows.len());
     for (ri, row_obj) in rows.iter().enumerate() {
         let cols: Vec<Bound<'_, PyAny>> = row_obj.extract()?;
+        let row = checked_grid_row(base_row, ri)?;
+        checked_grid_last_col(base_col, cols.len())?;
+        let mut cells = Vec::with_capacity(cols.len());
         for (ci, val) in cols.iter().enumerate() {
-            if val.is_none() {
-                continue;
-            }
-            let row = base_row + ri as u32;
-            let col = base_col + ci as u32;
-            if let Some(value) = raw_python_to_write_cell_value(val, date1904)? {
-                ws.write_cell(row, col, value, None);
-            }
-            // else: skip silently like the oracle does.
+            let value = raw_python_to_write_cell_value(val, date1904)?
+                .unwrap_or(WriteCellValue::Blank);
+            cells.push(WriteCell {
+                value,
+                style_id: None,
+            });
         }
+        staged.push((row, base_col, cells));
     }
 
+    let ws = require_sheet(wb, sheet)?;
+    commit_staged_grid(ws, staged)?;
     Ok(())
 }
 
@@ -132,29 +134,97 @@ pub(crate) fn write_value_style_id_grid(
     let date1904 = wb.date1904;
     let value_rows: Vec<Bound<'_, PyAny>> = values.extract()?;
     let style_rows: Vec<Bound<'_, PyAny>> = style_ids.extract()?;
-    let ws = require_sheet(wb, sheet)?;
-
+    let mut staged = Vec::with_capacity(value_rows.len());
     for (ri, row_obj) in value_rows.iter().enumerate() {
         let value_cols: Vec<Bound<'_, PyAny>> = row_obj.extract()?;
+        let row = checked_grid_row(base_row, ri)?;
+        checked_grid_last_col(base_col, value_cols.len())?;
         let style_cols: Option<Vec<Bound<'_, PyAny>>> = style_rows
             .get(ri)
             .map(|style_row| style_row.extract())
             .transpose()?;
+        let mut cells = Vec::with_capacity(value_cols.len());
         for (ci, val) in value_cols.iter().enumerate() {
             let style_id = match style_cols.as_ref().and_then(|cols| cols.get(ci)) {
                 Some(style) if !style.is_none() => Some(style.extract::<u32>()?),
                 _ => None,
             };
-            let row = base_row + ri as u32;
-            let col = base_col + ci as u32;
-            if let Some(value) = raw_python_to_write_cell_value(val, date1904)? {
-                ws.write_cell(row, col, value, style_id);
-            } else if style_id.is_some() {
-                ws.write_cell(row, col, WriteCellValue::Blank, style_id);
+            let value = raw_python_to_write_cell_value(val, date1904)?
+                .unwrap_or(WriteCellValue::Blank);
+            cells.push(WriteCell { value, style_id });
+        }
+        staged.push((row, base_col, cells));
+    }
+
+    let ws = require_sheet(wb, sheet)?;
+    commit_staged_grid(ws, staged)?;
+    Ok(())
+}
+
+fn checked_grid_row(base_row: u32, offset: usize) -> PyResult<u32> {
+    let offset = u32::try_from(offset)
+        .map_err(|_| PyValueError::new_err("value grid row offset is too large"))?;
+    let row = base_row
+        .checked_add(offset)
+        .ok_or_else(|| PyValueError::new_err("value grid row overflow"))?;
+    if row > refs::MAX_ROW {
+        return Err(PyValueError::new_err(format!(
+            "value grid row {row} exceeds worksheet limit {}",
+            refs::MAX_ROW
+        )));
+    }
+    Ok(row)
+}
+
+fn checked_grid_last_col(base_col: u32, width: usize) -> PyResult<()> {
+    if width == 0 {
+        return Ok(());
+    }
+    let width = u32::try_from(width)
+        .map_err(|_| PyValueError::new_err("value grid width is too large"))?;
+    let last_col = base_col
+        .checked_add(width - 1)
+        .ok_or_else(|| PyValueError::new_err("value grid column overflow"))?;
+    if last_col > refs::MAX_COL {
+        return Err(PyValueError::new_err(format!(
+            "value grid column {last_col} exceeds worksheet limit {}",
+            refs::MAX_COL
+        )));
+    }
+    Ok(())
+}
+
+fn commit_staged_grid(
+    ws: &mut Worksheet,
+    staged: Vec<(u32, u32, Vec<WriteCell>)>,
+) -> PyResult<()> {
+    let first_emittable = staged.iter().find(|(_, _, cells)| {
+        cells.iter().any(|cell| {
+            !matches!(cell.value, WriteCellValue::Blank) || cell.style_id.is_some()
+        })
+    });
+    let use_dense = first_emittable
+        .is_some_and(|(row, first_col, _)| ws.can_append_dense_at(*row, *first_col));
+
+    for (row, first_col, cells) in staged {
+        let has_emittable = cells.iter().any(|cell| {
+            !matches!(cell.value, WriteCellValue::Blank) || cell.style_id.is_some()
+        });
+        if !has_emittable {
+            continue;
+        }
+        if use_dense {
+            ws.append_dense_row(row, first_col, cells)
+                .map_err(PyValueError::new_err)?;
+        } else {
+            for (offset, cell) in cells.into_iter().enumerate() {
+                if matches!(cell.value, WriteCellValue::Blank) && cell.style_id.is_none() {
+                    continue;
+                }
+                ws.set_cell(row, first_col + offset as u32, cell);
             }
         }
     }
-
     Ok(())
 }
 

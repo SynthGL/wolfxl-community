@@ -30,19 +30,18 @@ pub fn emit(out: &mut String, sheet: &Worksheet) {
     let mut min_col = u32::MAX;
     let mut max_col = 0u32;
 
-    for (&row_num, row) in &sheet.rows {
-        for (&col_num, cell) in &row.cells {
+    sheet
+        .visit_cells_row_major::<()>(|row_num, col_num, cell| {
             if matches!(cell.value, WriteCellValue::Blank) && cell.style_id.is_none() {
-                continue;
+                return Ok(());
             }
             min_row = min_row.min(row_num);
             max_row = max_row.max(row_num);
             min_col = min_col.min(col_num);
             max_col = max_col.max(col_num);
-        }
-        // Rows with only custom attrs do not expand the dimension; OOXML
-        // dimension represents the range of materialized cell data.
-    }
+            Ok(())
+        })
+        .expect("dimension scan is infallible");
 
     if max_row == 0 {
         out.push_str("<dimension ref=\"A1\"/>");
@@ -55,7 +54,7 @@ pub fn emit(out: &mut String, sheet: &Worksheet) {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::model::cell::WriteCellValue;
+    use crate::model::cell::{WriteCell, WriteCellValue};
 
     #[test]
     fn empty_sheet_defaults_to_a1() {
@@ -99,5 +98,25 @@ mod tests {
         emit(&mut out, &sheet);
 
         assert_eq!(out, "<dimension ref=\"E10\"/>");
+    }
+
+    #[test]
+    fn dense_rows_use_the_same_nonblank_dimension_rules() {
+        let mut sheet = Worksheet::new("S");
+        sheet
+            .append_dense_row(
+                5,
+                2,
+                vec![
+                    WriteCell::new(WriteCellValue::Blank),
+                    WriteCell::new(WriteCellValue::Number(2.0)),
+                ],
+            )
+            .unwrap();
+        let mut out = String::new();
+
+        emit(&mut out, &sheet);
+
+        assert_eq!(out, "<dimension ref=\"C5\"/>");
     }
 }

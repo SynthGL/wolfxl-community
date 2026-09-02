@@ -12,6 +12,19 @@ use super::threaded_comment::ThreadedComment;
 use super::validation::DataValidation;
 use crate::refs;
 
+/// One compact contiguous run of cells queued in row-major order.
+///
+/// Dense rows avoid one tree node per eager cell. Later entries in
+/// [`Worksheet::rows`] remain the sparse edit overlay and take precedence at
+/// emission time.
+#[derive(Debug, Clone)]
+pub(crate) struct DenseRow {
+    pub(crate) row: u32,
+    pub(crate) first_col: u32,
+    pub(crate) cells: Vec<WriteCell>,
+    pub(crate) emittable_cells: u32,
+}
+
 /// A single worksheet within a workbook.
 ///
 /// `BTreeMap` row/cell keys are deliberate: OOXML requires rows inside
@@ -37,6 +50,9 @@ pub struct Worksheet {
 
     /// Sparse row storage, keyed by 1-based row index.
     pub rows: BTreeMap<u32, Row>,
+
+    /// Compact monotonic eager rows with sparse last-write-wins overlays.
+    pub(crate) dense_rows: Vec<DenseRow>,
 
     /// Ranges of cells merged into one visual cell.
     pub merges: Vec<Merge>,
@@ -148,6 +164,7 @@ impl Worksheet {
         Self {
             name: name.into(),
             rows: BTreeMap::new(),
+            dense_rows: Vec::new(),
             merges: Vec::new(),
             freeze: None,
             split: None,
@@ -179,6 +196,154 @@ impl Worksheet {
     /// Set a cell by 1-based row/column. Any row in between is left untouched.
     pub fn set_cell(&mut self, row: u32, col: u32, cell: WriteCell) {
         self.rows.entry(row).or_default().cells.insert(col, cell);
+    }
+
+    /// Materialize one sparse overlay cell while preserving a dense value.
+    pub fn cell_for_overlay(&mut self, row: u32, col: u32) -> &mut WriteCell {
+        let dense = self.dense_cell(row, col).cloned();
+        self.rows
+            .entry(row)
+            .or_default()
+            .cells
+            .entry(col)
+            .or_insert_with(|| {
+                dense.unwrap_or_else(|| WriteCell {
+                    value: WriteCellValue::Blank,
+                    style_id: None,
+                })
+            })
+    }
+
+    /// Append one contiguous row segment after every committed coordinate.
+    pub fn append_dense_row(
+        &mut self,
+        row: u32,
+        first_col: u32,
+        cells: Vec<WriteCell>,
+    ) -> Result<(), String> {
+        if cells.is_empty() {
+            return Err("dense writer row must not be empty".to_string());
+        }
+        let last_col = first_col
+            .checked_add(cells.len() as u32 - 1)
+            .ok_or_else(|| "dense writer row column overflow".to_string())?;
+        if row == 0 || row > refs::MAX_ROW || first_col == 0 || last_col > refs::MAX_COL {
+            return Err(format!(
+                "dense writer row ({row}, {first_col}..={last_col}) is outside worksheet bounds"
+            ));
+        }
+        if self
+            .dense_tail()
+            .is_some_and(|tail| (row, first_col) <= tail)
+        {
+            return Err("dense writer rows must be appended in coordinate order".to_string());
+        }
+        let emittable_cells = cells
+            .iter()
+            .filter(|cell| {
+                !matches!(cell.value, WriteCellValue::Blank) || cell.style_id.is_some()
+            })
+            .count() as u32;
+        self.dense_rows.push(DenseRow {
+            row,
+            first_col,
+            cells,
+            emittable_cells,
+        });
+        Ok(())
+    }
+
+    pub fn dense_tail(&self) -> Option<(u32, u32)> {
+        let dense = self.dense_rows.last()?;
+        Some((
+            dense.row,
+            dense.first_col + dense.cells.len() as u32 - 1,
+        ))
+    }
+
+    pub fn dense_cell(&self, row: u32, col: u32) -> Option<&WriteCell> {
+        let index = self
+            .dense_rows
+            .binary_search_by(|dense| {
+                let end_col = dense.first_col + dense.cells.len() as u32 - 1;
+                if dense.row < row || (dense.row == row && end_col < col) {
+                    std::cmp::Ordering::Less
+                } else if dense.row > row || dense.first_col > col {
+                    std::cmp::Ordering::Greater
+                } else {
+                    std::cmp::Ordering::Equal
+                }
+            })
+            .ok()?;
+        let dense = &self.dense_rows[index];
+        dense.cells.get((col - dense.first_col) as usize)
+    }
+
+    /// Read the logical cell after applying the sparse last-write-wins overlay.
+    pub fn cell(&self, row: u32, col: u32) -> Option<&WriteCell> {
+        self.rows
+            .get(&row)
+            .and_then(|row| row.cells.get(&col))
+            .or_else(|| self.dense_cell(row, col))
+    }
+
+    pub fn can_append_dense_at(&self, row: u32, col: u32) -> bool {
+        let sparse_tail = self
+            .rows
+            .iter()
+            .rev()
+            .find_map(|(&row, data)| data.cells.keys().next_back().map(|&col| (row, col)));
+        self.dense_tail()
+            .into_iter()
+            .chain(sparse_tail)
+            .max()
+            .is_none_or(|tail| (row, col) > tail)
+    }
+
+    pub fn has_dense_rows(&self) -> bool {
+        !self.dense_rows.is_empty()
+    }
+
+    pub(crate) fn visit_cells_row_major<E>(
+        &self,
+        mut visit: impl FnMut(u32, u32, &WriteCell) -> Result<(), E>,
+    ) -> Result<(), E> {
+        self.visit_logical_rows(|row, sparse, dense| {
+            visit_merged_row_cells(sparse, dense, |col, cell| visit(row, col, cell))
+        })
+    }
+
+    pub(crate) fn visit_logical_rows<E>(
+        &self,
+        mut visit: impl FnMut(u32, Option<&Row>, &[DenseRow]) -> Result<(), E>,
+    ) -> Result<(), E> {
+        let mut dense_index = 0;
+        let mut sparse = self.rows.iter().peekable();
+        while dense_index < self.dense_rows.len() || sparse.peek().is_some() {
+            let dense_row = self.dense_rows.get(dense_index).map(|dense| dense.row);
+            let sparse_row = sparse.peek().map(|(row, _)| **row);
+            let row = match (dense_row, sparse_row) {
+                (Some(dense), Some(sparse)) => dense.min(sparse),
+                (Some(dense), None) => dense,
+                (None, Some(sparse)) => sparse,
+                (None, None) => unreachable!(),
+            };
+            let dense_start = dense_index;
+            while self
+                .dense_rows
+                .get(dense_index)
+                .is_some_and(|dense| dense.row == row)
+            {
+                dense_index += 1;
+            }
+            let sparse_row = if sparse.peek().is_some_and(|(key, _)| **key == row) {
+                sparse.next().map(|(_, value)| value)
+            } else {
+                None
+            };
+            visit(row, sparse_row, &self.dense_rows[dense_start..dense_index])?;
+        }
+        Ok(())
     }
 
     pub fn set_row_height(&mut self, row: u32, height: f64) {
@@ -316,6 +481,46 @@ pub struct Row {
 
     /// Sparse cell storage, keyed by 1-based column index.
     pub cells: BTreeMap<u32, WriteCell>,
+}
+
+pub(crate) fn visit_merged_row_cells<E>(
+    sparse: Option<&Row>,
+    dense_rows: &[DenseRow],
+    mut visit: impl FnMut(u32, &WriteCell) -> Result<(), E>,
+) -> Result<(), E> {
+    let mut sparse_cells = sparse
+        .into_iter()
+        .flat_map(|row| row.cells.iter())
+        .peekable();
+    for dense in dense_rows {
+        for (offset, dense_cell) in dense.cells.iter().enumerate() {
+            let col = dense.first_col + offset as u32;
+            while sparse_cells
+                .peek()
+                .is_some_and(|(sparse_col, _)| **sparse_col < col)
+            {
+                let (&sparse_col, sparse_cell) = sparse_cells
+                    .next()
+                    .expect("peeked sparse cell remains present");
+                visit(sparse_col, sparse_cell)?;
+            }
+            if sparse_cells
+                .peek()
+                .is_some_and(|(sparse_col, _)| **sparse_col == col)
+            {
+                let (&sparse_col, sparse_cell) = sparse_cells
+                    .next()
+                    .expect("peeked sparse cell remains present");
+                visit(sparse_col, sparse_cell)?;
+            } else {
+                visit(col, dense_cell)?;
+            }
+        }
+    }
+    for (&col, cell) in sparse_cells {
+        visit(col, cell)?;
+    }
+    Ok(())
 }
 
 /// One column's metadata. Excel stores column widths per-range, but the
@@ -515,6 +720,56 @@ mod tests {
             WriteCellValue::String("hi".to_string())
         );
         assert_eq!(s.rows[&1].cells[&1].style_id, Some(7));
+    }
+
+    #[test]
+    fn dense_cells_are_visible_and_sparse_cells_override_them() {
+        let mut s = Worksheet::new("S");
+        s.append_dense_row(
+            2,
+            3,
+            vec![
+                WriteCell::new(WriteCellValue::Number(1.0)),
+                WriteCell::new(WriteCellValue::String("dense".into())),
+            ],
+        )
+        .unwrap();
+
+        assert_eq!(s.cell(2, 3).unwrap().value, WriteCellValue::Number(1.0));
+        s.set_cell(
+            2,
+            4,
+            WriteCell::new(WriteCellValue::String("overlay".into())),
+        );
+        assert_eq!(
+            s.cell(2, 4).unwrap().value,
+            WriteCellValue::String("overlay".into())
+        );
+    }
+
+    #[test]
+    fn dense_rows_require_monotonic_valid_coordinates() {
+        let mut s = Worksheet::new("S");
+        s.append_dense_row(
+            1,
+            1,
+            vec![WriteCell::new(WriteCellValue::Number(1.0))],
+        )
+        .unwrap();
+        assert!(s
+            .append_dense_row(
+                1,
+                1,
+                vec![WriteCell::new(WriteCellValue::Number(2.0))]
+            )
+            .is_err());
+        assert!(s
+            .append_dense_row(
+                refs::MAX_ROW + 1,
+                1,
+                vec![WriteCell::new(WriteCellValue::Number(2.0))]
+            )
+            .is_err());
     }
 
     #[test]

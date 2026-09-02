@@ -15,23 +15,22 @@ use core::fmt;
 
 use crate::intern::SstBuilder;
 use crate::model::cell::{FormulaResult, WriteCell, WriteCellValue};
-use crate::model::worksheet::{Row, Worksheet};
+use crate::model::worksheet::{visit_merged_row_cells, DenseRow, Row, Worksheet};
 use crate::{refs, xml_escape};
 
 /// Emit `<sheetData>...</sheetData>` for worksheet rows and cells.
 pub fn emit(out: &mut String, sheet: &Worksheet, sst: &mut SstBuilder) {
-    if sheet.rows.is_empty() {
+    if sheet.rows.is_empty() && sheet.dense_rows.is_empty() {
         out.push_str("<sheetData/>");
         return;
     }
 
     out.push_str("<sheetData>");
-
-    for (&row_num, row) in &sheet.rows {
-        // Infallible: pushing into a String never errors.
-        let _ = emit_row_to(out, row_num, row, sst);
-    }
-
+    sheet
+        .visit_logical_rows(|row_num, row, dense| {
+            emit_merged_row_to(out, row_num, row, dense, sst)
+        })
+        .expect("formatting into a String is infallible");
     out.push_str("</sheetData>");
 }
 
@@ -48,43 +47,65 @@ pub(crate) fn emit_row_to<W: fmt::Write>(
     row: &Row,
     sst: &mut SstBuilder,
 ) -> fmt::Result {
-    let has_real_cells = row
-        .cells
-        .values()
-        .any(|c| !matches!(c.value, WriteCellValue::Blank) || c.style_id.is_some());
-    let has_attrs = row.custom_height.is_some() || row.hidden || row.style_id.is_some();
+    emit_merged_row_to(out, row_num, Some(row), &[], sst)
+}
 
-    if row.cells.is_empty() && !has_attrs {
+fn emit_merged_row_to<W: fmt::Write>(
+    out: &mut W,
+    row_num: u32,
+    row: Option<&Row>,
+    dense_rows: &[DenseRow],
+    sst: &mut SstBuilder,
+) -> fmt::Result {
+    let (has_cells, has_real_cells) = if row.is_none_or(|row| row.cells.is_empty()) {
+        (
+            !dense_rows.is_empty(),
+            dense_rows.iter().any(|dense| dense.emittable_cells > 0),
+        )
+    } else {
+        let mut has_cells = false;
+        let mut has_real_cells = false;
+        visit_merged_row_cells::<()>(row, dense_rows, |_, cell| {
+            has_cells = true;
+            has_real_cells |=
+                !matches!(cell.value, WriteCellValue::Blank) || cell.style_id.is_some();
+            Ok(())
+        })
+        .expect("row cell scan is infallible");
+        (has_cells, has_real_cells)
+    };
+    let has_attrs = row.is_some_and(|row| {
+        row.custom_height.is_some() || row.hidden || row.style_id.is_some()
+    });
+
+    if !has_cells && !has_attrs {
         return Ok(());
     }
 
     write!(out, "<row r=\"{}\"", row_num)?;
 
-    if let Some(h) = row.custom_height {
-        write!(out, " ht=\"{}\" customHeight=\"1\"", format_f64(h))?;
-    }
-    if row.hidden {
-        out.write_str(" hidden=\"1\"")?;
-    }
-    if let Some(s) = row.style_id {
-        write!(out, " s=\"{}\" customFormat=\"1\"", s)?;
+    if let Some(row) = row {
+        if let Some(h) = row.custom_height {
+            write!(out, " ht=\"{}\" customHeight=\"1\"", format_f64(h))?;
+        }
+        if row.hidden {
+            out.write_str(" hidden=\"1\"")?;
+        }
+        if let Some(s) = row.style_id {
+            write!(out, " s=\"{}\" customFormat=\"1\"", s)?;
+        }
     }
 
     if !has_real_cells {
-        // Either the row is empty (no cells at all) or every cell is an
-        // unstyled blank. Either way the row is self-closing.
         out.write_str("/>")?;
         return Ok(());
     }
 
     out.write_char('>')?;
-
-    for (&col_num, cell) in &row.cells {
-        emit_cell_to(out, row_num, col_num, cell, sst)?;
-    }
-
-    out.write_str("</row>")?;
-    Ok(())
+    visit_merged_row_cells(row, dense_rows, |col_num, cell| {
+        emit_cell_to(out, row_num, col_num, cell, sst)
+    })?;
+    out.write_str("</row>")
 }
 
 fn emit_cell_to<W: fmt::Write>(
@@ -507,5 +528,33 @@ mod tests {
             .trim_start_matches("<sheetData>")
             .trim_end_matches("</sheetData>");
         assert_eq!(inner, streaming);
+    }
+
+    #[test]
+    fn dense_rows_match_sparse_xml_and_accept_sparse_overlays() {
+        let cells = vec![
+            WriteCell::new(WriteCellValue::Number(42.0)),
+            WriteCell::new(WriteCellValue::Blank),
+            WriteCell::new(WriteCellValue::String("dense".into())),
+        ];
+        let mut sparse = Worksheet::new("S");
+        for (offset, cell) in cells.iter().cloned().enumerate() {
+            sparse.set_cell(3, 2 + offset as u32, cell);
+        }
+        sparse.set_cell(3, 4, WriteCell::new(WriteCellValue::String("edit".into())));
+
+        let mut dense = Worksheet::new("S");
+        dense.append_dense_row(3, 2, cells).unwrap();
+        dense.set_cell(3, 4, WriteCell::new(WriteCellValue::String("edit".into())));
+
+        let mut sparse_sst = SstBuilder::default();
+        let mut sparse_xml = String::new();
+        emit(&mut sparse_xml, &sparse, &mut sparse_sst);
+        let mut dense_sst = SstBuilder::default();
+        let mut dense_xml = String::new();
+        emit(&mut dense_xml, &dense, &mut dense_sst);
+
+        assert_eq!(dense_xml, sparse_xml);
+        assert_eq!(dense_sst.iter().collect::<Vec<_>>(), sparse_sst.iter().collect::<Vec<_>>());
     }
 }

@@ -48,7 +48,7 @@ pub(crate) fn enable_streaming(wb: &mut Workbook, name: &str) -> PyResult<()> {
     if ws.streaming.is_some() {
         return Ok(());
     }
-    if !ws.rows.is_empty() {
+    if !ws.rows.is_empty() || ws.has_dense_rows() {
         return Err(PyValueError::new_err(
             "cannot enable streaming on a sheet with existing rows",
         ));

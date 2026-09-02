@@ -5,7 +5,7 @@ use pyo3::prelude::*;
 use pyo3::types::{PyAny, PyDict};
 use wolfxl_writer::model::{
     AlignmentSpec, BorderSideSpec, BorderSpec, FillSpec, FontSpec, FormatSpec, GradientFillSpec,
-    GradientStopSpec, ProtectionSpec, Worksheet, WriteCell, WriteCellValue,
+    GradientStopSpec, ProtectionSpec, Worksheet,
 };
 use wolfxl_writer::Workbook;
 
@@ -499,16 +499,7 @@ fn require_sheet<'wb>(wb: &'wb mut Workbook, name: &str) -> PyResult<&'wb mut Wo
 }
 
 fn set_cell_style_id(ws: &mut Worksheet, row: u32, col: u32, style_id: u32) {
-    let cell = ws
-        .rows
-        .entry(row)
-        .or_default()
-        .cells
-        .entry(col)
-        .or_insert_with(|| WriteCell {
-            value: WriteCellValue::Blank,
-            style_id: None,
-        });
+    let cell = ws.cell_for_overlay(row, col);
     cell.style_id = Some(style_id);
 }
 
