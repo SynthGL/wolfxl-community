@@ -4,7 +4,7 @@ build-backend = "maturin"
 
 [project]
 name = "wolfxl"
-version = "2.0.2"
+version = "2.0.3"
 description = "MIT-licensed Excel I/O for Python with openpyxl-shaped APIs and a Rust backend"
 readme = "PYPI.md"
 requires-python = ">=3.9"
@@ -23,6 +23,9 @@ classifiers = [
     "Topic :: Office/Business :: Financial :: Spreadsheet",
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
+
+[project.scripts]
+wolfxl-ops = "wolfxl.operations.cli:main"
 
 [project.optional-dependencies]
 calc = ["formulas>=1.3.3,<2.0"]

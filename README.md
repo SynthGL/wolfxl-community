@@ -32,7 +32,7 @@ Every chart in this README is generated from a
 Install the current Community release:
 
 ```bash
-python -m pip install wolfxl==2.0.2
+python -m pip install wolfxl==2.0.3
 ```
 
 WolfXL Community supports Python 3.9 and newer CPython versions for which a
@@ -54,6 +54,23 @@ workbook.save("report.xlsx")
 loaded = load_workbook("report.xlsx")
 print(loaded["Summary"]["B1"].value)
 loaded.close()
+```
+
+## Workbook fidelity guard
+
+Audit whether editing a spreadsheet quietly rewrote or corrupted untouched OOXML package parts:
+
+```bash
+wolfxl-ops guard original.xlsx edited.xlsx
+```
+
+Or compare in Python:
+
+```python
+from wolfxl import compare_workbooks
+
+diff = compare_workbooks("original.xlsx", "edited.xlsx")
+print(f"Passed: {diff.passed}, issues found: {diff.issue_count}")
 ```
 
 ## Migrating from openpyxl

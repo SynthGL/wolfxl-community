@@ -9,11 +9,11 @@ import wolfxl
 from wolfxl import Workbook, load_workbook
 
 
-assert version("wolfxl") == "2.0.2"
-assert wolfxl.__version__ == "2.0.2"
+assert version("wolfxl") == "2.0.3"
+assert wolfxl.__version__ == "2.0.3"
 
+assert find_spec("wolfxl.operations") is not None
 for module_name in (
-    "wolfxl.operations",
     "wolfxl.render",
     "wolfxl.integrations",
     "wolfxl._conversion",
@@ -31,5 +31,19 @@ with TemporaryDirectory() as directory:
     loaded = load_workbook(path)
     assert loaded.active["A1"].value == "community"
     loaded.close()
+
+    path2 = Path(directory) / "community-smoke-2.xlsx"
+    loaded = load_workbook(path)
+    loaded.save(path2)
+    loaded.close()
+
+    # Guard and compare smoke test
+    comparison = wolfxl.compare_workbooks(path, path2)
+    assert comparison.passed is True
+    assert comparison.issue_count == 0
+
+    from wolfxl.operations.cli import main as cli_main
+    rc = cli_main(["guard", str(path), str(path2)])
+    assert rc == 0
 
 print("community artifact smoke: ok")

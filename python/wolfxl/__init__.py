@@ -23,7 +23,7 @@ from io import BytesIO
 import os
 import importlib
 from types import ModuleType
-from typing import IO, Dict, Union, cast
+from typing import IO, Any, Dict, Mapping, Union, cast
 from zipfile import BadZipFile, ZIP_DEFLATED, ZipFile
 
 from wolfxl._cell import Cell
@@ -54,6 +54,7 @@ from wolfxl._workbook import CopyOptions, Workbook
 from wolfxl._worksheet import Worksheet
 from wolfxl.compat.numbers import NUMPY
 from wolfxl.utils.exceptions import InvalidFileException
+from wolfxl.comparison import WorkbookComparison, WorkbookIdentity
 
 DEBUG = False
 
@@ -327,3 +328,14 @@ def uninstall_as_openpyxl() -> None:
     from wolfxl.openpyxl_compat import uninstall_as_openpyxl as uninstall
 
     uninstall()
+
+def compare_workbooks(
+    before: str | os.PathLike[str],
+    after: str | os.PathLike[str],
+    *,
+    policy: Mapping[str, Any] | None = None,
+) -> WorkbookComparison:
+    """Compare two OOXML workbooks using Guard without writing a report file."""
+    from wolfxl.operations.guard import compare_workbooks as _compare_workbooks
+
+    return _compare_workbooks(before, after, policy=policy)
