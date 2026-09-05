@@ -1,0 +1,1486 @@
+{
+  "machine": {
+    "system": "Linux",
+    "node": "localhost",
+    "release": "6.18.35",
+    "version": "#1 SMP Mon Aug 31 18:10:37 UTC 2026",
+    "machine": "x86_64",
+    "processor": "x86_64"
+  },
+  "cpu": "\t: AMD EPYC 9V74 80-Core Processor",
+  "env": {
+    "WOLFXL_BENCH_SHEETS": "4"
+  },
+  "binary_sha256": {
+    "before": "d8fa49dfc40c15ce2ec0f512850a717a998d5dfd62607964e9bc44e29319238a",
+    "after": "6ed8980dc4f9a977cd57e2ab24e2d09a41db82be8a802e8b9a2801b846b11faf"
+  },
+  "summary": [
+    {
+      "workload": "numeric",
+      "same_parts": true,
+      "same_zip": false,
+      "before": {
+        "median_ms": 12.5998345,
+        "p95_ms": 14.210441,
+        "allocations": 425.0,
+        "allocated_mib": 13.062080383300781,
+        "peak_rss_kib": 15800.0,
+        "n": 28,
+        "output_bytes": 461180
+      },
+      "after": {
+        "median_ms": 13.3323785,
+        "p95_ms": 18.971825,
+        "allocations": 401.0,
+        "allocated_mib": 5.333539009094238,
+        "peak_rss_kib": 12662.0,
+        "n": 28,
+        "output_bytes": 461264
+      },
+      "speedup": 0.9450552652701841
+    },
+    {
+      "workload": "repeated-strings",
+      "same_parts": true,
+      "same_zip": false,
+      "before": {
+        "median_ms": 14.5652435,
+        "p95_ms": 17.043499,
+        "allocations": 567.0,
+        "allocated_mib": 13.088838577270508,
+        "peak_rss_kib": 19338.0,
+        "n": 28,
+        "output_bytes": 465310
+      },
+      "after": {
+        "median_ms": 14.040658,
+        "p95_ms": 14.821892,
+        "allocations": 543.0,
+        "allocated_mib": 5.364229202270508,
+        "peak_rss_kib": 15994.0,
+        "n": 28,
+        "output_bytes": 465322
+      },
+      "speedup": 1.0373618885952496
+    },
+    {
+      "workload": "large-numeric",
+      "same_parts": true,
+      "same_zip": false,
+      "before": {
+        "median_ms": 145.109367,
+        "p95_ms": 145.109367,
+        "allocations": 441,
+        "allocated_mib": 84.75148010253906,
+        "peak_rss_kib": 134516,
+        "n": 1,
+        "output_bytes": 4596260
+      },
+      "after": {
+        "median_ms": 140.17374,
+        "p95_ms": 140.17374,
+        "allocations": 405,
+        "allocated_mib": 20.965954780578613,
+        "peak_rss_kib": 100240,
+        "n": 1,
+        "output_bytes": 4597056
+      },
+      "speedup": 1.0352107819909777
+    }
+  ],
+  "runs": [
+    {
+      "workload": "numeric",
+      "variant": "before",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "/workspace/scratch/6c0922bea284/community-serializer/scripts/performance/time_writer.py",
+        "/workspace/scratch/6c0922bea284/evidence/community-eager/numeric-0-before.rss",
+        "/workspace/scratch/6c0922bea284/evidence/community-save-serializer",
+        "numeric",
+        "1250",
+        "20",
+        "7",
+        "/workspace/scratch/6c0922bea284/evidence/community-eager/numeric-0-before.xlsx"
+      ],
+      "peak_rss_kib": 15752,
+      "samples": [
+        {
+          "round": 1,
+          "ns": 13165277,
+          "allocations": 425,
+          "allocated_bytes": 13696584,
+          "output_bytes": 461180
+        },
+        {
+          "round": 2,
+          "ns": 12386483,
+          "allocations": 425,
+          "allocated_bytes": 13696584,
+          "output_bytes": 461180
+        },
+        {
+          "round": 3,
+          "ns": 12439342,
+          "allocations": 425,
+          "allocated_bytes": 13696584,
+          "output_bytes": 461180
+        },
+        {
+          "round": 4,
+          "ns": 12428987,
+          "allocations": 425,
+          "allocated_bytes": 13696584,
+          "output_bytes": 461180
+        },
+        {
+          "round": 5,
+          "ns": 12785143,
+          "allocations": 425,
+          "allocated_bytes": 13696584,
+          "output_bytes": 461180
+        },
+        {
+          "round": 6,
+          "ns": 13283745,
+          "allocations": 425,
+          "allocated_bytes": 13696584,
+          "output_bytes": 461180
+        },
+        {
+          "round": 7,
+          "ns": 13412710,
+          "allocations": 425,
+          "allocated_bytes": 13696584,
+          "output_bytes": 461180
+        }
+      ],
+      "zip_sha256": "d3eb186502d46a50087ab620da0193e561469171da26802236a9e59e9e26db19",
+      "parts": {
+        "[Content_Types].xml": "035e7486de6ee6e86d4c289b087c07042ffc238f250fae2170d9108dc62969d4",
+        "_rels/.rels": "2d683d1d28ca96d0fd91f67f132be8888844c03246b92edc19b7359f291121bc",
+        "xl/workbook.xml": "15a00eceaf8a928331423aa0e93dbe2d0cba5c6cc48af0c5139312d3a2d71e4f",
+        "xl/_rels/workbook.xml.rels": "5eb7b8bf50cd617bdf98c8af2c80f1c192d533b2600805e4466510a504357858",
+        "xl/worksheets/sheet1.xml": "b6e3b7735744a44a84f4e810241f4b14ddce484af66afc78acf075aee8f91a39",
+        "xl/worksheets/sheet2.xml": "b6e3b7735744a44a84f4e810241f4b14ddce484af66afc78acf075aee8f91a39",
+        "xl/worksheets/sheet3.xml": "b6e3b7735744a44a84f4e810241f4b14ddce484af66afc78acf075aee8f91a39",
+        "xl/worksheets/sheet4.xml": "b6e3b7735744a44a84f4e810241f4b14ddce484af66afc78acf075aee8f91a39",
+        "xl/styles.xml": "bb5ccbdfa9dc8467ef180dcb0f1e427cfaa2c4fa5d391f22b8099d7641ceb6e5",
+        "xl/sharedStrings.xml": "c248cba6c01dff6c864e2605a4060ad999662329cf1798036279e7c43fa4c0d3",
+        "docProps/core.xml": "aab7c99f9215b569040059048435ab1f169c6f7489dd7a71b733d0b0b36bfafd",
+        "docProps/app.xml": "97a027981ed82eb1479770d58b3f4e3ce0e08d54c7da4aef6bff91bd9330a52a"
+      }
+    },
+    {
+      "workload": "numeric",
+      "variant": "after",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "/workspace/scratch/6c0922bea284/community-serializer/scripts/performance/time_writer.py",
+        "/workspace/scratch/6c0922bea284/evidence/community-eager/numeric-1-after.rss",
+        "/workspace/scratch/6c0922bea284/evidence/community-save-streaming",
+        "numeric",
+        "1250",
+        "20",
+        "7",
+        "/workspace/scratch/6c0922bea284/evidence/community-eager/numeric-1-after.xlsx"
+      ],
+      "peak_rss_kib": 12776,
+      "samples": [
+        {
+          "round": 1,
+          "ns": 14003359,
+          "allocations": 401,
+          "allocated_bytes": 5592621,
+          "output_bytes": 461264
+        },
+        {
+          "round": 2,
+          "ns": 13317085,
+          "allocations": 401,
+          "allocated_bytes": 5592621,
+          "output_bytes": 461264
+        },
+        {
+          "round": 3,
+          "ns": 12775459,
+          "allocations": 401,
+          "allocated_bytes": 5592621,
+          "output_bytes": 461264
+        },
+        {
+          "round": 4,
+          "ns": 12823702,
+          "allocations": 401,
+          "allocated_bytes": 5592621,
+          "output_bytes": 461264
+        },
+        {
+          "round": 5,
+          "ns": 12765024,
+          "allocations": 401,
+          "allocated_bytes": 5592621,
+          "output_bytes": 461264
+        },
+        {
+          "round": 6,
+          "ns": 12484711,
+          "allocations": 401,
+          "allocated_bytes": 5592621,
+          "output_bytes": 461264
+        },
+        {
+          "round": 7,
+          "ns": 12845935,
+          "allocations": 401,
+          "allocated_bytes": 5592621,
+          "output_bytes": 461264
+        }
+      ],
+      "zip_sha256": "2af240c05bf573e66e477363ee75934357247a95f0482ffc4e4078b06b738048",
+      "parts": {
+        "[Content_Types].xml": "035e7486de6ee6e86d4c289b087c07042ffc238f250fae2170d9108dc62969d4",
+        "_rels/.rels": "2d683d1d28ca96d0fd91f67f132be8888844c03246b92edc19b7359f291121bc",
+        "xl/workbook.xml": "15a00eceaf8a928331423aa0e93dbe2d0cba5c6cc48af0c5139312d3a2d71e4f",
+        "xl/_rels/workbook.xml.rels": "5eb7b8bf50cd617bdf98c8af2c80f1c192d533b2600805e4466510a504357858",
+        "xl/worksheets/sheet1.xml": "b6e3b7735744a44a84f4e810241f4b14ddce484af66afc78acf075aee8f91a39",
+        "xl/worksheets/sheet2.xml": "b6e3b7735744a44a84f4e810241f4b14ddce484af66afc78acf075aee8f91a39",
+        "xl/worksheets/sheet3.xml": "b6e3b7735744a44a84f4e810241f4b14ddce484af66afc78acf075aee8f91a39",
+        "xl/worksheets/sheet4.xml": "b6e3b7735744a44a84f4e810241f4b14ddce484af66afc78acf075aee8f91a39",
+        "xl/styles.xml": "bb5ccbdfa9dc8467ef180dcb0f1e427cfaa2c4fa5d391f22b8099d7641ceb6e5",
+        "xl/sharedStrings.xml": "c248cba6c01dff6c864e2605a4060ad999662329cf1798036279e7c43fa4c0d3",
+        "docProps/core.xml": "aab7c99f9215b569040059048435ab1f169c6f7489dd7a71b733d0b0b36bfafd",
+        "docProps/app.xml": "97a027981ed82eb1479770d58b3f4e3ce0e08d54c7da4aef6bff91bd9330a52a"
+      }
+    },
+    {
+      "workload": "numeric",
+      "variant": "after",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "/workspace/scratch/6c0922bea284/community-serializer/scripts/performance/time_writer.py",
+        "/workspace/scratch/6c0922bea284/evidence/community-eager/numeric-2-after.rss",
+        "/workspace/scratch/6c0922bea284/evidence/community-save-streaming",
+        "numeric",
+        "1250",
+        "20",
+        "7",
+        "/workspace/scratch/6c0922bea284/evidence/community-eager/numeric-2-after.xlsx"
+      ],
+      "peak_rss_kib": 12604,
+      "samples": [
+        {
+          "round": 1,
+          "ns": 13635064,
+          "allocations": 401,
+          "allocated_bytes": 5592621,
+          "output_bytes": 461264
+        },
+        {
+          "round": 2,
+          "ns": 12906847,
+          "allocations": 401,
+          "allocated_bytes": 5592621,
+          "output_bytes": 461264
+        },
+        {
+          "round": 3,
+          "ns": 13473190,
+          "allocations": 401,
+          "allocated_bytes": 5592621,
+          "output_bytes": 461264
+        },
+        {
+          "round": 4,
+          "ns": 12195826,
+          "allocations": 401,
+          "allocated_bytes": 5592621,
+          "output_bytes": 461264
+        },
+        {
+          "round": 5,
+          "ns": 12502108,
+          "allocations": 401,
+          "allocated_bytes": 5592621,
+          "output_bytes": 461264
+        },
+        {
+          "round": 6,
+          "ns": 12685544,
+          "allocations": 401,
+          "allocated_bytes": 5592621,
+          "output_bytes": 461264
+        },
+        {
+          "round": 7,
+          "ns": 12736010,
+          "allocations": 401,
+          "allocated_bytes": 5592621,
+          "output_bytes": 461264
+        }
+      ],
+      "zip_sha256": "2af240c05bf573e66e477363ee75934357247a95f0482ffc4e4078b06b738048",
+      "parts": {
+        "[Content_Types].xml": "035e7486de6ee6e86d4c289b087c07042ffc238f250fae2170d9108dc62969d4",
+        "_rels/.rels": "2d683d1d28ca96d0fd91f67f132be8888844c03246b92edc19b7359f291121bc",
+        "xl/workbook.xml": "15a00eceaf8a928331423aa0e93dbe2d0cba5c6cc48af0c5139312d3a2d71e4f",
+        "xl/_rels/workbook.xml.rels": "5eb7b8bf50cd617bdf98c8af2c80f1c192d533b2600805e4466510a504357858",
+        "xl/worksheets/sheet1.xml": "b6e3b7735744a44a84f4e810241f4b14ddce484af66afc78acf075aee8f91a39",
+        "xl/worksheets/sheet2.xml": "b6e3b7735744a44a84f4e810241f4b14ddce484af66afc78acf075aee8f91a39",
+        "xl/worksheets/sheet3.xml": "b6e3b7735744a44a84f4e810241f4b14ddce484af66afc78acf075aee8f91a39",
+        "xl/worksheets/sheet4.xml": "b6e3b7735744a44a84f4e810241f4b14ddce484af66afc78acf075aee8f91a39",
+        "xl/styles.xml": "bb5ccbdfa9dc8467ef180dcb0f1e427cfaa2c4fa5d391f22b8099d7641ceb6e5",
+        "xl/sharedStrings.xml": "c248cba6c01dff6c864e2605a4060ad999662329cf1798036279e7c43fa4c0d3",
+        "docProps/core.xml": "aab7c99f9215b569040059048435ab1f169c6f7489dd7a71b733d0b0b36bfafd",
+        "docProps/app.xml": "97a027981ed82eb1479770d58b3f4e3ce0e08d54c7da4aef6bff91bd9330a52a"
+      }
+    },
+    {
+      "workload": "numeric",
+      "variant": "before",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "/workspace/scratch/6c0922bea284/community-serializer/scripts/performance/time_writer.py",
+        "/workspace/scratch/6c0922bea284/evidence/community-eager/numeric-3-before.rss",
+        "/workspace/scratch/6c0922bea284/evidence/community-save-serializer",
+        "numeric",
+        "1250",
+        "20",
+        "7",
+        "/workspace/scratch/6c0922bea284/evidence/community-eager/numeric-3-before.xlsx"
+      ],
+      "peak_rss_kib": 15888,
+      "samples": [
+        {
+          "round": 1,
+          "ns": 13281321,
+          "allocations": 425,
+          "allocated_bytes": 13696584,
+          "output_bytes": 461180
+        },
+        {
+          "round": 2,
+          "ns": 12537601,
+          "allocations": 425,
+          "allocated_bytes": 13696584,
+          "output_bytes": 461180
+        },
+        {
+          "round": 3,
+          "ns": 12161654,
+          "allocations": 425,
+          "allocated_bytes": 13696584,
+          "output_bytes": 461180
+        },
+        {
+          "round": 4,
+          "ns": 12374865,
+          "allocations": 425,
+          "allocated_bytes": 13696584,
+          "output_bytes": 461180
+        },
+        {
+          "round": 5,
+          "ns": 12823452,
+          "allocations": 425,
+          "allocated_bytes": 13696584,
+          "output_bytes": 461180
+        },
+        {
+          "round": 6,
+          "ns": 12274344,
+          "allocations": 425,
+          "allocated_bytes": 13696584,
+          "output_bytes": 461180
+        },
+        {
+          "round": 7,
+          "ns": 12421736,
+          "allocations": 425,
+          "allocated_bytes": 13696584,
+          "output_bytes": 461180
+        }
+      ],
+      "zip_sha256": "d3eb186502d46a50087ab620da0193e561469171da26802236a9e59e9e26db19",
+      "parts": {
+        "[Content_Types].xml": "035e7486de6ee6e86d4c289b087c07042ffc238f250fae2170d9108dc62969d4",
+        "_rels/.rels": "2d683d1d28ca96d0fd91f67f132be8888844c03246b92edc19b7359f291121bc",
+        "xl/workbook.xml": "15a00eceaf8a928331423aa0e93dbe2d0cba5c6cc48af0c5139312d3a2d71e4f",
+        "xl/_rels/workbook.xml.rels": "5eb7b8bf50cd617bdf98c8af2c80f1c192d533b2600805e4466510a504357858",
+        "xl/worksheets/sheet1.xml": "b6e3b7735744a44a84f4e810241f4b14ddce484af66afc78acf075aee8f91a39",
+        "xl/worksheets/sheet2.xml": "b6e3b7735744a44a84f4e810241f4b14ddce484af66afc78acf075aee8f91a39",
+        "xl/worksheets/sheet3.xml": "b6e3b7735744a44a84f4e810241f4b14ddce484af66afc78acf075aee8f91a39",
+        "xl/worksheets/sheet4.xml": "b6e3b7735744a44a84f4e810241f4b14ddce484af66afc78acf075aee8f91a39",
+        "xl/styles.xml": "bb5ccbdfa9dc8467ef180dcb0f1e427cfaa2c4fa5d391f22b8099d7641ceb6e5",
+        "xl/sharedStrings.xml": "c248cba6c01dff6c864e2605a4060ad999662329cf1798036279e7c43fa4c0d3",
+        "docProps/core.xml": "aab7c99f9215b569040059048435ab1f169c6f7489dd7a71b733d0b0b36bfafd",
+        "docProps/app.xml": "97a027981ed82eb1479770d58b3f4e3ce0e08d54c7da4aef6bff91bd9330a52a"
+      }
+    },
+    {
+      "workload": "numeric",
+      "variant": "before",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "/workspace/scratch/6c0922bea284/community-serializer/scripts/performance/time_writer.py",
+        "/workspace/scratch/6c0922bea284/evidence/community-eager/numeric-4-before.rss",
+        "/workspace/scratch/6c0922bea284/evidence/community-save-serializer",
+        "numeric",
+        "1250",
+        "20",
+        "7",
+        "/workspace/scratch/6c0922bea284/evidence/community-eager/numeric-4-before.xlsx"
+      ],
+      "peak_rss_kib": 15848,
+      "samples": [
+        {
+          "round": 1,
+          "ns": 12857653,
+          "allocations": 425,
+          "allocated_bytes": 13696584,
+          "output_bytes": 461180
+        },
+        {
+          "round": 2,
+          "ns": 12291649,
+          "allocations": 425,
+          "allocated_bytes": 13696584,
+          "output_bytes": 461180
+        },
+        {
+          "round": 3,
+          "ns": 12362878,
+          "allocations": 425,
+          "allocated_bytes": 13696584,
+          "output_bytes": 461180
+        },
+        {
+          "round": 4,
+          "ns": 14210441,
+          "allocations": 425,
+          "allocated_bytes": 13696584,
+          "output_bytes": 461180
+        },
+        {
+          "round": 5,
+          "ns": 12231479,
+          "allocations": 425,
+          "allocated_bytes": 13696584,
+          "output_bytes": 461180
+        },
+        {
+          "round": 6,
+          "ns": 12662068,
+          "allocations": 425,
+          "allocated_bytes": 13696584,
+          "output_bytes": 461180
+        },
+        {
+          "round": 7,
+          "ns": 15207824,
+          "allocations": 425,
+          "allocated_bytes": 13696584,
+          "output_bytes": 461180
+        }
+      ],
+      "zip_sha256": "d3eb186502d46a50087ab620da0193e561469171da26802236a9e59e9e26db19",
+      "parts": {
+        "[Content_Types].xml": "035e7486de6ee6e86d4c289b087c07042ffc238f250fae2170d9108dc62969d4",
+        "_rels/.rels": "2d683d1d28ca96d0fd91f67f132be8888844c03246b92edc19b7359f291121bc",
+        "xl/workbook.xml": "15a00eceaf8a928331423aa0e93dbe2d0cba5c6cc48af0c5139312d3a2d71e4f",
+        "xl/_rels/workbook.xml.rels": "5eb7b8bf50cd617bdf98c8af2c80f1c192d533b2600805e4466510a504357858",
+        "xl/worksheets/sheet1.xml": "b6e3b7735744a44a84f4e810241f4b14ddce484af66afc78acf075aee8f91a39",
+        "xl/worksheets/sheet2.xml": "b6e3b7735744a44a84f4e810241f4b14ddce484af66afc78acf075aee8f91a39",
+        "xl/worksheets/sheet3.xml": "b6e3b7735744a44a84f4e810241f4b14ddce484af66afc78acf075aee8f91a39",
+        "xl/worksheets/sheet4.xml": "b6e3b7735744a44a84f4e810241f4b14ddce484af66afc78acf075aee8f91a39",
+        "xl/styles.xml": "bb5ccbdfa9dc8467ef180dcb0f1e427cfaa2c4fa5d391f22b8099d7641ceb6e5",
+        "xl/sharedStrings.xml": "c248cba6c01dff6c864e2605a4060ad999662329cf1798036279e7c43fa4c0d3",
+        "docProps/core.xml": "aab7c99f9215b569040059048435ab1f169c6f7489dd7a71b733d0b0b36bfafd",
+        "docProps/app.xml": "97a027981ed82eb1479770d58b3f4e3ce0e08d54c7da4aef6bff91bd9330a52a"
+      }
+    },
+    {
+      "workload": "numeric",
+      "variant": "after",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "/workspace/scratch/6c0922bea284/community-serializer/scripts/performance/time_writer.py",
+        "/workspace/scratch/6c0922bea284/evidence/community-eager/numeric-5-after.rss",
+        "/workspace/scratch/6c0922bea284/evidence/community-save-streaming",
+        "numeric",
+        "1250",
+        "20",
+        "7",
+        "/workspace/scratch/6c0922bea284/evidence/community-eager/numeric-5-after.xlsx"
+      ],
+      "peak_rss_kib": 12544,
+      "samples": [
+        {
+          "round": 1,
+          "ns": 14345455,
+          "allocations": 401,
+          "allocated_bytes": 5592621,
+          "output_bytes": 461264
+        },
+        {
+          "round": 2,
+          "ns": 13035130,
+          "allocations": 401,
+          "allocated_bytes": 5592621,
+          "output_bytes": 461264
+        },
+        {
+          "round": 3,
+          "ns": 92915058,
+          "allocations": 401,
+          "allocated_bytes": 5592621,
+          "output_bytes": 461264
+        },
+        {
+          "round": 4,
+          "ns": 18971825,
+          "allocations": 401,
+          "allocated_bytes": 5592621,
+          "output_bytes": 461264
+        },
+        {
+          "round": 5,
+          "ns": 13915917,
+          "allocations": 401,
+          "allocated_bytes": 5592621,
+          "output_bytes": 461264
+        },
+        {
+          "round": 6,
+          "ns": 14355860,
+          "allocations": 401,
+          "allocated_bytes": 5592621,
+          "output_bytes": 461264
+        },
+        {
+          "round": 7,
+          "ns": 14279765,
+          "allocations": 401,
+          "allocated_bytes": 5592621,
+          "output_bytes": 461264
+        }
+      ],
+      "zip_sha256": "2af240c05bf573e66e477363ee75934357247a95f0482ffc4e4078b06b738048",
+      "parts": {
+        "[Content_Types].xml": "035e7486de6ee6e86d4c289b087c07042ffc238f250fae2170d9108dc62969d4",
+        "_rels/.rels": "2d683d1d28ca96d0fd91f67f132be8888844c03246b92edc19b7359f291121bc",
+        "xl/workbook.xml": "15a00eceaf8a928331423aa0e93dbe2d0cba5c6cc48af0c5139312d3a2d71e4f",
+        "xl/_rels/workbook.xml.rels": "5eb7b8bf50cd617bdf98c8af2c80f1c192d533b2600805e4466510a504357858",
+        "xl/worksheets/sheet1.xml": "b6e3b7735744a44a84f4e810241f4b14ddce484af66afc78acf075aee8f91a39",
+        "xl/worksheets/sheet2.xml": "b6e3b7735744a44a84f4e810241f4b14ddce484af66afc78acf075aee8f91a39",
+        "xl/worksheets/sheet3.xml": "b6e3b7735744a44a84f4e810241f4b14ddce484af66afc78acf075aee8f91a39",
+        "xl/worksheets/sheet4.xml": "b6e3b7735744a44a84f4e810241f4b14ddce484af66afc78acf075aee8f91a39",
+        "xl/styles.xml": "bb5ccbdfa9dc8467ef180dcb0f1e427cfaa2c4fa5d391f22b8099d7641ceb6e5",
+        "xl/sharedStrings.xml": "c248cba6c01dff6c864e2605a4060ad999662329cf1798036279e7c43fa4c0d3",
+        "docProps/core.xml": "aab7c99f9215b569040059048435ab1f169c6f7489dd7a71b733d0b0b36bfafd",
+        "docProps/app.xml": "97a027981ed82eb1479770d58b3f4e3ce0e08d54c7da4aef6bff91bd9330a52a"
+      }
+    },
+    {
+      "workload": "numeric",
+      "variant": "after",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "/workspace/scratch/6c0922bea284/community-serializer/scripts/performance/time_writer.py",
+        "/workspace/scratch/6c0922bea284/evidence/community-eager/numeric-6-after.rss",
+        "/workspace/scratch/6c0922bea284/evidence/community-save-streaming",
+        "numeric",
+        "1250",
+        "20",
+        "7",
+        "/workspace/scratch/6c0922bea284/evidence/community-eager/numeric-6-after.xlsx"
+      ],
+      "peak_rss_kib": 12720,
+      "samples": [
+        {
+          "round": 1,
+          "ns": 13938772,
+          "allocations": 401,
+          "allocated_bytes": 5592621,
+          "output_bytes": 461264
+        },
+        {
+          "round": 2,
+          "ns": 13347672,
+          "allocations": 401,
+          "allocated_bytes": 5592621,
+          "output_bytes": 461264
+        },
+        {
+          "round": 3,
+          "ns": 13689267,
+          "allocations": 401,
+          "allocated_bytes": 5592621,
+          "output_bytes": 461264
+        },
+        {
+          "round": 4,
+          "ns": 13315062,
+          "allocations": 401,
+          "allocated_bytes": 5592621,
+          "output_bytes": 461264
+        },
+        {
+          "round": 5,
+          "ns": 13862137,
+          "allocations": 401,
+          "allocated_bytes": 5592621,
+          "output_bytes": 461264
+        },
+        {
+          "round": 6,
+          "ns": 12867138,
+          "allocations": 401,
+          "allocated_bytes": 5592621,
+          "output_bytes": 461264
+        },
+        {
+          "round": 7,
+          "ns": 13825882,
+          "allocations": 401,
+          "allocated_bytes": 5592621,
+          "output_bytes": 461264
+        }
+      ],
+      "zip_sha256": "2af240c05bf573e66e477363ee75934357247a95f0482ffc4e4078b06b738048",
+      "parts": {
+        "[Content_Types].xml": "035e7486de6ee6e86d4c289b087c07042ffc238f250fae2170d9108dc62969d4",
+        "_rels/.rels": "2d683d1d28ca96d0fd91f67f132be8888844c03246b92edc19b7359f291121bc",
+        "xl/workbook.xml": "15a00eceaf8a928331423aa0e93dbe2d0cba5c6cc48af0c5139312d3a2d71e4f",
+        "xl/_rels/workbook.xml.rels": "5eb7b8bf50cd617bdf98c8af2c80f1c192d533b2600805e4466510a504357858",
+        "xl/worksheets/sheet1.xml": "b6e3b7735744a44a84f4e810241f4b14ddce484af66afc78acf075aee8f91a39",
+        "xl/worksheets/sheet2.xml": "b6e3b7735744a44a84f4e810241f4b14ddce484af66afc78acf075aee8f91a39",
+        "xl/worksheets/sheet3.xml": "b6e3b7735744a44a84f4e810241f4b14ddce484af66afc78acf075aee8f91a39",
+        "xl/worksheets/sheet4.xml": "b6e3b7735744a44a84f4e810241f4b14ddce484af66afc78acf075aee8f91a39",
+        "xl/styles.xml": "bb5ccbdfa9dc8467ef180dcb0f1e427cfaa2c4fa5d391f22b8099d7641ceb6e5",
+        "xl/sharedStrings.xml": "c248cba6c01dff6c864e2605a4060ad999662329cf1798036279e7c43fa4c0d3",
+        "docProps/core.xml": "aab7c99f9215b569040059048435ab1f169c6f7489dd7a71b733d0b0b36bfafd",
+        "docProps/app.xml": "97a027981ed82eb1479770d58b3f4e3ce0e08d54c7da4aef6bff91bd9330a52a"
+      }
+    },
+    {
+      "workload": "numeric",
+      "variant": "before",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "/workspace/scratch/6c0922bea284/community-serializer/scripts/performance/time_writer.py",
+        "/workspace/scratch/6c0922bea284/evidence/community-eager/numeric-7-before.rss",
+        "/workspace/scratch/6c0922bea284/evidence/community-save-serializer",
+        "numeric",
+        "1250",
+        "20",
+        "7",
+        "/workspace/scratch/6c0922bea284/evidence/community-eager/numeric-7-before.xlsx"
+      ],
+      "peak_rss_kib": 15696,
+      "samples": [
+        {
+          "round": 1,
+          "ns": 13156523,
+          "allocations": 425,
+          "allocated_bytes": 13696584,
+          "output_bytes": 461180
+        },
+        {
+          "round": 2,
+          "ns": 12769169,
+          "allocations": 425,
+          "allocated_bytes": 13696584,
+          "output_bytes": 461180
+        },
+        {
+          "round": 3,
+          "ns": 12525843,
+          "allocations": 425,
+          "allocated_bytes": 13696584,
+          "output_bytes": 461180
+        },
+        {
+          "round": 4,
+          "ns": 13970621,
+          "allocations": 425,
+          "allocated_bytes": 13696584,
+          "output_bytes": 461180
+        },
+        {
+          "round": 5,
+          "ns": 13249774,
+          "allocations": 425,
+          "allocated_bytes": 13696584,
+          "output_bytes": 461180
+        },
+        {
+          "round": 6,
+          "ns": 11994423,
+          "allocations": 425,
+          "allocated_bytes": 13696584,
+          "output_bytes": 461180
+        },
+        {
+          "round": 7,
+          "ns": 12125560,
+          "allocations": 425,
+          "allocated_bytes": 13696584,
+          "output_bytes": 461180
+        }
+      ],
+      "zip_sha256": "d3eb186502d46a50087ab620da0193e561469171da26802236a9e59e9e26db19",
+      "parts": {
+        "[Content_Types].xml": "035e7486de6ee6e86d4c289b087c07042ffc238f250fae2170d9108dc62969d4",
+        "_rels/.rels": "2d683d1d28ca96d0fd91f67f132be8888844c03246b92edc19b7359f291121bc",
+        "xl/workbook.xml": "15a00eceaf8a928331423aa0e93dbe2d0cba5c6cc48af0c5139312d3a2d71e4f",
+        "xl/_rels/workbook.xml.rels": "5eb7b8bf50cd617bdf98c8af2c80f1c192d533b2600805e4466510a504357858",
+        "xl/worksheets/sheet1.xml": "b6e3b7735744a44a84f4e810241f4b14ddce484af66afc78acf075aee8f91a39",
+        "xl/worksheets/sheet2.xml": "b6e3b7735744a44a84f4e810241f4b14ddce484af66afc78acf075aee8f91a39",
+        "xl/worksheets/sheet3.xml": "b6e3b7735744a44a84f4e810241f4b14ddce484af66afc78acf075aee8f91a39",
+        "xl/worksheets/sheet4.xml": "b6e3b7735744a44a84f4e810241f4b14ddce484af66afc78acf075aee8f91a39",
+        "xl/styles.xml": "bb5ccbdfa9dc8467ef180dcb0f1e427cfaa2c4fa5d391f22b8099d7641ceb6e5",
+        "xl/sharedStrings.xml": "c248cba6c01dff6c864e2605a4060ad999662329cf1798036279e7c43fa4c0d3",
+        "docProps/core.xml": "aab7c99f9215b569040059048435ab1f169c6f7489dd7a71b733d0b0b36bfafd",
+        "docProps/app.xml": "97a027981ed82eb1479770d58b3f4e3ce0e08d54c7da4aef6bff91bd9330a52a"
+      }
+    },
+    {
+      "workload": "repeated-strings",
+      "variant": "before",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "/workspace/scratch/6c0922bea284/community-serializer/scripts/performance/time_writer.py",
+        "/workspace/scratch/6c0922bea284/evidence/community-eager/repeated-strings-0-before.rss",
+        "/workspace/scratch/6c0922bea284/evidence/community-save-serializer",
+        "repeated-strings",
+        "1250",
+        "20",
+        "7",
+        "/workspace/scratch/6c0922bea284/evidence/community-eager/repeated-strings-0-before.xlsx"
+      ],
+      "peak_rss_kib": 19324,
+      "samples": [
+        {
+          "round": 1,
+          "ns": 15899386,
+          "allocations": 567,
+          "allocated_bytes": 13724642,
+          "output_bytes": 465310
+        },
+        {
+          "round": 2,
+          "ns": 14359687,
+          "allocations": 567,
+          "allocated_bytes": 13724642,
+          "output_bytes": 465310
+        },
+        {
+          "round": 3,
+          "ns": 14754691,
+          "allocations": 567,
+          "allocated_bytes": 13724642,
+          "output_bytes": 465310
+        },
+        {
+          "round": 4,
+          "ns": 14641671,
+          "allocations": 567,
+          "allocated_bytes": 13724642,
+          "output_bytes": 465310
+        },
+        {
+          "round": 5,
+          "ns": 14330612,
+          "allocations": 567,
+          "allocated_bytes": 13724642,
+          "output_bytes": 465310
+        },
+        {
+          "round": 6,
+          "ns": 13942828,
+          "allocations": 567,
+          "allocated_bytes": 13724642,
+          "output_bytes": 465310
+        },
+        {
+          "round": 7,
+          "ns": 14339034,
+          "allocations": 567,
+          "allocated_bytes": 13724642,
+          "output_bytes": 465310
+        }
+      ],
+      "zip_sha256": "4bc5cedc7a304bbf5fffb9904c74b0dcebbd945a4058fd686c5ecf9ed19abe09",
+      "parts": {
+        "[Content_Types].xml": "035e7486de6ee6e86d4c289b087c07042ffc238f250fae2170d9108dc62969d4",
+        "_rels/.rels": "2d683d1d28ca96d0fd91f67f132be8888844c03246b92edc19b7359f291121bc",
+        "xl/workbook.xml": "15a00eceaf8a928331423aa0e93dbe2d0cba5c6cc48af0c5139312d3a2d71e4f",
+        "xl/_rels/workbook.xml.rels": "5eb7b8bf50cd617bdf98c8af2c80f1c192d533b2600805e4466510a504357858",
+        "xl/worksheets/sheet1.xml": "7c0b5174f33c445c5bab1b0db6a8657ece7a108a50fc30967d58a3fc460cc3cc",
+        "xl/worksheets/sheet2.xml": "7c0b5174f33c445c5bab1b0db6a8657ece7a108a50fc30967d58a3fc460cc3cc",
+        "xl/worksheets/sheet3.xml": "7c0b5174f33c445c5bab1b0db6a8657ece7a108a50fc30967d58a3fc460cc3cc",
+        "xl/worksheets/sheet4.xml": "7c0b5174f33c445c5bab1b0db6a8657ece7a108a50fc30967d58a3fc460cc3cc",
+        "xl/styles.xml": "bb5ccbdfa9dc8467ef180dcb0f1e427cfaa2c4fa5d391f22b8099d7641ceb6e5",
+        "xl/sharedStrings.xml": "d3254e3727332ed49570cd9e48754cd0c236447830019b591e40cb403386be39",
+        "docProps/core.xml": "aab7c99f9215b569040059048435ab1f169c6f7489dd7a71b733d0b0b36bfafd",
+        "docProps/app.xml": "97a027981ed82eb1479770d58b3f4e3ce0e08d54c7da4aef6bff91bd9330a52a"
+      }
+    },
+    {
+      "workload": "repeated-strings",
+      "variant": "after",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "/workspace/scratch/6c0922bea284/community-serializer/scripts/performance/time_writer.py",
+        "/workspace/scratch/6c0922bea284/evidence/community-eager/repeated-strings-1-after.rss",
+        "/workspace/scratch/6c0922bea284/evidence/community-save-streaming",
+        "repeated-strings",
+        "1250",
+        "20",
+        "7",
+        "/workspace/scratch/6c0922bea284/evidence/community-eager/repeated-strings-1-after.xlsx"
+      ],
+      "peak_rss_kib": 16008,
+      "samples": [
+        {
+          "round": 1,
+          "ns": 14411174,
+          "allocations": 543,
+          "allocated_bytes": 5624802,
+          "output_bytes": 465322
+        },
+        {
+          "round": 2,
+          "ns": 14821892,
+          "allocations": 543,
+          "allocated_bytes": 5624802,
+          "output_bytes": 465322
+        },
+        {
+          "round": 3,
+          "ns": 14245184,
+          "allocations": 543,
+          "allocated_bytes": 5624802,
+          "output_bytes": 465322
+        },
+        {
+          "round": 4,
+          "ns": 14048007,
+          "allocations": 543,
+          "allocated_bytes": 5624802,
+          "output_bytes": 465322
+        },
+        {
+          "round": 5,
+          "ns": 13795626,
+          "allocations": 543,
+          "allocated_bytes": 5624802,
+          "output_bytes": 465322
+        },
+        {
+          "round": 6,
+          "ns": 14195659,
+          "allocations": 543,
+          "allocated_bytes": 5624802,
+          "output_bytes": 465322
+        },
+        {
+          "round": 7,
+          "ns": 14359095,
+          "allocations": 543,
+          "allocated_bytes": 5624802,
+          "output_bytes": 465322
+        }
+      ],
+      "zip_sha256": "5956130bb34736791c135e01695c7b0dfbbcbd65ad808c30767ca7ef9b7bd64c",
+      "parts": {
+        "[Content_Types].xml": "035e7486de6ee6e86d4c289b087c07042ffc238f250fae2170d9108dc62969d4",
+        "_rels/.rels": "2d683d1d28ca96d0fd91f67f132be8888844c03246b92edc19b7359f291121bc",
+        "xl/workbook.xml": "15a00eceaf8a928331423aa0e93dbe2d0cba5c6cc48af0c5139312d3a2d71e4f",
+        "xl/_rels/workbook.xml.rels": "5eb7b8bf50cd617bdf98c8af2c80f1c192d533b2600805e4466510a504357858",
+        "xl/worksheets/sheet1.xml": "7c0b5174f33c445c5bab1b0db6a8657ece7a108a50fc30967d58a3fc460cc3cc",
+        "xl/worksheets/sheet2.xml": "7c0b5174f33c445c5bab1b0db6a8657ece7a108a50fc30967d58a3fc460cc3cc",
+        "xl/worksheets/sheet3.xml": "7c0b5174f33c445c5bab1b0db6a8657ece7a108a50fc30967d58a3fc460cc3cc",
+        "xl/worksheets/sheet4.xml": "7c0b5174f33c445c5bab1b0db6a8657ece7a108a50fc30967d58a3fc460cc3cc",
+        "xl/styles.xml": "bb5ccbdfa9dc8467ef180dcb0f1e427cfaa2c4fa5d391f22b8099d7641ceb6e5",
+        "xl/sharedStrings.xml": "d3254e3727332ed49570cd9e48754cd0c236447830019b591e40cb403386be39",
+        "docProps/core.xml": "aab7c99f9215b569040059048435ab1f169c6f7489dd7a71b733d0b0b36bfafd",
+        "docProps/app.xml": "97a027981ed82eb1479770d58b3f4e3ce0e08d54c7da4aef6bff91bd9330a52a"
+      }
+    },
+    {
+      "workload": "repeated-strings",
+      "variant": "after",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "/workspace/scratch/6c0922bea284/community-serializer/scripts/performance/time_writer.py",
+        "/workspace/scratch/6c0922bea284/evidence/community-eager/repeated-strings-2-after.rss",
+        "/workspace/scratch/6c0922bea284/evidence/community-save-streaming",
+        "repeated-strings",
+        "1250",
+        "20",
+        "7",
+        "/workspace/scratch/6c0922bea284/evidence/community-eager/repeated-strings-2-after.xlsx"
+      ],
+      "peak_rss_kib": 15972,
+      "samples": [
+        {
+          "round": 1,
+          "ns": 15172551,
+          "allocations": 543,
+          "allocated_bytes": 5624802,
+          "output_bytes": 465322
+        },
+        {
+          "round": 2,
+          "ns": 14192144,
+          "allocations": 543,
+          "allocated_bytes": 5624802,
+          "output_bytes": 465322
+        },
+        {
+          "round": 3,
+          "ns": 14056359,
+          "allocations": 543,
+          "allocated_bytes": 5624802,
+          "output_bytes": 465322
+        },
+        {
+          "round": 4,
+          "ns": 14014796,
+          "allocations": 543,
+          "allocated_bytes": 5624802,
+          "output_bytes": 465322
+        },
+        {
+          "round": 5,
+          "ns": 13716206,
+          "allocations": 543,
+          "allocated_bytes": 5624802,
+          "output_bytes": 465322
+        },
+        {
+          "round": 6,
+          "ns": 14431164,
+          "allocations": 543,
+          "allocated_bytes": 5624802,
+          "output_bytes": 465322
+        },
+        {
+          "round": 7,
+          "ns": 14024331,
+          "allocations": 543,
+          "allocated_bytes": 5624802,
+          "output_bytes": 465322
+        }
+      ],
+      "zip_sha256": "5956130bb34736791c135e01695c7b0dfbbcbd65ad808c30767ca7ef9b7bd64c",
+      "parts": {
+        "[Content_Types].xml": "035e7486de6ee6e86d4c289b087c07042ffc238f250fae2170d9108dc62969d4",
+        "_rels/.rels": "2d683d1d28ca96d0fd91f67f132be8888844c03246b92edc19b7359f291121bc",
+        "xl/workbook.xml": "15a00eceaf8a928331423aa0e93dbe2d0cba5c6cc48af0c5139312d3a2d71e4f",
+        "xl/_rels/workbook.xml.rels": "5eb7b8bf50cd617bdf98c8af2c80f1c192d533b2600805e4466510a504357858",
+        "xl/worksheets/sheet1.xml": "7c0b5174f33c445c5bab1b0db6a8657ece7a108a50fc30967d58a3fc460cc3cc",
+        "xl/worksheets/sheet2.xml": "7c0b5174f33c445c5bab1b0db6a8657ece7a108a50fc30967d58a3fc460cc3cc",
+        "xl/worksheets/sheet3.xml": "7c0b5174f33c445c5bab1b0db6a8657ece7a108a50fc30967d58a3fc460cc3cc",
+        "xl/worksheets/sheet4.xml": "7c0b5174f33c445c5bab1b0db6a8657ece7a108a50fc30967d58a3fc460cc3cc",
+        "xl/styles.xml": "bb5ccbdfa9dc8467ef180dcb0f1e427cfaa2c4fa5d391f22b8099d7641ceb6e5",
+        "xl/sharedStrings.xml": "d3254e3727332ed49570cd9e48754cd0c236447830019b591e40cb403386be39",
+        "docProps/core.xml": "aab7c99f9215b569040059048435ab1f169c6f7489dd7a71b733d0b0b36bfafd",
+        "docProps/app.xml": "97a027981ed82eb1479770d58b3f4e3ce0e08d54c7da4aef6bff91bd9330a52a"
+      }
+    },
+    {
+      "workload": "repeated-strings",
+      "variant": "before",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "/workspace/scratch/6c0922bea284/community-serializer/scripts/performance/time_writer.py",
+        "/workspace/scratch/6c0922bea284/evidence/community-eager/repeated-strings-3-before.rss",
+        "/workspace/scratch/6c0922bea284/evidence/community-save-serializer",
+        "repeated-strings",
+        "1250",
+        "20",
+        "7",
+        "/workspace/scratch/6c0922bea284/evidence/community-eager/repeated-strings-3-before.xlsx"
+      ],
+      "peak_rss_kib": 19352,
+      "samples": [
+        {
+          "round": 1,
+          "ns": 15768870,
+          "allocations": 567,
+          "allocated_bytes": 13724642,
+          "output_bytes": 465310
+        },
+        {
+          "round": 2,
+          "ns": 14322220,
+          "allocations": 567,
+          "allocated_bytes": 13724642,
+          "output_bytes": 465310
+        },
+        {
+          "round": 3,
+          "ns": 15303328,
+          "allocations": 567,
+          "allocated_bytes": 13724642,
+          "output_bytes": 465310
+        },
+        {
+          "round": 4,
+          "ns": 14213666,
+          "allocations": 567,
+          "allocated_bytes": 13724642,
+          "output_bytes": 465310
+        },
+        {
+          "round": 5,
+          "ns": 17043499,
+          "allocations": 567,
+          "allocated_bytes": 13724642,
+          "output_bytes": 465310
+        },
+        {
+          "round": 6,
+          "ns": 14364864,
+          "allocations": 567,
+          "allocated_bytes": 13724642,
+          "output_bytes": 465310
+        },
+        {
+          "round": 7,
+          "ns": 14066394,
+          "allocations": 567,
+          "allocated_bytes": 13724642,
+          "output_bytes": 465310
+        }
+      ],
+      "zip_sha256": "4bc5cedc7a304bbf5fffb9904c74b0dcebbd945a4058fd686c5ecf9ed19abe09",
+      "parts": {
+        "[Content_Types].xml": "035e7486de6ee6e86d4c289b087c07042ffc238f250fae2170d9108dc62969d4",
+        "_rels/.rels": "2d683d1d28ca96d0fd91f67f132be8888844c03246b92edc19b7359f291121bc",
+        "xl/workbook.xml": "15a00eceaf8a928331423aa0e93dbe2d0cba5c6cc48af0c5139312d3a2d71e4f",
+        "xl/_rels/workbook.xml.rels": "5eb7b8bf50cd617bdf98c8af2c80f1c192d533b2600805e4466510a504357858",
+        "xl/worksheets/sheet1.xml": "7c0b5174f33c445c5bab1b0db6a8657ece7a108a50fc30967d58a3fc460cc3cc",
+        "xl/worksheets/sheet2.xml": "7c0b5174f33c445c5bab1b0db6a8657ece7a108a50fc30967d58a3fc460cc3cc",
+        "xl/worksheets/sheet3.xml": "7c0b5174f33c445c5bab1b0db6a8657ece7a108a50fc30967d58a3fc460cc3cc",
+        "xl/worksheets/sheet4.xml": "7c0b5174f33c445c5bab1b0db6a8657ece7a108a50fc30967d58a3fc460cc3cc",
+        "xl/styles.xml": "bb5ccbdfa9dc8467ef180dcb0f1e427cfaa2c4fa5d391f22b8099d7641ceb6e5",
+        "xl/sharedStrings.xml": "d3254e3727332ed49570cd9e48754cd0c236447830019b591e40cb403386be39",
+        "docProps/core.xml": "aab7c99f9215b569040059048435ab1f169c6f7489dd7a71b733d0b0b36bfafd",
+        "docProps/app.xml": "97a027981ed82eb1479770d58b3f4e3ce0e08d54c7da4aef6bff91bd9330a52a"
+      }
+    },
+    {
+      "workload": "repeated-strings",
+      "variant": "before",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "/workspace/scratch/6c0922bea284/community-serializer/scripts/performance/time_writer.py",
+        "/workspace/scratch/6c0922bea284/evidence/community-eager/repeated-strings-4-before.rss",
+        "/workspace/scratch/6c0922bea284/evidence/community-save-serializer",
+        "repeated-strings",
+        "1250",
+        "20",
+        "7",
+        "/workspace/scratch/6c0922bea284/evidence/community-eager/repeated-strings-4-before.xlsx"
+      ],
+      "peak_rss_kib": 19352,
+      "samples": [
+        {
+          "round": 1,
+          "ns": 15726816,
+          "allocations": 567,
+          "allocated_bytes": 13724642,
+          "output_bytes": 465310
+        },
+        {
+          "round": 2,
+          "ns": 14310643,
+          "allocations": 567,
+          "allocated_bytes": 13724642,
+          "output_bytes": 465310
+        },
+        {
+          "round": 3,
+          "ns": 14246396,
+          "allocations": 567,
+          "allocated_bytes": 13724642,
+          "output_bytes": 465310
+        },
+        {
+          "round": 4,
+          "ns": 14957616,
+          "allocations": 567,
+          "allocated_bytes": 13724642,
+          "output_bytes": 465310
+        },
+        {
+          "round": 5,
+          "ns": 14160926,
+          "allocations": 567,
+          "allocated_bytes": 13724642,
+          "output_bytes": 465310
+        },
+        {
+          "round": 6,
+          "ns": 14135188,
+          "allocations": 567,
+          "allocated_bytes": 13724642,
+          "output_bytes": 465310
+        },
+        {
+          "round": 7,
+          "ns": 13631209,
+          "allocations": 567,
+          "allocated_bytes": 13724642,
+          "output_bytes": 465310
+        }
+      ],
+      "zip_sha256": "4bc5cedc7a304bbf5fffb9904c74b0dcebbd945a4058fd686c5ecf9ed19abe09",
+      "parts": {
+        "[Content_Types].xml": "035e7486de6ee6e86d4c289b087c07042ffc238f250fae2170d9108dc62969d4",
+        "_rels/.rels": "2d683d1d28ca96d0fd91f67f132be8888844c03246b92edc19b7359f291121bc",
+        "xl/workbook.xml": "15a00eceaf8a928331423aa0e93dbe2d0cba5c6cc48af0c5139312d3a2d71e4f",
+        "xl/_rels/workbook.xml.rels": "5eb7b8bf50cd617bdf98c8af2c80f1c192d533b2600805e4466510a504357858",
+        "xl/worksheets/sheet1.xml": "7c0b5174f33c445c5bab1b0db6a8657ece7a108a50fc30967d58a3fc460cc3cc",
+        "xl/worksheets/sheet2.xml": "7c0b5174f33c445c5bab1b0db6a8657ece7a108a50fc30967d58a3fc460cc3cc",
+        "xl/worksheets/sheet3.xml": "7c0b5174f33c445c5bab1b0db6a8657ece7a108a50fc30967d58a3fc460cc3cc",
+        "xl/worksheets/sheet4.xml": "7c0b5174f33c445c5bab1b0db6a8657ece7a108a50fc30967d58a3fc460cc3cc",
+        "xl/styles.xml": "bb5ccbdfa9dc8467ef180dcb0f1e427cfaa2c4fa5d391f22b8099d7641ceb6e5",
+        "xl/sharedStrings.xml": "d3254e3727332ed49570cd9e48754cd0c236447830019b591e40cb403386be39",
+        "docProps/core.xml": "aab7c99f9215b569040059048435ab1f169c6f7489dd7a71b733d0b0b36bfafd",
+        "docProps/app.xml": "97a027981ed82eb1479770d58b3f4e3ce0e08d54c7da4aef6bff91bd9330a52a"
+      }
+    },
+    {
+      "workload": "repeated-strings",
+      "variant": "after",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "/workspace/scratch/6c0922bea284/community-serializer/scripts/performance/time_writer.py",
+        "/workspace/scratch/6c0922bea284/evidence/community-eager/repeated-strings-5-after.rss",
+        "/workspace/scratch/6c0922bea284/evidence/community-save-streaming",
+        "repeated-strings",
+        "1250",
+        "20",
+        "7",
+        "/workspace/scratch/6c0922bea284/evidence/community-eager/repeated-strings-5-after.xlsx"
+      ],
+      "peak_rss_kib": 15996,
+      "samples": [
+        {
+          "round": 1,
+          "ns": 14310122,
+          "allocations": 543,
+          "allocated_bytes": 5624802,
+          "output_bytes": 465322
+        },
+        {
+          "round": 2,
+          "ns": 13798591,
+          "allocations": 543,
+          "allocated_bytes": 5624802,
+          "output_bytes": 465322
+        },
+        {
+          "round": 3,
+          "ns": 13917520,
+          "allocations": 543,
+          "allocated_bytes": 5624802,
+          "output_bytes": 465322
+        },
+        {
+          "round": 4,
+          "ns": 13692095,
+          "allocations": 543,
+          "allocated_bytes": 5624802,
+          "output_bytes": 465322
+        },
+        {
+          "round": 5,
+          "ns": 13471963,
+          "allocations": 543,
+          "allocated_bytes": 5624802,
+          "output_bytes": 465322
+        },
+        {
+          "round": 6,
+          "ns": 14570699,
+          "allocations": 543,
+          "allocated_bytes": 5624802,
+          "output_bytes": 465322
+        },
+        {
+          "round": 7,
+          "ns": 13966589,
+          "allocations": 543,
+          "allocated_bytes": 5624802,
+          "output_bytes": 465322
+        }
+      ],
+      "zip_sha256": "5956130bb34736791c135e01695c7b0dfbbcbd65ad808c30767ca7ef9b7bd64c",
+      "parts": {
+        "[Content_Types].xml": "035e7486de6ee6e86d4c289b087c07042ffc238f250fae2170d9108dc62969d4",
+        "_rels/.rels": "2d683d1d28ca96d0fd91f67f132be8888844c03246b92edc19b7359f291121bc",
+        "xl/workbook.xml": "15a00eceaf8a928331423aa0e93dbe2d0cba5c6cc48af0c5139312d3a2d71e4f",
+        "xl/_rels/workbook.xml.rels": "5eb7b8bf50cd617bdf98c8af2c80f1c192d533b2600805e4466510a504357858",
+        "xl/worksheets/sheet1.xml": "7c0b5174f33c445c5bab1b0db6a8657ece7a108a50fc30967d58a3fc460cc3cc",
+        "xl/worksheets/sheet2.xml": "7c0b5174f33c445c5bab1b0db6a8657ece7a108a50fc30967d58a3fc460cc3cc",
+        "xl/worksheets/sheet3.xml": "7c0b5174f33c445c5bab1b0db6a8657ece7a108a50fc30967d58a3fc460cc3cc",
+        "xl/worksheets/sheet4.xml": "7c0b5174f33c445c5bab1b0db6a8657ece7a108a50fc30967d58a3fc460cc3cc",
+        "xl/styles.xml": "bb5ccbdfa9dc8467ef180dcb0f1e427cfaa2c4fa5d391f22b8099d7641ceb6e5",
+        "xl/sharedStrings.xml": "d3254e3727332ed49570cd9e48754cd0c236447830019b591e40cb403386be39",
+        "docProps/core.xml": "aab7c99f9215b569040059048435ab1f169c6f7489dd7a71b733d0b0b36bfafd",
+        "docProps/app.xml": "97a027981ed82eb1479770d58b3f4e3ce0e08d54c7da4aef6bff91bd9330a52a"
+      }
+    },
+    {
+      "workload": "repeated-strings",
+      "variant": "after",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "/workspace/scratch/6c0922bea284/community-serializer/scripts/performance/time_writer.py",
+        "/workspace/scratch/6c0922bea284/evidence/community-eager/repeated-strings-6-after.rss",
+        "/workspace/scratch/6c0922bea284/evidence/community-save-streaming",
+        "repeated-strings",
+        "1250",
+        "20",
+        "7",
+        "/workspace/scratch/6c0922bea284/evidence/community-eager/repeated-strings-6-after.xlsx"
+      ],
+      "peak_rss_kib": 15992,
+      "samples": [
+        {
+          "round": 1,
+          "ns": 14033309,
+          "allocations": 543,
+          "allocated_bytes": 5624802,
+          "output_bytes": 465322
+        },
+        {
+          "round": 2,
+          "ns": 13831245,
+          "allocations": 543,
+          "allocated_bytes": 5624802,
+          "output_bytes": 465322
+        },
+        {
+          "round": 3,
+          "ns": 13776422,
+          "allocations": 543,
+          "allocated_bytes": 5624802,
+          "output_bytes": 465322
+        },
+        {
+          "round": 4,
+          "ns": 14166840,
+          "allocations": 543,
+          "allocated_bytes": 5624802,
+          "output_bytes": 465322
+        },
+        {
+          "round": 5,
+          "ns": 13688890,
+          "allocations": 543,
+          "allocated_bytes": 5624802,
+          "output_bytes": 465322
+        },
+        {
+          "round": 6,
+          "ns": 14348324,
+          "allocations": 543,
+          "allocated_bytes": 5624802,
+          "output_bytes": 465322
+        },
+        {
+          "round": 7,
+          "ns": 13932637,
+          "allocations": 543,
+          "allocated_bytes": 5624802,
+          "output_bytes": 465322
+        }
+      ],
+      "zip_sha256": "5956130bb34736791c135e01695c7b0dfbbcbd65ad808c30767ca7ef9b7bd64c",
+      "parts": {
+        "[Content_Types].xml": "035e7486de6ee6e86d4c289b087c07042ffc238f250fae2170d9108dc62969d4",
+        "_rels/.rels": "2d683d1d28ca96d0fd91f67f132be8888844c03246b92edc19b7359f291121bc",
+        "xl/workbook.xml": "15a00eceaf8a928331423aa0e93dbe2d0cba5c6cc48af0c5139312d3a2d71e4f",
+        "xl/_rels/workbook.xml.rels": "5eb7b8bf50cd617bdf98c8af2c80f1c192d533b2600805e4466510a504357858",
+        "xl/worksheets/sheet1.xml": "7c0b5174f33c445c5bab1b0db6a8657ece7a108a50fc30967d58a3fc460cc3cc",
+        "xl/worksheets/sheet2.xml": "7c0b5174f33c445c5bab1b0db6a8657ece7a108a50fc30967d58a3fc460cc3cc",
+        "xl/worksheets/sheet3.xml": "7c0b5174f33c445c5bab1b0db6a8657ece7a108a50fc30967d58a3fc460cc3cc",
+        "xl/worksheets/sheet4.xml": "7c0b5174f33c445c5bab1b0db6a8657ece7a108a50fc30967d58a3fc460cc3cc",
+        "xl/styles.xml": "bb5ccbdfa9dc8467ef180dcb0f1e427cfaa2c4fa5d391f22b8099d7641ceb6e5",
+        "xl/sharedStrings.xml": "d3254e3727332ed49570cd9e48754cd0c236447830019b591e40cb403386be39",
+        "docProps/core.xml": "aab7c99f9215b569040059048435ab1f169c6f7489dd7a71b733d0b0b36bfafd",
+        "docProps/app.xml": "97a027981ed82eb1479770d58b3f4e3ce0e08d54c7da4aef6bff91bd9330a52a"
+      }
+    },
+    {
+      "workload": "repeated-strings",
+      "variant": "before",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "/workspace/scratch/6c0922bea284/community-serializer/scripts/performance/time_writer.py",
+        "/workspace/scratch/6c0922bea284/evidence/community-eager/repeated-strings-7-before.rss",
+        "/workspace/scratch/6c0922bea284/evidence/community-save-serializer",
+        "repeated-strings",
+        "1250",
+        "20",
+        "7",
+        "/workspace/scratch/6c0922bea284/evidence/community-eager/repeated-strings-7-before.xlsx"
+      ],
+      "peak_rss_kib": 19320,
+      "samples": [
+        {
+          "round": 1,
+          "ns": 15670636,
+          "allocations": 567,
+          "allocated_bytes": 13724642,
+          "output_bytes": 465310
+        },
+        {
+          "round": 2,
+          "ns": 19101417,
+          "allocations": 567,
+          "allocated_bytes": 13724642,
+          "output_bytes": 465310
+        },
+        {
+          "round": 3,
+          "ns": 15091454,
+          "allocations": 567,
+          "allocated_bytes": 13724642,
+          "output_bytes": 465310
+        },
+        {
+          "round": 4,
+          "ns": 15988326,
+          "allocations": 567,
+          "allocated_bytes": 13724642,
+          "output_bytes": 465310
+        },
+        {
+          "round": 5,
+          "ns": 14937401,
+          "allocations": 567,
+          "allocated_bytes": 13724642,
+          "output_bytes": 465310
+        },
+        {
+          "round": 6,
+          "ns": 14488816,
+          "allocations": 567,
+          "allocated_bytes": 13724642,
+          "output_bytes": 465310
+        },
+        {
+          "round": 7,
+          "ns": 15046266,
+          "allocations": 567,
+          "allocated_bytes": 13724642,
+          "output_bytes": 465310
+        }
+      ],
+      "zip_sha256": "4bc5cedc7a304bbf5fffb9904c74b0dcebbd945a4058fd686c5ecf9ed19abe09",
+      "parts": {
+        "[Content_Types].xml": "035e7486de6ee6e86d4c289b087c07042ffc238f250fae2170d9108dc62969d4",
+        "_rels/.rels": "2d683d1d28ca96d0fd91f67f132be8888844c03246b92edc19b7359f291121bc",
+        "xl/workbook.xml": "15a00eceaf8a928331423aa0e93dbe2d0cba5c6cc48af0c5139312d3a2d71e4f",
+        "xl/_rels/workbook.xml.rels": "5eb7b8bf50cd617bdf98c8af2c80f1c192d533b2600805e4466510a504357858",
+        "xl/worksheets/sheet1.xml": "7c0b5174f33c445c5bab1b0db6a8657ece7a108a50fc30967d58a3fc460cc3cc",
+        "xl/worksheets/sheet2.xml": "7c0b5174f33c445c5bab1b0db6a8657ece7a108a50fc30967d58a3fc460cc3cc",
+        "xl/worksheets/sheet3.xml": "7c0b5174f33c445c5bab1b0db6a8657ece7a108a50fc30967d58a3fc460cc3cc",
+        "xl/worksheets/sheet4.xml": "7c0b5174f33c445c5bab1b0db6a8657ece7a108a50fc30967d58a3fc460cc3cc",
+        "xl/styles.xml": "bb5ccbdfa9dc8467ef180dcb0f1e427cfaa2c4fa5d391f22b8099d7641ceb6e5",
+        "xl/sharedStrings.xml": "d3254e3727332ed49570cd9e48754cd0c236447830019b591e40cb403386be39",
+        "docProps/core.xml": "aab7c99f9215b569040059048435ab1f169c6f7489dd7a71b733d0b0b36bfafd",
+        "docProps/app.xml": "97a027981ed82eb1479770d58b3f4e3ce0e08d54c7da4aef6bff91bd9330a52a"
+      }
+    },
+    {
+      "workload": "large-numeric",
+      "variant": "before",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "/workspace/scratch/6c0922bea284/community-serializer/scripts/performance/time_writer.py",
+        "/workspace/scratch/6c0922bea284/evidence/community-eager/large-before.rss",
+        "/workspace/scratch/6c0922bea284/evidence/community-save-serializer",
+        "numeric",
+        "12500",
+        "20",
+        "1",
+        "/workspace/scratch/6c0922bea284/evidence/community-eager/large-before.xlsx"
+      ],
+      "peak_rss_kib": 134516,
+      "parts": {
+        "[Content_Types].xml": "035e7486de6ee6e86d4c289b087c07042ffc238f250fae2170d9108dc62969d4",
+        "_rels/.rels": "2d683d1d28ca96d0fd91f67f132be8888844c03246b92edc19b7359f291121bc",
+        "xl/workbook.xml": "15a00eceaf8a928331423aa0e93dbe2d0cba5c6cc48af0c5139312d3a2d71e4f",
+        "xl/_rels/workbook.xml.rels": "5eb7b8bf50cd617bdf98c8af2c80f1c192d533b2600805e4466510a504357858",
+        "xl/worksheets/sheet1.xml": "b727d4ad059d1225de51a8950b45ad7c6a2241c4485f0e9ee34ce657b686ac83",
+        "xl/worksheets/sheet2.xml": "b727d4ad059d1225de51a8950b45ad7c6a2241c4485f0e9ee34ce657b686ac83",
+        "xl/worksheets/sheet3.xml": "b727d4ad059d1225de51a8950b45ad7c6a2241c4485f0e9ee34ce657b686ac83",
+        "xl/worksheets/sheet4.xml": "b727d4ad059d1225de51a8950b45ad7c6a2241c4485f0e9ee34ce657b686ac83",
+        "xl/styles.xml": "bb5ccbdfa9dc8467ef180dcb0f1e427cfaa2c4fa5d391f22b8099d7641ceb6e5",
+        "xl/sharedStrings.xml": "c248cba6c01dff6c864e2605a4060ad999662329cf1798036279e7c43fa4c0d3",
+        "docProps/core.xml": "aab7c99f9215b569040059048435ab1f169c6f7489dd7a71b733d0b0b36bfafd",
+        "docProps/app.xml": "97a027981ed82eb1479770d58b3f4e3ce0e08d54c7da4aef6bff91bd9330a52a"
+      },
+      "zip_sha256": "448fa54f69bd0b9789710fdc025f2470be52776b761e461f7fac704de2cd10f2",
+      "samples": [
+        {
+          "round": 1,
+          "ns": 145109367,
+          "allocations": 441,
+          "allocated_bytes": 88868368,
+          "output_bytes": 4596260
+        }
+      ]
+    },
+    {
+      "workload": "large-numeric",
+      "variant": "after",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "/workspace/scratch/6c0922bea284/community-serializer/scripts/performance/time_writer.py",
+        "/workspace/scratch/6c0922bea284/evidence/community-eager/large-after.rss",
+        "/workspace/scratch/6c0922bea284/evidence/community-save-streaming",
+        "numeric",
+        "12500",
+        "20",
+        "1",
+        "/workspace/scratch/6c0922bea284/evidence/community-eager/large-after.xlsx"
+      ],
+      "peak_rss_kib": 100240,
+      "parts": {
+        "[Content_Types].xml": "035e7486de6ee6e86d4c289b087c07042ffc238f250fae2170d9108dc62969d4",
+        "_rels/.rels": "2d683d1d28ca96d0fd91f67f132be8888844c03246b92edc19b7359f291121bc",
+        "xl/workbook.xml": "15a00eceaf8a928331423aa0e93dbe2d0cba5c6cc48af0c5139312d3a2d71e4f",
+        "xl/_rels/workbook.xml.rels": "5eb7b8bf50cd617bdf98c8af2c80f1c192d533b2600805e4466510a504357858",
+        "xl/worksheets/sheet1.xml": "b727d4ad059d1225de51a8950b45ad7c6a2241c4485f0e9ee34ce657b686ac83",
+        "xl/worksheets/sheet2.xml": "b727d4ad059d1225de51a8950b45ad7c6a2241c4485f0e9ee34ce657b686ac83",
+        "xl/worksheets/sheet3.xml": "b727d4ad059d1225de51a8950b45ad7c6a2241c4485f0e9ee34ce657b686ac83",
+        "xl/worksheets/sheet4.xml": "b727d4ad059d1225de51a8950b45ad7c6a2241c4485f0e9ee34ce657b686ac83",
+        "xl/styles.xml": "bb5ccbdfa9dc8467ef180dcb0f1e427cfaa2c4fa5d391f22b8099d7641ceb6e5",
+        "xl/sharedStrings.xml": "c248cba6c01dff6c864e2605a4060ad999662329cf1798036279e7c43fa4c0d3",
+        "docProps/core.xml": "aab7c99f9215b569040059048435ab1f169c6f7489dd7a71b733d0b0b36bfafd",
+        "docProps/app.xml": "97a027981ed82eb1479770d58b3f4e3ce0e08d54c7da4aef6bff91bd9330a52a"
+      },
+      "zip_sha256": "2b7a40c8a0d2fd2311e3f9d9b51a55aa2872a56b5a908f57038f96f2cd5cdd40",
+      "samples": [
+        {
+          "round": 1,
+          "ns": 140173740,
+          "allocations": 405,
+          "allocated_bytes": 21984397,
+          "output_bytes": 4597056
+        }
+      ]
+    }
+  ]
+}
