@@ -189,11 +189,20 @@ pub fn emit_streaming_to<W: std::io::Write>(
     _styles: &StylesBuilder,
     dest: &mut W,
 ) -> std::io::Result<()> {
-    let stream = sheet
-        .streaming
-        .as_ref()
-        .expect("emit_streaming_to requires sheet.streaming = Some");
+    assert!(
+        sheet.streaming.is_some(),
+        "emit_streaming_to requires a streaming sheet"
+    );
+    emit_to(sheet, sheet_idx, None, dest)
+}
 
+/// Stream either an eager worksheet or an existing write-only spool.
+pub(crate) fn emit_to<W: std::io::Write>(
+    sheet: &Worksheet,
+    sheet_idx: u32,
+    sst: Option<&mut SstBuilder>,
+    dest: &mut W,
+) -> std::io::Result<()> {
     // --- Head (XML decl, root, slots 2-5, opening <sheetData>) ---
     //
     // Tiny by construction: dimension + sheetViews + sheetFormatPr + cols
@@ -213,17 +222,21 @@ pub fn emit_streaming_to<W: std::io::Write>(
     // Slot 6: <sheetData>. Empty streaming sheet → self-closing tag,
     // single small write. Otherwise: write the head ending with the
     // opening tag, splice the temp file, then write `</sheetData>`.
-    if stream.row_count() == 0 {
-        head.push_str("<sheetData/>");
-        dest.write_all(head.as_bytes())?;
+    if let Some(stream) = sheet.streaming.as_ref() {
+        if stream.row_count() == 0 {
+            head.push_str("<sheetData/>");
+            dest.write_all(head.as_bytes())?;
+        } else {
+            head.push_str("<sheetData>");
+            dest.write_all(head.as_bytes())?;
+            drop(head);
+            stream.splice_into_writer(dest)?;
+            dest.write_all(b"</sheetData>")?;
+        }
     } else {
-        head.push_str("<sheetData>");
         dest.write_all(head.as_bytes())?;
-        // Free the head buffer before the splice so peak memory stays
-        // bounded by the larger of head and tail, not their sum.
         drop(head);
-        stream.splice_into_writer(dest)?;
-        dest.write_all(b"</sheetData>")?;
+        super::sheet_data::emit_to(dest, sheet, sst.expect("eager sheet requires SST"))?;
     }
 
     // --- Tail (slots 8-37 + closing </worksheet>) ---
@@ -295,6 +308,75 @@ mod tests {
     use crate::model::worksheet::{Column, FreezePane, Hyperlink, Merge, Worksheet};
     use quick_xml::events::Event;
     use quick_xml::Reader;
+
+    #[test]
+    fn eager_stream_matches_buffered_dense_sparse_and_escaped_data() {
+        let mut sheet = Worksheet::new("S");
+        for row in 1..=2000 {
+            sheet
+                .append_dense_row(
+                    row,
+                    1,
+                    vec![
+                        WriteCell::new(WriteCellValue::Number(row as f64 / 3.0)),
+                        WriteCell::new(WriteCellValue::String(format!(" 日本語 & <{row}> "))),
+                    ],
+                )
+                .unwrap();
+        }
+        sheet.set_cell(
+            3,
+            2,
+            WriteCell::new(WriteCellValue::String("overwritten".into())),
+        );
+        sheet.set_cell(
+            4,
+            9,
+            WriteCell::new(WriteCellValue::Formula {
+                expr: "IF(A1<2,1,0)".repeat(20_000),
+                result: None,
+            }),
+        );
+        for empty in [false, true] {
+            let empty_sheet = Worksheet::new("Empty");
+            let current = if empty { &empty_sheet } else { &sheet };
+            let styles = StylesBuilder::default();
+            let mut reference_sst = SstBuilder::default();
+            let reference = emit(&current, 0, &mut reference_sst, &styles);
+            let mut actual_sst = SstBuilder::default();
+            let mut actual = Vec::new();
+            emit_to(&current, 0, Some(&mut actual_sst), &mut actual).unwrap();
+            assert_eq!(reference, actual);
+            assert_eq!(reference_sst.total_count(), actual_sst.total_count());
+            assert_eq!(
+                super::super::shared_strings_xml::emit(&reference_sst),
+                super::super::shared_strings_xml::emit(&actual_sst)
+            );
+        }
+    }
+
+    #[test]
+    fn eager_stream_propagates_original_io_error() {
+        struct Fails;
+        impl std::io::Write for Fails {
+            fn write(&mut self, _: &[u8]) -> std::io::Result<usize> {
+                Err(std::io::Error::new(
+                    std::io::ErrorKind::BrokenPipe,
+                    "test sink",
+                ))
+            }
+            fn flush(&mut self) -> std::io::Result<()> {
+                Ok(())
+            }
+        }
+        let mut sheet = Worksheet::new("S");
+        sheet.set_cell(1, 1, WriteCell::new(WriteCellValue::Number(1.0)));
+        let error =
+            super::super::sheet_data::emit_to(&mut Fails, &sheet, &mut SstBuilder::default())
+                .unwrap_err();
+        assert_eq!(error.kind(), std::io::ErrorKind::BrokenPipe);
+        assert_eq!(error.to_string(), "test sink");
+    }
 
     fn parse_ok(bytes: &[u8]) {
         let text = std::str::from_utf8(bytes).expect("utf8");

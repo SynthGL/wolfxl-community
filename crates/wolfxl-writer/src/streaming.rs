@@ -216,9 +216,9 @@ impl StreamingSheet {
 /// row encoder feeds both the eager `String` and the streaming temp
 /// file. Captures the underlying `io::Error` separately because
 /// `fmt::Error` is a unit type and would otherwise lose the cause.
-struct IoFmtAdapter<'a, W: Write> {
-    inner: &'a mut W,
-    err: Option<io::Error>,
+pub(crate) struct IoFmtAdapter<'a, W: Write> {
+    pub(crate) inner: &'a mut W,
+    pub(crate) err: Option<io::Error>,
 }
 
 impl<W: Write> fmt::Write for IoFmtAdapter<'_, W> {

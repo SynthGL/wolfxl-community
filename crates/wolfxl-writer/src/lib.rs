@@ -72,10 +72,9 @@ pub fn emit_xlsx(wb: &mut Workbook) -> Vec<u8> {
 
 /// Stream a complete `.xlsx` archive directly into `dest`.
 ///
-/// Same contract as [`emit_xlsx`] for parts and ordering, but skips the
-/// final in-memory ZIP materialisation. Sheet/styles/SST bodies are still
-/// built up as `Vec<u8>` entries because most emitters build them via
-/// `String` accumulators; only the final ZIP container streams to `dest`.
+/// Same contract as [`emit_xlsx`] for parts and ordering. Eager worksheet
+/// rows pass through a bounded buffer directly into ZIP; write-only sheets
+/// stream their existing spool. Styles and the final SST remain buffered.
 ///
 /// `dest` must be `Write + Seek` because `ZipWriter` patches local-file-
 /// header sizes after each entry. Production callers pass a
@@ -87,8 +86,7 @@ pub fn emit_xlsx_to<W: std::io::Write + std::io::Seek>(
     use crate::emit::drawings::DrawingItem;
     use crate::emit::{
         calc_chain_xml, charts, comments_xml, content_types, doc_props, drawings, drawings_vml,
-        persons_xml, rels, shared_strings_xml, sheet_xml, styles_xml, tables_xml,
-        threaded_comments_xml, workbook_xml,
+        persons_xml, rels, styles_xml, tables_xml, threaded_comments_xml, workbook_xml,
     };
     use crate::zip::ZipEntry;
 
@@ -98,26 +96,17 @@ pub fn emit_xlsx_to<W: std::io::Write + std::io::Seek>(
     // `tc={guid}` synthetic author entries.
     threaded_comments_xml::synthesize_legacy_placeholders(wb);
 
-    // RFC-073 v2 (sheet-body streaming): each sheet entry is either a
-    // pre-computed `Vec<u8>` (eager path) or an in-place stream from a
-    // per-sheet temp file (write_only path). Eager-sheet emit mutates the
-    // SST as it walks string cells; streaming sheets already interned at
-    // `append_row` time, so by save the SST is final regardless. Both
-    // paths end up at the same SST state before `shared_strings_xml::emit`
-    // runs below.
-    let mut sheet_ops: Vec<EmitOp> = Vec::with_capacity(wb.sheets.len());
-    for (idx, sheet) in wb.sheets.iter().enumerate() {
-        let path = format!("xl/worksheets/sheet{}.xml", idx + 1);
-        if sheet.streaming.is_some() {
-            sheet_ops.push(EmitOp::SheetStream {
-                path,
-                sheet_idx: idx,
-            });
-        } else {
-            let bytes = sheet_xml::emit(sheet, idx as u32, &mut wb.sst, &wb.styles);
-            sheet_ops.push(EmitOp::Bytes(ZipEntry { path, bytes }));
-        }
-    }
+    // Defer every sheet body until its ZIP entry is open. Eager sheets intern
+    // strings while emitting; the deferred SST entry follows all worksheets.
+    let mut sheet_ops: Vec<EmitOp> = wb
+        .sheets
+        .iter()
+        .enumerate()
+        .map(|(idx, _)| EmitOp::SheetStream {
+            path: format!("xl/worksheets/sheet{}.xml", idx + 1),
+            sheet_idx: idx,
+        })
+        .collect();
 
     let calc_chain = calc_chain_xml::emit(wb);
     let mut ops: Vec<EmitOp> = vec![
@@ -279,10 +268,7 @@ pub fn emit_xlsx_to<W: std::io::Write + std::io::Seek>(
             path: "xl/styles.xml".to_string(),
             bytes: styles_xml::emit(&wb.styles),
         }),
-        EmitOp::Bytes(ZipEntry {
-            path: "xl/sharedStrings.xml".to_string(),
-            bytes: shared_strings_xml::emit(&wb.sst),
-        }),
+        EmitOp::SharedStrings,
         EmitOp::Bytes(ZipEntry {
             path: "docProps/core.xml".to_string(),
             bytes: doc_props::emit_core(wb),
@@ -318,13 +304,11 @@ pub fn emit_xlsx_to<W: std::io::Write + std::io::Seek>(
 
 /// One queued OOXML part awaiting packaging.
 ///
-/// Most parts are pre-built `Vec<u8>` byte buffers (`Bytes`). For
-/// `Workbook(write_only=True)` sheets, the body is too large to materialise
-/// in RAM, so we defer body emission until the `ZipWriter` has opened the
-/// file entry — `SheetStream` carries the sheet index, and the dispatch
-/// loop calls [`emit::sheet_xml::emit_streaming_to`] straight into the
-/// open ZIP entry.
+/// Metadata parts are pre-built bytes. All worksheet bodies are deferred
+/// until their ZIP entry opens; shared strings are deferred until those
+/// worksheets have finished interning their values.
 enum EmitOp {
+    SharedStrings,
     Bytes(crate::zip::ZipEntry),
     SheetStream {
         path: String,
@@ -337,13 +321,11 @@ enum EmitOp {
 ///
 /// Mirrors the body of [`crate::zip::package_to`] for the `Bytes` arm so
 /// byte-equality vs the buffered `package` path is preserved entry-by-entry.
-/// For the `SheetStream` arm, opens the ZIP entry with DEFLATE (sheet
-/// bodies are always over the STORE threshold) and hands the writer to
-/// [`emit::sheet_xml::emit_streaming_to`], which `io::copy`s the
-/// per-sheet temp file straight through.
+/// Worksheet bodies use DEFLATE and stream eager rows or existing spools.
+/// The shared-string entry sees the final SST after every sheet is written.
 fn package_emit_ops<W: std::io::Write + std::io::Seek>(
     ops: &[EmitOp],
-    wb: &crate::Workbook,
+    wb: &mut crate::Workbook,
     dest: &mut W,
 ) -> Result<(), std::io::Error> {
     use ::zip::write::SimpleFileOptions;
@@ -361,7 +343,18 @@ fn package_emit_ops<W: std::io::Write + std::io::Seek>(
     let zip_to_io = |e: ::zip::result::ZipError| std::io::Error::other(e.to_string());
 
     for op in ops {
+        let deferred_sst;
+        let op = if matches!(op, EmitOp::SharedStrings) {
+            deferred_sst = EmitOp::Bytes(crate::zip::ZipEntry {
+                path: "xl/sharedStrings.xml".to_string(),
+                bytes: crate::emit::shared_strings_xml::emit(&wb.sst),
+            });
+            &deferred_sst
+        } else {
+            op
+        };
         match op {
+            EmitOp::SharedStrings => unreachable!("SST materialized above"),
             EmitOp::Bytes(entry) => {
                 let method = if entry.bytes.len() < DEFLATE_MIN_BYTES {
                     CompressionMethod::Stored
@@ -391,10 +384,10 @@ fn package_emit_ops<W: std::io::Write + std::io::Seek>(
                 }
                 writer.start_file(path.clone(), opts).map_err(zip_to_io)?;
                 let sheet = &wb.sheets[*sheet_idx];
-                crate::emit::sheet_xml::emit_streaming_to(
+                crate::emit::sheet_xml::emit_to(
                     sheet,
                     *sheet_idx as u32,
-                    &wb.styles,
+                    Some(&mut wb.sst),
                     &mut writer,
                 )?;
             }

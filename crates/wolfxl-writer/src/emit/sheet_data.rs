@@ -32,6 +32,39 @@ pub fn emit(out: &mut String, sheet: &Worksheet, sst: &mut SstBuilder) {
     out.push_str("</sheetData>");
 }
 
+/// Emit eager rows through one bounded I/O buffer, using the same row encoder.
+pub(crate) fn emit_to<W: std::io::Write>(
+    dest: &mut W,
+    sheet: &Worksheet,
+    sst: &mut SstBuilder,
+) -> std::io::Result<()> {
+    let mut buffered = std::io::BufWriter::with_capacity(64 * 1024, dest);
+    let mut out = crate::streaming::IoFmtAdapter {
+        inner: &mut buffered,
+        err: None,
+    };
+    let result = (|| {
+        use std::fmt::Write;
+        if sheet.rows.is_empty() && sheet.dense_rows.is_empty() {
+            return out.write_str("<sheetData/>");
+        }
+        out.write_str("<sheetData>")?;
+        sheet.visit_logical_rows(|row_num, row, dense| {
+            emit_merged_row_to(&mut out, row_num, row, dense, sst)
+        })?;
+        out.write_str("</sheetData>")
+    })();
+    result.map_err(|_| {
+        out.err
+            .take()
+            .unwrap_or_else(|| std::io::Error::other("row formatting failed"))
+    })?;
+    buffered
+        .into_inner()
+        .map(|_| ())
+        .map_err(|error| error.into_error())
+}
+
 /// Encode a single `<row r="…">…</row>` element into `out`.
 ///
 /// Returns `fmt::Result` from the underlying writes — pushing into a
