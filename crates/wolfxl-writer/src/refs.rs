@@ -171,6 +171,43 @@ pub fn format_a1(row: u32, col: u32) -> String {
     out
 }
 
+/// Stack-backed A1 address for allocation-free serialization.
+pub(crate) struct A1Ref {
+    bytes: [u8; 10],
+    start: usize,
+}
+
+impl A1Ref {
+    pub(crate) fn new(row: u32, col: u32) -> Self {
+        assert!((1..=MAX_ROW).contains(&row), "row out of range: {row}");
+        assert!((1..=MAX_COL).contains(&col), "column out of range: {col}");
+        let mut result = Self {
+            bytes: [0; 10],
+            start: 10,
+        };
+        let mut n = row;
+        while n > 0 {
+            result.start -= 1;
+            result.bytes[result.start] = b'0' + (n % 10) as u8;
+            n /= 10;
+        }
+        n = col;
+        while n > 0 {
+            n -= 1;
+            result.start -= 1;
+            result.bytes[result.start] = b'A' + (n % 26) as u8;
+            n /= 26;
+        }
+        result
+    }
+}
+
+impl core::fmt::Display for A1Ref {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.write_str(core::str::from_utf8(&self.bytes[self.start..]).expect("ASCII A1 address"))
+    }
+}
+
 /// Parse an A1 range into `((top_left), (bottom_right))`, both `(row, col)`.
 ///
 /// A single-cell form (`"A1"`) is accepted and returns the same cell as both
@@ -310,6 +347,15 @@ pub fn quote_sheet_name_if_needed(name: &str) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn stack_addresses_match_owned_formatter() {
+        for row in [1, 9, 10, 99, 100, 999_999, MAX_ROW] {
+            for col in 1..=MAX_COL {
+                assert_eq!(A1Ref::new(row, col).to_string(), format_a1(row, col));
+            }
+        }
+    }
 
     // ---- col_to_letters / letters_to_col ----
 

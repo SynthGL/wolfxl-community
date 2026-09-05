@@ -40,12 +40,13 @@ pub fn emit(sst: &SstBuilder) -> Vec<u8> {
         let needs_preserve = s.chars().next().is_some_and(|c| c.is_whitespace())
             || s.chars().next_back().is_some_and(|c| c.is_whitespace());
 
-        let escaped = xml_escape::text(s);
         if needs_preserve {
-            out.push_str(&format!("<si><t xml:space=\"preserve\">{escaped}</t></si>"));
+            out.push_str("<si><t xml:space=\"preserve\">");
         } else {
-            out.push_str(&format!("<si><t>{escaped}</t></si>"));
+            out.push_str("<si><t>");
         }
+        xml_escape::write_text_to(&mut out, s).expect("String writes are infallible");
+        out.push_str("</t></si>");
     }
 
     out.push_str("</sst>");

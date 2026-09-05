@@ -112,7 +112,7 @@ fn emit_cell_to<W: fmt::Write>(
     cell: &WriteCell,
     sst: &mut SstBuilder,
 ) -> fmt::Result {
-    let cell_ref = refs::format_a1(row_num, col_num);
+    let cell_ref = refs::A1Ref::new(row_num, col_num);
 
     match &cell.value {
         WriteCellValue::Blank => {
@@ -282,12 +282,21 @@ fn emit_cell_to<W: fmt::Write>(
     Ok(())
 }
 
-fn format_number(n: f64) -> String {
-    if n == (n as i64) as f64 {
-        format!("{}", n as i64)
-    } else {
-        format!("{}", n)
+struct Number(f64);
+
+impl fmt::Display for Number {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let n = self.0;
+        if n == (n as i64) as f64 {
+            write!(f, "{}", n as i64)
+        } else {
+            write!(f, "{}", n)
+        }
     }
+}
+
+fn format_number(n: f64) -> Number {
+    Number(n)
 }
 
 fn format_f64(n: f64) -> String {
@@ -301,6 +310,36 @@ fn format_f64(n: f64) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn direct_numbers_preserve_legacy_formatting() {
+        let mut values = vec![
+            0.0,
+            -0.0,
+            0.1,
+            -1.25,
+            f64::MIN_POSITIVE,
+            f64::MAX,
+            f64::INFINITY,
+            f64::NEG_INFINITY,
+            f64::NAN,
+            i64::MAX as f64,
+            i64::MIN as f64,
+        ];
+        let mut bits = 123456789_u64;
+        for _ in 0..10_000 {
+            bits = bits.wrapping_mul(6364136223846793005).wrapping_add(1);
+            values.push(f64::from_bits(bits));
+        }
+        for n in values {
+            let expected = if n == (n as i64) as f64 {
+                format!("{}", n as i64)
+            } else {
+                format!("{n}")
+            };
+            assert_eq!(format_number(n).to_string(), expected);
+        }
+    }
 
     #[test]
     fn empty_sheet_data_self_closes() {
