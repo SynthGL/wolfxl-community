@@ -18,39 +18,53 @@ use crate::xml_escape;
 ///
 /// Returns a self-closing `<sst …/>` when the table is empty.
 pub fn emit(sst: &SstBuilder) -> Vec<u8> {
-    const NS: &str = "http://schemas.openxmlformats.org/spreadsheetml/2006/main";
-
     let mut out = String::with_capacity(512 + sst.unique_count() as usize * 32);
-    out.push_str("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\r\n");
-
-    if sst.is_empty() {
-        out.push_str(&format!(
-            "<sst xmlns=\"{NS}\" count=\"0\" uniqueCount=\"0\"/>"
-        ));
-        return out.into_bytes();
-    }
-
-    let total = sst.total_count();
-    let unique = sst.unique_count();
-    out.push_str(&format!(
-        "<sst xmlns=\"{NS}\" count=\"{total}\" uniqueCount=\"{unique}\">"
-    ));
-
-    for (_idx, s) in sst.iter() {
-        let needs_preserve = s.chars().next().is_some_and(|c| c.is_whitespace())
-            || s.chars().next_back().is_some_and(|c| c.is_whitespace());
-
-        if needs_preserve {
-            out.push_str("<si><t xml:space=\"preserve\">");
-        } else {
-            out.push_str("<si><t>");
-        }
-        xml_escape::write_text_to(&mut out, s).expect("String writes are infallible");
-        out.push_str("</t></si>");
-    }
-
-    out.push_str("</sst>");
+    emit_to_fmt(sst, &mut out).expect("String formatting is infallible");
     out.into_bytes()
+}
+
+/// Stream shared-string XML using one bounded buffer, including oversized text.
+pub fn emit_to<W: std::io::Write>(sst: &SstBuilder, dest: &mut W) -> std::io::Result<()> {
+    let mut buffered = std::io::BufWriter::with_capacity(64 * 1024, dest);
+    let mut out = crate::streaming::IoFmtAdapter {
+        inner: &mut buffered,
+        err: None,
+    };
+    emit_to_fmt(sst, &mut out).map_err(|_| {
+        out.err
+            .take()
+            .unwrap_or_else(|| std::io::Error::other("SST formatting failed"))
+    })?;
+    buffered
+        .into_inner()
+        .map(|_| ())
+        .map_err(|error| error.into_error())
+}
+
+fn emit_to_fmt<W: std::fmt::Write>(sst: &SstBuilder, out: &mut W) -> std::fmt::Result {
+    const NS: &str = "http://schemas.openxmlformats.org/spreadsheetml/2006/main";
+    out.write_str("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\r\n")?;
+    if sst.is_empty() {
+        return write!(out, "<sst xmlns=\"{NS}\" count=\"0\" uniqueCount=\"0\"/>");
+    }
+    write!(
+        out,
+        "<sst xmlns=\"{NS}\" count=\"{}\" uniqueCount=\"{}\">",
+        sst.total_count(),
+        sst.unique_count()
+    )?;
+    for (_, s) in sst.iter() {
+        let needs_preserve = s.chars().next().is_some_and(char::is_whitespace)
+            || s.chars().next_back().is_some_and(char::is_whitespace);
+        if needs_preserve {
+            out.write_str("<si><t xml:space=\"preserve\">")?;
+        } else {
+            out.write_str("<si><t>")?;
+        }
+        xml_escape::write_text_to(out, s)?;
+        out.write_str("</t></si>")?;
+    }
+    out.write_str("</sst>")
 }
 
 #[cfg(test)]
@@ -59,6 +73,40 @@ mod tests {
     use crate::intern::SstBuilder;
     use quick_xml::events::Event;
     use quick_xml::Reader;
+
+    #[test]
+    fn streamed_sst_matches_buffered_for_large_unicode_and_empty_table() {
+        let mut sst = SstBuilder::default();
+        for large in [false, true] {
+            if large {
+                sst.intern(&" 日本語 🦀 <&> ".repeat(20_000));
+                for i in 0..10_000 {
+                    sst.intern(&format!("value-{i}"));
+                }
+            }
+            let mut bytes = Vec::new();
+            emit_to(&sst, &mut bytes).unwrap();
+            assert_eq!(emit(&sst), bytes);
+        }
+    }
+
+    #[test]
+    fn streamed_sst_preserves_io_failure() {
+        struct Fails;
+        impl std::io::Write for Fails {
+            fn write(&mut self, _: &[u8]) -> std::io::Result<usize> {
+                Err(std::io::Error::new(
+                    std::io::ErrorKind::BrokenPipe,
+                    "test sink",
+                ))
+            }
+            fn flush(&mut self) -> std::io::Result<()> {
+                Ok(())
+            }
+        }
+        let error = emit_to(&SstBuilder::default(), &mut Fails).unwrap_err();
+        assert_eq!(error.kind(), std::io::ErrorKind::BrokenPipe);
+    }
 
     fn parse_ok(bytes: &[u8]) {
         let text = std::str::from_utf8(bytes).expect("utf8");

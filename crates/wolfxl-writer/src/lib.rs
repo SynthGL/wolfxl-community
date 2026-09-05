@@ -74,7 +74,7 @@ pub fn emit_xlsx(wb: &mut Workbook) -> Vec<u8> {
 ///
 /// Same contract as [`emit_xlsx`] for parts and ordering. Eager worksheet
 /// rows pass through a bounded buffer directly into ZIP; write-only sheets
-/// stream their existing spool. Styles and the final SST remain buffered.
+/// stream their existing spool. The final SST also streams; metadata stays buffered.
 ///
 /// `dest` must be `Write + Seek` because `ZipWriter` patches local-file-
 /// header sizes after each entry. Production callers pass a
@@ -343,18 +343,20 @@ fn package_emit_ops<W: std::io::Write + std::io::Seek>(
     let zip_to_io = |e: ::zip::result::ZipError| std::io::Error::other(e.to_string());
 
     for op in ops {
-        let deferred_sst;
-        let op = if matches!(op, EmitOp::SharedStrings) {
-            deferred_sst = EmitOp::Bytes(crate::zip::ZipEntry {
-                path: "xl/sharedStrings.xml".to_string(),
-                bytes: crate::emit::shared_strings_xml::emit(&wb.sst),
-            });
-            &deferred_sst
-        } else {
-            op
-        };
         match op {
-            EmitOp::SharedStrings => unreachable!("SST materialized above"),
+            EmitOp::SharedStrings => {
+                // Even the empty SST document exceeds the 128-byte STORE cutoff.
+                let mut opts = SimpleFileOptions::default()
+                    .compression_method(CompressionMethod::Deflated)
+                    .compression_level(Some(FAST_SAVE_DEFLATE_LEVEL));
+                if let Some(dt) = epoch_override {
+                    opts = opts.last_modified_time(dt);
+                }
+                writer
+                    .start_file("xl/sharedStrings.xml", opts)
+                    .map_err(zip_to_io)?;
+                crate::emit::shared_strings_xml::emit_to(&wb.sst, &mut writer)?;
+            }
             EmitOp::Bytes(entry) => {
                 let method = if entry.bytes.len() < DEFLATE_MIN_BYTES {
                     CompressionMethod::Stored
