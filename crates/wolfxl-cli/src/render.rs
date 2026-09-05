@@ -82,11 +82,7 @@ pub fn json<W: Write>(w: &mut W, sheet: &Sheet, opts: &RenderOptions) -> std::io
     let data_rows = total_rows.saturating_sub(1);
     let returned_rows = opts.max_rows.unwrap_or(data_rows).min(data_rows);
     let returned_columns = opts.max_columns.unwrap_or(cols).min(cols);
-    let headers: Vec<String> = sheet
-        .headers()
-        .into_iter()
-        .take(returned_columns)
-        .collect();
+    let headers: Vec<String> = sheet.headers().into_iter().take(returned_columns).collect();
     let sheet_name_json = serde_json::to_string(&sheet.name).expect("string is JSON-safe");
 
     writeln!(w, "{{")?;
@@ -106,12 +102,7 @@ pub fn json<W: Write>(w: &mut W, sheet: &Sheet, opts: &RenderOptions) -> std::io
         writeln!(w, "  ],")?;
     }
 
-    let body: Vec<&Vec<Cell>> = sheet
-        .rows()
-        .iter()
-        .skip(1)
-        .take(returned_rows)
-        .collect();
+    let body: Vec<&Vec<Cell>> = sheet.rows().iter().skip(1).take(returned_rows).collect();
     if body.is_empty() {
         writeln!(w, "  \"data\": []")?;
     } else {
