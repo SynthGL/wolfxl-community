@@ -31,15 +31,25 @@
 /// `"` or `'` — those are legal inside element text.
 pub fn text(s: &str) -> String {
     let mut out = String::with_capacity(s.len());
-    for ch in s.chars() {
-        match ch {
-            '&' => out.push_str("&amp;"),
-            '<' => out.push_str("&lt;"),
-            '>' => out.push_str("&gt;"),
-            _ => out.push(ch),
-        }
-    }
+    write_text_to(&mut out, s).expect("formatting into a String is infallible");
     out
+}
+
+/// Escape directly into the destination without a temporary string.
+pub(crate) fn write_text_to<W: core::fmt::Write>(out: &mut W, s: &str) -> core::fmt::Result {
+    let mut start = 0;
+    for (i, byte) in s.bytes().enumerate() {
+        let escaped = match byte {
+            b'&' => "&amp;",
+            b'<' => "&lt;",
+            b'>' => "&gt;",
+            _ => continue,
+        };
+        out.write_str(&s[start..i])?;
+        out.write_str(escaped)?;
+        start = i + 1;
+    }
+    out.write_str(&s[start..])
 }
 
 /// Escape XML attribute-value content. For values inside `attr="…"`.
