@@ -156,48 +156,29 @@ fn emit_cell_to<W: fmt::Write>(
         }
 
         WriteCellValue::Formula { expr, result } => {
-            let escaped_expr = xml_escape::text(expr);
+            write!(out, "<c r=\"{}\"", cell_ref)?;
             match result {
-                None => {
-                    write!(out, "<c r=\"{}\"", cell_ref)?;
-                    if let Some(s) = cell.style_id {
-                        write!(out, " s=\"{}\"", s)?;
-                    }
-                    write!(out, "><f>{}</f></c>", escaped_expr)?;
-                }
-                Some(FormulaResult::Number(n)) => {
-                    write!(out, "<c r=\"{}\"", cell_ref)?;
-                    if let Some(s) = cell.style_id {
-                        write!(out, " s=\"{}\"", s)?;
-                    }
-                    write!(
-                        out,
-                        "><f>{}</f><v>{}</v></c>",
-                        escaped_expr,
-                        format_number(*n)
-                    )?;
-                }
-                Some(FormulaResult::String(s)) => {
-                    write!(out, "<c r=\"{}\" t=\"str\"", cell_ref)?;
-                    if let Some(style) = cell.style_id {
-                        write!(out, " s=\"{}\"", style)?;
-                    }
-                    write!(
-                        out,
-                        "><f>{}</f><v>{}</v></c>",
-                        escaped_expr,
-                        xml_escape::text(s)
-                    )?;
-                }
-                Some(FormulaResult::Boolean(b)) => {
-                    write!(out, "<c r=\"{}\" t=\"b\"", cell_ref)?;
-                    if let Some(s) = cell.style_id {
-                        write!(out, " s=\"{}\"", s)?;
-                    }
-                    let bval = if *b { 1 } else { 0 };
-                    write!(out, "><f>{}</f><v>{}</v></c>", escaped_expr, bval)?;
-                }
+                Some(FormulaResult::String(_)) => out.write_str(" t=\"str\"")?,
+                Some(FormulaResult::Boolean(_)) => out.write_str(" t=\"b\"")?,
+                _ => {}
             }
+            if let Some(style) = cell.style_id {
+                write!(out, " s=\"{}\"", style)?;
+            }
+            out.write_str("><f>")?;
+            xml_escape::write_text_to(out, expr)?;
+            out.write_str("</f>")?;
+            match result {
+                Some(FormulaResult::Number(n)) => write!(out, "<v>{}</v>", format_number(*n))?,
+                Some(FormulaResult::String(value)) => {
+                    out.write_str("<v>")?;
+                    xml_escape::write_text_to(out, value)?;
+                    out.write_str("</v>")?;
+                }
+                Some(FormulaResult::Boolean(value)) => write!(out, "<v>{}</v>", u8::from(*value))?,
+                None => {}
+            }
+            out.write_str("</c>")?;
         }
 
         WriteCellValue::DateSerial(f) => {

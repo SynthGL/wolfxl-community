@@ -119,10 +119,11 @@ pub fn emit_xlsx_to<W: std::io::Write + std::io::Seek>(
         }
     }
 
+    let calc_chain = calc_chain_xml::emit(wb);
     let mut ops: Vec<EmitOp> = vec![
         EmitOp::Bytes(ZipEntry {
             path: "[Content_Types].xml".to_string(),
-            bytes: content_types::emit(wb),
+            bytes: content_types::emit_with_calc_chain(wb, calc_chain.is_some()),
         }),
         EmitOp::Bytes(ZipEntry {
             path: "_rels/.rels".to_string(),
@@ -134,7 +135,7 @@ pub fn emit_xlsx_to<W: std::io::Write + std::io::Seek>(
         }),
         EmitOp::Bytes(ZipEntry {
             path: "xl/_rels/workbook.xml.rels".to_string(),
-            bytes: rels::emit_workbook(wb),
+            bytes: rels::emit_workbook_with_calc_chain(wb, calc_chain.is_some()),
         }),
     ];
     ops.append(&mut sheet_ops);
@@ -305,7 +306,7 @@ pub fn emit_xlsx_to<W: std::io::Write + std::io::Seek>(
     // workbook has at least one formula cell — Excel transparently
     // works without it, so an empty workbook should ship without the
     // part (matching openpyxl's behaviour).
-    if let Some(cc_bytes) = calc_chain_xml::emit(wb) {
+    if let Some(cc_bytes) = calc_chain {
         ops.push(EmitOp::Bytes(ZipEntry {
             path: "xl/calcChain.xml".to_string(),
             bytes: cc_bytes,
