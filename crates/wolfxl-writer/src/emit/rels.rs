@@ -50,6 +50,10 @@ pub fn emit_root(_wb: &Workbook) -> Vec<u8> {
 /// `xl/_rels/workbook.xml.rels` — workbook → sheets, styles, shared strings,
 /// (optional) calcChain.
 pub fn emit_workbook(wb: &Workbook) -> Vec<u8> {
+    emit_workbook_with_calc_chain(wb, crate::emit::calc_chain_xml::has_any_formula(wb))
+}
+
+pub(crate) fn emit_workbook_with_calc_chain(wb: &Workbook, has_calc_chain: bool) -> Vec<u8> {
     let mut g = RelsGraph::new();
     let n_sheets = wb.sheets.len();
     for idx in 0..n_sheets {
@@ -78,7 +82,7 @@ pub fn emit_workbook(wb: &Workbook) -> Vec<u8> {
     next_rid += 1;
     // calcChain rel, only when the workbook has at least one formula
     // (matches the gate in `emit_xlsx`).
-    if crate::emit::calc_chain_xml::has_any_formula(wb) {
+    if has_calc_chain {
         g.add_with_id(
             RelId(format!("rId{next_rid}")),
             crate::emit::calc_chain_xml::REL_CALC_CHAIN,

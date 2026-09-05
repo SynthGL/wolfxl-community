@@ -9,6 +9,8 @@
 //! omit the `xl/calcChain.xml` part entirely (and leave the
 //! `[Content_Types].xml` Override + workbook rel out as well).
 
+use std::fmt::Write as _;
+
 use crate::model::cell::WriteCellValue;
 use crate::model::workbook::Workbook;
 
@@ -25,14 +27,15 @@ pub const REL_CALC_CHAIN: &str =
 /// part + register the Override + add the workbook rel.
 pub fn has_any_formula(wb: &Workbook) -> bool {
     wb.sheets.iter().any(|sheet| {
-        let mut found = false;
         sheet
-            .visit_cells_row_major::<()>(|_, _, cell| {
-                found |= matches!(cell.value, WriteCellValue::Formula { .. });
-                Ok(())
+            .visit_cells_row_major(|_, _, cell| {
+                if matches!(cell.value, WriteCellValue::Formula { .. }) {
+                    Err(())
+                } else {
+                    Ok(())
+                }
             })
-            .expect("formula scan is infallible");
-        found
+            .is_err()
     })
 }
 
@@ -49,8 +52,9 @@ pub fn emit(wb: &Workbook) -> Option<Vec<u8>> {
         sheet
             .visit_cells_row_major::<()>(|row, col, cell| {
                 if let WriteCellValue::Formula { .. } = cell.value {
-                    let cell_ref = crate::refs::format_a1(row, col);
-                    out.push_str(&format!("<c r=\"{}\" i=\"{}\"/>", cell_ref, i));
+                    let cell_ref = crate::refs::A1Ref::new(row, col);
+                    write!(out, "<c r=\"{}\" i=\"{}\"/>", cell_ref, i)
+                        .expect("String formatting is infallible");
                     wrote_any = true;
                 }
                 Ok(())

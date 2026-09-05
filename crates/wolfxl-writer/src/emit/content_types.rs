@@ -43,6 +43,10 @@ const CT_XML_DEFAULT: &str = "application/xml";
 
 /// Emit `[Content_Types].xml` as UTF-8 bytes.
 pub fn emit(wb: &Workbook) -> Vec<u8> {
+    emit_with_calc_chain(wb, crate::emit::calc_chain_xml::has_any_formula(wb))
+}
+
+pub(crate) fn emit_with_calc_chain(wb: &Workbook, has_calc_chain: bool) -> Vec<u8> {
     let mut out = String::with_capacity(1024);
     out.push_str("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\r\n");
     out.push_str("<Types xmlns=\"http://schemas.openxmlformats.org/package/2006/content-types\">");
@@ -177,7 +181,7 @@ pub fn emit(wb: &Workbook) -> Vec<u8> {
 
     // calcChain.xml override, only when the workbook has at least one formula
     // (matches the emit-side gate in `emit_xlsx`).
-    if crate::emit::calc_chain_xml::has_any_formula(wb) {
+    if has_calc_chain {
         out.push_str(&format!(
             "<Override PartName=\"/xl/calcChain.xml\" ContentType=\"{}\"/>",
             crate::emit::calc_chain_xml::CT_CALC_CHAIN
